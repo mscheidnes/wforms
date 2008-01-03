@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <title>wForms 3.0 - Hint Behavior Test Suite</title>
+    <meta name="Description" content="wForms is an open-source, unobtrusive javascript library that adds commonly needed behaviors to traditional web forms without the need for any programming skills." />
+    <meta http-equiv="Keywords" content="form, web form, html form, online form, wForms, input validation, field validation, javascript library" />
+	
+	<script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
+
+	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
+    <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
+	
+	<script type="text/javascript" src="../lib/base2-p.js"></script>
+	<script type="text/javascript" src="../lib/base2-dom-p.js"></script>
+	<script type="text/javascript" src="../wforms_core.js"></script>
+	<script type="text/javascript" src="../wforms_repeat.js"></script>	
+	<script type="text/javascript" src="../wforms_hint.js"></script>
+	
+	
+	<script type="text/javascript">
+		 
+       function switchHintPosition() {
+           var f = document.getElementById('hintFieldset');            
+           if(!f.hasClass)
+           base2.DOM.bind(f);
+           if(f.hasClass('hintsTooltip')) 
+            f.removeClass('hintsTooltip');
+           else 
+               f.addClass('hintsTooltip');
+           return false;
+       }
+		wFORMS.behaviors.hint.instance.prototype.onApply = function() {
+			setUpPageStatus = 'complete';
+		} 
+	
+		function setUpPage() {}
+	  
+	  	function setUp() {  }
+		
+		function tearDown() {}
+		
+		function testHint() {
+			var testForm = document.getElementById('testForm');
+			var field = document.getElementById('testForm');
+			var hint = document.getElementById('testForm');
+			var bInstance = wFORMS.getBehaviorInstance(testForm, 'hint');
+			
+			bInstance.setup(hint, field);
+		
+			assertEquals('15px', hint.style.left);
+			assertEquals('54px', hint.style.top);
+		}
+		
+	</script>
+	</head>
+	<body class="wForm" style="padding:5px; margin:10px;">
+        <form method="post" action="http://app.formassembly.com/responses/testprocessor" id="testForm" class="hintsTooltip">
+            <div class="oneField">
+                <label for="testField" class="preField">Test Field
+                	<span class="reqMark">*</span>
+                </label>
+              	<input type="text" id="testField" name="testField"  />
+                <div class="field-hint-inactive" id="testField-H">
+                    <span>Mail and e-mail correspondence will be sent to this name.</span>
+                </div>
+              	<br />
+               	<span class="errMsg" id="testField-E">
+                </span>
+            </div>
+
+        </form>
+    </body>
+</html>
+
