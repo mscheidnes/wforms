@@ -63,17 +63,9 @@ wFORMS.behaviors.calculation.applyTo = function(f) {
 			// process variables, add onchange/onblur event to update total.
 			for (var i = 0; i < variables.length; i++) {
 				if(variables[i]!='') {
-					
-					/* 
-					Binding with forEach sometime fails when using this, resulting in undefined 'variable' parameter. 
-						f.querySelectorAll("*[class*=\"...\"]");
-					Library call works fine: base2.DOM.Document.querySelectorAll(...) 
-					*/
-					base2.DOM.Document.querySelectorAll(f,"*[class*=\""+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+variables[i]+"\"]").forEach(
+					f.querySelectorAll("*[class*=\""+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+variables[i]+"\"]").forEach(
 						function(variable){
-							if(!variable.addEventListener) {
-								base2.DOM.bind(variable);
-							}
+							
 							// make sure the variable is an exact match.
 							var exactMatch = ((' ' + variable.className + ' ').indexOf(' '+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+variables[i]+' ')!=-1);
 							if(!exactMatch) return;
@@ -187,25 +179,19 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 		}
 		 
 		// TODO: Exclude switched-off variables?
-		
-		/* 
-		Binding with forEach sometime fails when using this, resulting in undefined 'variable' parameter. 
-			f.querySelectorAll("*[class*=\"...\"]");
-		Library call works fine: base2.DOM.Document.querySelectorAll(...) 
-		*/
-		base2.DOM.Document.querySelectorAll(f,"*[class*=\""+_self.behavior.VARIABLE_SELECTOR_PREFIX+v.name+"\"]").forEach(
-			function(variable){
-								
+		f.querySelectorAll("*[class*=\""+_self.behavior.VARIABLE_SELECTOR_PREFIX+v.name+"\"]").forEach(
+			function(f){
+				
 				// make sure the variable is an exact match.
-				var exactMatch = ((' ' + variable.className + ' ').indexOf(' '+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+v.name+' ')!=-1);
+				var exactMatch = ((' ' + f.className + ' ').indexOf(' '+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+v.name+' ')!=-1);
 				if(!exactMatch) return;
 				
 				// If field value has a different purpose, the value for the calculation can be set in the
 				// class attribute, prefixed with CHOICE_VALUE_SELECTOR_PREFIX
-				if(_self.hasValueInClassName(variable)) {
-					var value = _self.getValueFromClassName(variable);
+				if(_self.hasValueInClassName(f)) {
+					var value = _self.getValueFromClassName(f);
 				} else {
-					var value = wFORMS.helpers.getFieldValue(variable);					
+					var value = wFORMS.helpers.getFieldValue(f);					
 				} 
 				if(!value) value=0;
 				
