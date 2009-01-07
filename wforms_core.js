@@ -6,7 +6,7 @@ NodeList.prototype.forEach = function (a, b) { for (var i = 0; i < this.length; 
 //
 
 if (typeof(base2) == "undefined") {
-	throw new Error("Base2 not found. wForms 3.0 depends on the base2 library.");
+	throw new Error("Base2 not found. wForms 3 depends on the base2 library.");
 }
 
 if (typeof(wFORMS) == "undefined") {
