@@ -13,11 +13,11 @@ There might be many triggers corresponding with one target, which will collectiv
 == Define a target and its triggers ==
 To specify a target, add css class 'target' to any of the html element you prefer to be as the target, then add 'rule' attribute to the element, write a relationship definition in, in the form of:
 
-_definition_: _logic_"["_css_selectors_"]"
+ _definition_: _logic_"["_css_selectors_"]"
 
-_logic_: "and" | "or"
+ _logic_: "and" | "or"
 
-_css_selectors_ : css_selector | css_selector"|"_css_selectors_
+ _css_selectors_ : css_selector | css_selector"|"_css_selectors_
 
 The css_selector are just any kind of legal css selectors to locate a trigger. So some samples are like the following:
 
@@ -38,6 +38,7 @@ The css_selector are just any kind of legal css selectors to locate a trigger. S
 
 }}}
 
+After writing the relationship rules you need to import 'wforms.js' or least the combination of 'wforms_core.js' and 'wforms_switch.js' in your page. Then the switch behavior will take effect automatically. 
 
 = Details =
 
