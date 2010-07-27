@@ -1,0 +1,36 @@
+#summary One-sentence summary of this page.
+
+= Usage=
+
+To enable switch behavior, we need to specify *trigger* *target* relationship. 
+
+There might be many triggers corresponding with one target, which will collectively decide the on/off state of the corresponding target in two types of logical conditions: *AND* and *OR*.
+
+  * *AND* The target will be turned on if and only if all of the corresponding triggers are turned on.
+
+  * *OR* The target will be turned on when any of the triggers is turned on.
+
+== Define a target and its triggers ==
+To specify a target, add css class 'target' to any of the html element you prefer to be as the target, then add 'rule' attribute to the element, write a relationship definition in the form of:
+
+_definition_: _logic_"["_css_selectors_"]"
+
+_logic_: "and" | "or"
+
+_css_selectors_ : css_selector | css_selector"|"_css_selectors_
+
+The css_selector are just any kind of legal css selectors to locate a trigger. So a sample is like the following:
+
+{{{
+<input name="foo" type="radio" class="switch-a" id="switcha" />A Switch <br/>
+<input name="foo" type="radio" class="switch-b" id="switchb"  />B Switch <br/>	
+<div id="casea" class="target" rule="or[#switcha|#switchb]">This is A state</div>
+}}}
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
