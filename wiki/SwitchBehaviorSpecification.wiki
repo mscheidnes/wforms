@@ -11,7 +11,7 @@ There might be many triggers corresponding with one target, which will collectiv
   * *OR* The target will be turned on when any of the triggers is turned on.
 
 == Define a target and its triggers ==
-To specify a target, add css class 'target' to any of the html element you prefer to be as the target, then add 'rule' attribute to the element, write a relationship definition in the form of:
+To specify a target, add css class 'target' to any of the html element you prefer to be as the target, then add 'rule' attribute to the element, write a relationship definition in, in the form of:
 
 _definition_: _logic_"["_css_selectors_"]"
 
@@ -19,12 +19,23 @@ _logic_: "and" | "or"
 
 _css_selectors_ : css_selector | css_selector"|"_css_selectors_
 
-The css_selector are just any kind of legal css selectors to locate a trigger. So a sample is like the following:
+The css_selector are just any kind of legal css selectors to locate a trigger. So some samples are like the following:
 
+  Sample 1
 {{{
-<input name="foo" type="radio" class="switch-a" id="switcha" />A Switch <br/>
-<input name="foo" type="radio" class="switch-b" id="switchb"  />B Switch <br/>	
+<input name="foo" type="radio" id="switcha" />A Switch <br/>
+<input name="foo" type="radio" id="switchb" />B Switch <br/>	
 <div id="casea" class="target" rule="or[#switcha|#switchb]">This is A state</div>
+}}}
+  Sample 2
+{{{
+<select>
+	<option>D</option>
+	<option id="opt2">F</option>
+	<option id="opt3">G</option>
+</select>
+<div id="cased" class="target" rule="and[#selectTest :first-child|#opt2]">This is D & F state</div>
+
 }}}
 
 
