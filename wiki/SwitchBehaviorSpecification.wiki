@@ -38,7 +38,38 @@ The css_selector are just any kind of legal css selectors to locate a trigger. S
 
 }}}
 
-After writing the relationship rules you need to import 'wforms.js' or least the combination of 'wforms_core.js' and 'wforms_switch.js' in your page. Then the switch behavior will take effect automatically. 
+After writing the relationship rules you need to import 'wforms.js' or at least the combination of 'wforms_core.js' and 'wforms_switch.js' in your page. Then the switch behavior will take effect automatically. 
+== Define css style for on/off state ==
+The ultimate result of switch behavior is to put *onstate* or *offstate* css class onto the target element. Wforms makes no assumptions about how these classes are like, so they need to be defined.
+
+A typical definition for these two css classes is like:
+{{{
+.target.offstate{
+    display: none !important;
+}
+.target.onstate{
+    display: block !important;
+}
+}}}
+
+Add .target to narrow the definition as much as possible, in order to prevent css rule pollution. Because the target element will always have a css class of '.target'
+
+= Trigger On/Off status checking mechanism =
+== Default Behavior ===
+The switch behavior has a default mechanism for deciding whether a trigger is turned *on* or *off*. The default behavior can be described as the following table
+
+|| *Element Type* || *On/Off status condition* ||
+||input type="radio"|| On if and only if the radio is selected||
+||input type="checkbox"||On if and only if the checkbox is checked||
+||option(in select)||On if and only if the option is selected||
+||input type="text"||On if and only if the text field is not empty, all white spaces do not count||
+||textarea||On if and only if the text area is not empty, all white spaces do not count||
+||a (link)||On first time the page is loaded, the link is at off status, when click on it once, it becomes on status, click it again will make it back to off status, so forth alternately.||
+
+
+== Customized Behavior ==
+
+This is typically only applied to text
 
 = Details =
 
