@@ -81,7 +81,8 @@ So the switch behavior will use the content in *formula* attribute with priority
 
 In practice, this feature is typically only used to text fields and text areas.
 
-= Detach switch behavior =
+= Disable and Enable switch behavior to a portion of document =
+== Detach switch behavior ==
 The target-triggers binding and switch behavior will take effect immediately after page is loaded. Later, if needed, the switch behavior can be detached selectively from desired targets by using the *destroy()* method.
 
 {{{
@@ -92,8 +93,19 @@ instance.destroy(documentArea);
 
 The only parameter is a parent node which is meant to specify a document area. Therefore all elements within the document area and with a *.target* css class will not respond to trigger status changes any more. The target elements' on/off state will be left as same as the moment when *destroy* was called.
 
-In the above sample, all target sections which are descendant of *documentArea*, including *documentArea* itself if it also has *.target* css class will be prevented from responding to switch behavior.
+In the above sample, all target sections which are descendant of *documentArea*, including *documentArea* itself if it also has *.target* css class, will be prevented from responding to switch behavior.
 
 == Recover switch behavior == 
+After disabling the switch behavior, if one wish to recover switch behavior, just use *applyTo()* and pass the document area need to be recovered as the sole parameter.
+
+{{{
+var instance = wFORMS.behaviors['switch'].instance;
+var documentArea = document.getElementById('#targetField');
+instance.applyTo(documentArea);
+}}}
+
+The only parameter is a parent node which is meant to specify a document area. Therefore all elements within the document area and with a *.target* css class will start to respond to trigger status changes again. The target elements' on/off state will be synchronized with the updated triggers' status.
+
+In the above sample, all target sections which are descendant of *documentArea*, including *documentArea* itself if it also has *.target* css class, will be resumed responding to the switch behavior.
 
 = Use Switch Behavior in conjunction with Repeat Behavior =
