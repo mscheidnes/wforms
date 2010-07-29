@@ -20,6 +20,8 @@ To specify a target, add css class 'target' to any of the html element you prefe
 
  _css_selectors_ : css_selector | css_selector"|"_css_selectors_
 
+To decipher this in simple English, the rule starts with either "and" or "or", then a pair of square parentheses[], which contains one or many css selectors separated by "|".  
+
 The css_selector are just any kind of legal css selectors to locate a trigger. So some samples are like the following:
 
   Sample 1
