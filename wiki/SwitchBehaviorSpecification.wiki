@@ -1,4 +1,5 @@
 #summary One-sentence summary of this page.
+#labels Phase-Design
 
 = Usage=
 
@@ -74,8 +75,25 @@ All triggers can be set with a customized on/off status checking rule. Just put 
 <input type="text" id="txt2" formula="parseInt(this.value) > 3"/>
 }}}
 
-the content in *formula* attribute is like a function content, in which *this* will point to the trigger itself. 
+the content in *formula* attribute is like a function content, in which *this* will point to the trigger element itself. 
 
 So the switch behavior will use the content in *formula* attribute with priority. If the execution has error, it will use the default behavior instead.
 
 In practice, this feature is typically only used to text fields and text areas.
+
+= Detach switch behavior =
+The target-triggers binding and switch behavior will take effect immediately after page is loaded. Later, if needed, the switch behavior can be detached selectively from desired targets by using the *destroy()* method.
+
+{{{
+var instance = wFORMS.behaviors['switch'].instance;
+var documentArea = document.getElementById('#targetField');
+instance.destroy(documentArea);
+}}}
+
+The only parameter is a parent node which is meant to specify a document area. Therefore all elements within the document area and with a *.target* css class will not respond to trigger status changes any more. The target elements' on/off state will be left as same as the moment when *destroy* was called.
+
+In the above sample, all target sections which are descendant of *documentArea*, including *documentArea* itself if it also has *.target* css class will be prevented from responding to switch behavior.
+
+== Recover switch behavior == 
+
+= Use Switch Behavior in conjunction with Repeat Behavior =
