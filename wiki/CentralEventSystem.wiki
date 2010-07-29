@@ -69,7 +69,7 @@ wFORMS.hooks.removeHook('behavior1', 'hook_event2', hookHandler1)
 = Current Existed Hooks =
 There are several hooks currently existed in the WForms library, they are
 
-||*Behavior*||*Event*||*Description*||Parameters passed ||
+||*Behavior*||*Event*||*Description*||Parameters passed (1 represents 1st parameter from left, 2 for 2nd from left, and so forth ||
 ||switch||switch_on|| triggered when a target element is turned on. || 1: the target dom element||
 || ||switch_off|| triggered when a target element is turned off. || 1: the target dom element||
 ||repeat||repeat|| triggered when a section has been cloned || 1: the dom element being cloned <br/> 2: the new cloned element which is a counter-part of 1||
