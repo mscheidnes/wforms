@@ -1,0 +1,16 @@
+#Central Event Mechanism Specification
+
+= Introduction =
+
+Central Event System provides a mechanism to register and implement hooks across the whole WForms library. 
+
+It provides a flexible way to enable multiple hook responders to a same event. Besides, a neutral event registry avoid the interdependency of registering event responders from one module to another, because an unpredictable loading sequence of modules will make it very hard to implement.   
+
+= Usage =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
+
+= Current Existed Hooks=
