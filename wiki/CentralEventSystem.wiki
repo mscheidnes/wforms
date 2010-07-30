@@ -13,7 +13,7 @@ The Central Event Mechanism is implemented in Core, so in order to use it, first
 The hook, which is used to describe a moment when a certain type of event happens, is divided into two levels: the behavior name and the event name.
 
 == Adding a hook event handler ==
-Ｔｏ　ｒｅｇｉｓｔｅｒ　ａ　ｈｏｏｋ　event ｈａｎｄｌｅｒ　ｔｏ　ｃｅｒｔａｉｎ　ｅｖｅｎｔ，　ｕｓｅ
+To register a hook event handler to certain event, use
 
 {{{
    wFORMS.hooks.addHook(ｂｅｈａｖｉｏｒ_ｎａｍｅ, ｅｖｅｎｔ_name, event_handler);
