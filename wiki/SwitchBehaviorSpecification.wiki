@@ -41,7 +41,8 @@ The css_selector are just any kind of legal css selectors to locate a trigger. S
 
 }}}
 
-After writing the relationship rules you need to import 'wforms.js' or at least the combination of 'wforms_core.js' and 'wforms_switch.js' in your page. Then the switch behavior will take effect automatically. 
+After writing the relationship rules you need to import 'wforms.js' or at least the combination of 'wforms_core.js' and 'wforms_switch.js' in your page. Then the switch behavior will take effect automatically.
+ 
 == Define css style for on/off state ==
 The ultimate result of switch behavior is to put *onstate* or *offstate* css class onto the target element. Wforms makes no assumptions about how these classes are like, so they need to be defined.
 
@@ -71,15 +72,15 @@ The switch behavior has a default mechanism for deciding whether a trigger is tu
 
 
 == Customized Behavior ==
-All triggers can be set with a customized on/off status checking rule. Just put a *formula* attribute to the trigger. Like follows,
+All triggers can be set with a customized on/off status checking rule. Just put a *triggerrule* attribute to the trigger. Like follows,
 
 {{{
-<input type="text" id="txt2" formula="parseInt(this.value) > 3"/>
+<input type="text" id="txt2" triggerrule="parseInt(this.value) > 3"/>
 }}}
 
-the content in *formula* attribute is like a function content, in which *this* will point to the trigger element itself. 
+the content in *triggerrule* attribute is like a function content, in which *this* will point to the trigger element itself. 
 
-So the switch behavior will use the content in *formula* attribute with priority. If the execution has error, it will use the default behavior instead.
+So the switch behavior will use the content in *triggerrule* attribute with priority. If the execution has error, it will use the default behavior instead.
 
 In practice, this feature is typically only used to text fields and text areas.
 
