@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <title>wForms 3.0 - Mootools Compatibility Test Suite</title>
+    <meta name="Description" content="wForms is an open-source, unobtrusive javascript library that adds commonly needed behaviors to traditional web forms without the need for any programming skills." />
+    <meta http-equiv="Keywords" content="form, web form, html form, online form, wForms, input validation, field validation, javascript library" />
+	
+	<script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
+	
+	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
+    <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
+
+	
+	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
+	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
+	<script type="text/javascript" src="../wforms_core.js"></script>
+	<script type="text/javascript" src="../wforms_repeat.js"></script>	
+	<script type="text/javascript" src="../wforms_hint.js"></script>	
+	<script type="text/javascript" src="../wforms_validation.js"></script>	
+	<script type="text/javascript" src="../wforms_paging.js"></script>	
+	<script type="text/javascript" src="../wforms_switch.js"></script>	
+	<script type="text/javascript" src="../wforms_calculation.js"></script>	
+	<script type="text/javascript" src="compatibility/mootools-release-1.11.js"></script>
+		<script type="text/javascript" src="../wforms_core.js"></script>
+	<script type="text/javascript" src="../wforms_repeat.js"></script>	
+	<script type="text/javascript" src="../wforms_hint.js"></script>	
+	<script type="text/javascript" src="../wforms_validation.js"></script>	
+	<script type="text/javascript" src="../wforms_paging.js"></script>	
+	<script type="text/javascript" src="../wforms_switch.js"></script>	
+	<script type="text/javascript" src="../wforms_calculation.js"></script>	
+	  
+	<script type="text/javascript">
+		
+		wFORMS.behaviors.onApplyAll = function() {
+			setUpPageStatus = 'complete';
+		} 
+		
+		function setUpPage() {
+		}
+	  
+	  	function setUp() {
+		}
+		
+		function tearDown() {
+			wFORMS.removeBehavior(document.getElementById('testForm'), 'paging');
+		}
+
+		function testApplyTo() {
+			var f = document.getElementById('testform1');
+			var bInstance = wFORMS.getBehaviorInstance(f, 'switch');
+			assertNotNull('instance should exist',bInstance);
+			
+			assertEquals('onstate-z', document.getElementById('casez').className);
+			
+		
+			assertEquals('offstate-a', document.getElementById('casea').className);
+			document.getElementById('switcha').checked=true;
+			bInstance.run(null, document.getElementById('switcha'));
+			assertEquals('onstate-a', document.getElementById('casea').className.replace(/^\s+/,''));
+			assertEquals('offstate-b', document.getElementById('caseb').className);
+		}		
+					
+	
+
+	</script>
+	</head>
+	<body class="wForm" style="padding:5px; margin:10px;" >
+        	<form id="testform1">
+		<input name="fooz" type="checkbox" class="switch-z" id="switchz" checked="checked" />Z Switch <br/>
+		<div id="casez" class="offstate-z">This is A state</div>
+		
+		
+		<input name="foo" type="radio" class="switch-a" id="switcha" />A Switch <br/>
+		<input name="foo" type="radio" class="switch-b" id="switchb"  />B Switch <br/>	
+		<a href="#" class="switch-c swtchIsOff" id="switchc" >C Switch</a> <br/>
+	
+		<select id="selectTest">
+			<option class="switch-d switch-e">D &amp; E</option>
+			<option class="switch-f">F</option>
+			<option class="switch-g">G</option>
+			<option>Test 4</option>
+		</select>
+
+		<div id="casea" class="offstate-a">This is A state</div>
+		<div id="caseb" class="offstate-b">This is B state</div>
+		<div id="casec" class="offstate-c">This is C state</div>
+		<div id="cased" class="offstate-d">This is D state</div>
+		<div id="casee" class="offstate-e">This is E state</div>
+		<div id="casef" class="offstate-f">This is F state</div>
+		<div id="caseg" class="offstate-g">This is F state</div>
+	</form>
+		
+    </body>
+	
+</html>
