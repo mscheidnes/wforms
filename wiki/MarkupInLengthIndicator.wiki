@@ -14,7 +14,7 @@ it is not recommended to do so, since maxlength attribute automatically work for
 = Markup generated in Length Indicator=
 
  * An auxiliary wrapper element must exist as a parent element of the input control. This wrapper element provides a necessary anchor for positioning the indicator. 
- * Usually, the input control in [http://www.formasembly.com FormBuilder] will have a parent element that matches css selector ".wForm .inputWrapper" and serves this purpose. So in wForms, the parent element of the input control will be first checked to see whether it matches the css selector(as it is defined as *wFORMS.INPUT_CONTROL_WRAPPER_SELECTOR*). If not, a wrapping div will be added for this input, which has *position* css attribute as 'relative' and *display* css attribute the same as the one of the input control.
+ * Usually, the input control in [http://www.formassembly.com FormBuilder] will have a parent element that matches css selector ".wForm .inputWrapper" and serves this purpose. So in wForms, the parent element of the input control will be first checked to see whether it matches the css selector(as it is defined as *wFORMS.INPUT_CONTROL_WRAPPER_SELECTOR*). If not, a wrapping div will be added for this input, which has *position* css attribute as 'relative' and *display* css attribute the same as the one of the input control.
  * Normally, an additional div will be generated automatically underneath the wrapping div, which has css class of '*lengthIndicator*', which can be redefined by overwriting    *wFORMS.behaviors.lengthPrompt.CUSTOM_INDICATOR_STYLE*. This DIV automatically receives the following CSS attributes:
 {{{
 position : 'absolute';
