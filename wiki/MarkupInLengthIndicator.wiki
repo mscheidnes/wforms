@@ -3,7 +3,7 @@
 = Setup the Length Indicator =
 
   * Length Indicator can be setup with *input[type="text"]* and *textarea*
-  * To setup Length Indicator, specify *maxlength* attribute for the element. Even though which attribute to specify can be changed by overwriting 
+  * To setup Length Indicator, specify *maxlength* attribute for the element. Even though the attribute to specify can be changed by overwriting 
 {{{
 wFORMS.behaviors.lengthPrompt.ATTRIBUTE_SELECTOR
 }}}
