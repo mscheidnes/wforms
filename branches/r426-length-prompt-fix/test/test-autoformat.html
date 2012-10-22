@@ -1,7 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-    <title>wForms 3.0 - Input Validation Behavior Test Suite</title>
+    <title>wForms 3.0 - Autoformat Behavior Test Suite</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="Description" content="wForms is an open-source, unobtrusive javascript library that adds commonly needed behaviors to traditional web forms without the need for any programming skills." />
     <meta http-equiv="Keywords" content="form, web form, html form, online form, wForms, input validation, field validation, javascript library" />
 	
@@ -9,8 +10,7 @@
 
 	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
     <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
-	<link href="../css/nicerblank/wforms.css" rel="stylesheet" type="text/css"></link>
-	
+
 	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
 	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
     <script type="text/javascript" src="../wforms_core.js"></script>
@@ -19,15 +19,23 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js" ></script>
 
     <script type="text/javascript" language="JavaScript">
-        function setUp() {}
+        var bInstance = null;
+
+        function setUp() {
+            wFORMS.behaviors.autoformat.applyTo(document.getElementById('testForm'));
+        }
 
         function tearDown() {}
 
         function testApplyTo(){
+
+            console.log(wFORMS.behaviors.autoformat._globalCache);
             var ids = ['ssn', 'telephone', 'telephone_short', 'decimal', 'SN', 'IF_ELSE', 'alternate'];
 
             var i = ids.length;
             while(i--){
+                console.log(ids[i]);
+                console.log(wFORMS.behaviors.autoformat._globalCache[ids[i]]);
                 assertTrue('', ids[i] in wFORMS.behaviors.autoformat._globalCache );
             }
         }
