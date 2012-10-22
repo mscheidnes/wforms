@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
     <title>wForms 3.0 - Input Validation Behavior Test Suite</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="Description" content="wForms is an open-source, unobtrusive javascript library that adds commonly needed behaviors to traditional web forms without the need for any programming skills." />
     <meta http-equiv="Keywords" content="form, web form, html form, online form, wForms, input validation, field validation, javascript library" />
 	
@@ -9,8 +10,7 @@
 
 	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
     <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
-	<link href="../css/nicerblank/wforms.css" rel="stylesheet" type="text/css"></link>
-	
+
 	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
 	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
 	<script type="text/javascript" src="../wforms_core.js"></script>
@@ -23,17 +23,22 @@
 	<script type="text/javascript" src="../customization/wforms_validation_length.js"></script>
 	
 	<script type="text/javascript">
-		 
-      
-		wFORMS.behaviors.validation.instance.prototype.onApply = function() {
-			setUpPageStatus = 'complete';
-		} 
-	
-		
-		function setUpPage() {}
+        var bInstance = null;
+
+        var checkTimer = setInterval(function(){
+            if(wFORMS.initialized === true){
+                clearInterval(checkTimer);
+                setUpPageStatus = 'complete';
+            }
+        }, 50);
+
+        function setUpPage() {
+
+        }
 	  
 	  	function setUp() {
-			bInstance = wFORMS.getBehaviorInstance(document.getElementById('testForm'), 'validation');
+            var form = document.getElementById('testForm');
+			bInstance = wFORMS.getBehaviorInstance(form, 'validation');
 		}
 		
 		// remove any remaining error message
@@ -590,45 +595,10 @@
 			// Test error message content
 			assertEquals('my error message',document.getElementById('testField-E').firstChild.innerHTML);
 
-            testField.value='2012/6/1';
+            testField.value='6/1/2012';
+            // will only pass for the same locale setting as specified in the localization-*.js
 			// Test validation rule
 			assertTrue('Should pass date validation:'+testField.value, bInstance.run(null, testForm));
-//            bInstance.run(null, testForm);
-
-//			testField.value='2/2/2008';
-//			// Test validation rule
-//			 assertTrue('Should pass date validation:'+testField.value, bInstance.run(null, testForm));
-//			// Test error message removal
-//			assertNull(document.getElementById('testField-E'));
-//
-//            //case 2
-//            testField.value='12/2/2008';
-//            assertTrue('Should pass date validation:'+testField.value, bInstance.run(null, testForm));
-//
-//            //test range
-//            testField.setAttribute('max', '1 1 2008');
-//            //Should fail
-//            assertFalse(bInstance.run(null, testForm));
-//
-//            testField.value='12/2/2008';
-//            testField.setAttribute('max', '1-1-2009');
-//            //should pass
-//            assertTrue(bInstance.run(null, testForm));
-//
-//            testField.removeAttribute('max');
-//            testField.setAttribute('min', '1 1 2009');
-//            //Should fail
-//            assertFalse(bInstance.run(null, testForm));
-//
-//            testField.setAttribute('min', '1-1-2008');
-//            //should pass
-//            assertTrue(bInstance.run(null, testForm));
-//
-//            testField.setAttribute('max', '12-1-2008');
-//            assertFalse(bInstance.run(null, testForm));
-//
-//            testField.removeAttribute('max');
-//            testField.removeAttribute('min');
         }
 
         // not fully implemented
@@ -802,20 +772,7 @@
 			
 			<div class="actions"><input type="submit" value="TEST" /></div>
         </form>
-        
-   
-        
- <script language="javascript" type="text/javascript">
 
-
-//     window.setTimeout(function(){
-//         setUp();
-//         testValidateDate();
-//     }, 100)
- </script>
-
-        
-       
        
     </body>
 </html>
