@@ -139,12 +139,10 @@ wFORMS.behaviors.validation.applyTo = function(f) {
 		for(var i=0;i<f.length;i++) {
 			var _v = new wFORMS.behaviors.validation.instance(f[i]);
 			v.push(_v);	
-			_v.applyOnBlur();
 			_v.onApply();
 		}
 	} else {
 		var v = new wFORMS.behaviors.validation.instance(f);
-		v.applyOnBlur();
 		v.onApply();
 	}
 	
@@ -174,20 +172,7 @@ wFORMS.behaviors.validation.instance.prototype.onApply = function() {
 	}
 } 
 
-wFORMS.behaviors.validation.instance.prototype.applyOnBlur = function(f) {
-
-	var f = this.target;
-
-	if(!f.querySelectorAll)
-		base2.DOM.bind(f);
-			
-	// Go through all matching elements
- 	f.querySelectorAll('input.validate-float, textarea.validate-float').forEach(function(element) {
- 		element.addEventListener('blur', function(e){ return this.value = this.value.replace(/[^+\-,\.0-9]/g,''); });
- 	});
-}
-
-
+ 
 /**
  * Executes the behavior
  * @param {event} 		e 	(optional) 
