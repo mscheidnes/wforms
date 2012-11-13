@@ -19,6 +19,13 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js" ></script>
 
     <script type="text/javascript" language="JavaScript">
+        var checkTimer = setInterval(function(){
+            if(wFORMS.initialized === true){
+                clearInterval(checkTimer);
+                setUpPageStatus = 'complete';
+            }
+        }, 50);
+
         function setUp() {}
 
         function tearDown() {}
