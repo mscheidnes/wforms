@@ -46,6 +46,7 @@ wFORMS.behaviors.autoformat = {
         this.buildTemplateFragmentList();
         this.promptLayer = null;
         this.inputCache = [];
+        this.setupUIConfig();
         this._pasteMonitorHandler = null;
         this._cutMonitorHandler = null;
         this.mutex = false;
@@ -377,6 +378,10 @@ wFORMS.behaviors.autoformat.InfoEntry.prototype.buildTemplateFragmentList = func
         }
         this.templateFragments.push(fragment);
     }
+};
+
+wFORMS.behaviors.autoformat.InfoEntry.prototype.setupUIConfig = function(){
+    this.direction = base2.DOM.AbstractView.getComputedStyle(window, this.element).direction;
 };
 
 /**
@@ -738,7 +743,12 @@ wFORMS.behaviors.autoformat.InfoEntry.prototype.updatePatternPrompt = function()
         }
         output += '<span class="' + style + '">' + symbol + '</span>';
     }
-    this.promptLayer.style.left = this.measureTextWidth(this.promptLayer, wFORMS.behaviors.autoformat.escapeHTMLEntities(inputText)) + 'px';
+
+    var attribute = 'left';
+    if(this.direction === 'rtl'){
+        attribute = 'right';
+    }
+    this.promptLayer.style[attribute] = this.measureTextWidth(this.promptLayer, wFORMS.behaviors.autoformat.escapeHTMLEntities(inputText)) + 'px';
     this.promptLayer.innerHTML = output;
 };
 
