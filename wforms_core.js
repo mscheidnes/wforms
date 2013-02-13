@@ -52,7 +52,7 @@ wFORMS.toString = function () {
 wFORMS.behaviors = {};
 wFORMS.helpers   = {}
 wFORMS.instances = []; // keeps track of behavior instances
-
+wFORMS.initialized = false;
 
 /**
  * Helper method.
@@ -364,23 +364,40 @@ wFORMS.LOADER.create = function() {
  * Initialization routine. Automatically applies the behaviors to all web forms in the document.  
  */	
 wFORMS.onLoadHandler = function() {
-
 	var forms=document.getElementsByTagName("FORM");
-	
-	for(var i=0;i<forms.length;i++) {		
-		// wrapper for setTimeout closure 
+	var queue = []; //serialize the functions calling
+	for(var i = 0;i < forms.length; i++) {
+		// wrapper for setTimeout closure
 		// (behaviors not applied correctly otherwise when 2+ forms)
-		var _f = function(f) {  
+		(function(f) {
 			if(f.getAttribute('rel')!='no-behavior') {
-				wFORMS.LOADER.show(f,'above');
-				setTimeout( function() {
-					wFORMS.applyBehaviors(f); 
-					wFORMS.LOADER.hide(f); 
-				}, 1);	
-			}			
-		}(forms[i]);
-	}	
-}
+                queue.push(function() {
+                    run(f);
+                });
+			}
+		})(forms[i]);
+	}
+    function tick(){
+        if(queue.length == 0){
+            return;
+        }
+        queue.shift()();
+    }
+    function run(form){
+        wFORMS.LOADER.show(form, 'above');
+
+        setTimeout(function(){
+            wFORMS.applyBehaviors(form);
+            wFORMS.LOADER.hide(form);
+            tick();
+        }, 1);
+    }
+    queue.push(function(){ // the last call, will mark the wForm as initialized
+        wFORMS.initialized = true;
+    });
+    tick();
+};
+
 /**
  * note: should be in wFORMS.helpers
  */
