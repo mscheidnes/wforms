@@ -45,6 +45,12 @@ wFORMS.behaviors.paging = {
 	 */
 	CSS_BUTTON_PLACEHOLDER : 'wfPagingButtons',
 	
+
+	CSS_PAGETAB : 'wfPageTab',
+	CSS_TABS 	: 'wfTab',
+	CSS_TABSID	: 'wfTabNav',
+	CSS_TABSCURRENT	: 'wfTabCurrentPage',
+
 	/**
 	 * ID prefix for the next buttons
      * @final
@@ -88,8 +94,16 @@ wFORMS.behaviors.paging = {
 	MESSAGES : {
 		CAPTION_NEXT : 'Next Page',
 		CAPTION_PREVIOUS : 'Previous Page',
-		CAPTION_UNLOAD : 'Any data entered on ANY PAGE of this form will be LOST.'
+		CAPTION_UNLOAD : 'Any data entered on ANY PAGE of this form will be LOST.',
+		NAV_LABEL : 'Page: ',
+		TAB_LABEL : 'Page ',
+
 	},
+
+	/**
+	 *
+	 */
+	showTabNavigation: false,
 
 	/**
      * Indicates that form should be validated on Next clicked
@@ -141,8 +155,12 @@ wFORMS.behaviors.paging = {
 wFORMS.behaviors.paging.applyTo = function(f) {
 	var b = null;
 	var behavior = wFORMS.behaviors.paging;
-	var isValidationAccepted = (wFORMS.behaviors.validation && wFORMS.behaviors.paging.runValidationOnPageNext);
 	
+	if(behavior.showTabNavigation) {
+		behavior.runValidationOnPageNext = false;
+	}
+	
+	var isValidationAccepted = (wFORMS.behaviors.validation && wFORMS.behaviors.paging.runValidationOnPageNext);
 	
 	// Iterates over the elements with specified class names
 	f.querySelectorAll(wFORMS.behaviors.paging.SELECTOR).forEach(
@@ -205,6 +223,10 @@ wFORMS.behaviors.paging.applyTo = function(f) {
 				// don't return anything to skip the warning 
 			};
 		}
+
+		if(b.behavior.showTabNavigation) {
+			b.generateTabs();
+		}
 		b.onApply();	
 		
 		// intercept the submit event
@@ -219,9 +241,10 @@ wFORMS.behaviors.paging.applyTo = function(f) {
  */
 wFORMS.behaviors.paging.instance.prototype.onApply = function() {}
 
-/** On submit advance the page instead, until the last page. */
+/** On submit advance the page instead, until the last page (Note: pressing return on Firefox and some other browsers triggers on submit) */
 wFORMS.behaviors.paging.instance.prototype.onSubmit = function (e, b) {
-	if (!wFORMS.behaviors.paging.isLastPageIndex(b.currentPageIndex)) {
+
+	if (!wFORMS.behaviors.paging.isLastPageIndex(b.currentPageIndex) && wFORMS.behaviors.paging.runValidationOnPageNext) {
 		var currentPage = wFORMS.behaviors.paging.getPageByIndex(b.currentPageIndex);
 		var nextPage = b.findNextPage(b.currentPageIndex);
 		
@@ -459,6 +482,7 @@ wFORMS.behaviors.paging.instance.prototype.activatePage = function(index /*, scr
 				}
 				
 				// run page change event handlers
+				_self.labelCurrentPageTab(p);
 				_self.onPageChange(p);
 				if(index > _currentPageIndex){
 					_self.onPageNext(p);
@@ -642,8 +666,88 @@ wFORMS.behaviors.paging.instance.prototype.findPreviousPage = function(index){
 }
 
 
+wFORMS.behaviors.paging.instance.prototype.jumpTo = function(i){
+	var b = this;
+	var index = i;
+	
+	if(b.currentPageIndex!=index) {	
+		b.behavior.hidePage(b.behavior.getPageByIndex(b.currentPageIndex));
+		b.setupManagedControls(index);
+		b.behavior.showPage(b.behavior.getPageByIndex(index));
+		b.currentPageIndex = index;
+	}
+	
+	//If there's a page with an error, jump to that first.
+
+	vInstance = wFORMS.getBehaviorInstance(b.target, 'validation');
+	if(vInstance.errorPages && vInstance.errorPages[index] && !arguments[1]){
+		var elem = document.getElementById(vInstance.errorPages[index][0]);
+		if(elem.scrollIntoView) {
+			//Fix for very stange rendering bug.  
+			//Page would lock up in Chrome if scrollIntoView was called
+			setTimeout(function(){elem.scrollIntoView();},1);
+		}
+	};
+	var p = b.behavior.getPageByIndex(index);
+	this.labelCurrentPageTab(p);
+	this.onPageChange(p);
+}
 
 
+/**
+ * Create a list of tabs to move users around the form.
+ * Append into element e
+ */
+wFORMS.behaviors.paging.instance.prototype.generateTabs = function(e){
+
+	var _b = this;
+	var d  = document.createElement('div');
+	d.id   = this.behavior.CSS_TABSID;
+	 
+	var d_text = document.createTextNode(this.behavior.MESSAGES.NAV_LABEL);
+	d.appendChild(d_text);
+	
+	if(e){
+		e.appendChild(d);
+	}else{
+		this.target.parentNode.insertBefore(d,this.target);
+	}
+	
+	var pages = base2.DOM.Element.querySelectorAll(this.target,"."+this.behavior.CSS_PAGE+", ."+this.behavior.CSS_CURRENT_PAGE);
+	pages.forEach(function(elem,i){
+		var tab = document.createElement('a');
+		tab.setAttribute("class",_b.behavior.CSS_TABS);
+		tab.setAttribute("id",_b.behavior.CSS_PAGETAB+"_"+(i+1));
+		tab.setAttribute("href","#");
+        
+		var label = base2.DOM.Element.querySelector(elem,'h4');
+        var label_text = null;
+		if(label){
+         label_text = label.innerText?label.innerText:label.textContent;
+		}
+		tab.setAttribute("title",label_text?label_text:_b.behavior.MESSAGES.TAB_LABEL+(i+1));
+		
+		var tab_text = document.createTextNode(i+1);
+		tab.appendChild(tab_text);
+		
+		base2.DOM.Element.addEventListener(tab,'click',function(){_b.jumpTo(i+1); return false; });
+		d.appendChild(tab);
+	});	
+	return pages;
+}
+
+wFORMS.behaviors.paging.instance.prototype.labelCurrentPageTab = function(p){
+	_b = this;
+	currentIndex = this.currentPageIndex;
+	
+	base2.DOM.Element.querySelectorAll(this.target.parentNode,'a[id^="'+this.behavior.CSS_PAGETAB+'"]').forEach(function(i){
+		if(!i.removeClass || !i.hasClass || !i.addClass){wFORMS.standardizeElement(i);}
+		i.removeClass(_b.behavior.CSS_TABSCURRENT);
+		if(i.getAttribute("id")==(_b.behavior.CSS_PAGETAB+"_"+currentIndex)){
+		  i.addClass(_b.behavior.CSS_TABSCURRENT);
+		}
+	});	
+}
 
 /**
  * Executes the behavior
@@ -652,4 +756,26 @@ wFORMS.behaviors.paging.instance.prototype.findPreviousPage = function(index){
  */
 wFORMS.behaviors.paging.instance.prototype.run = function(e, element){
 	this.activatePage(element.getAttribute(wFORMS.behaviors.paging.ATTR_INDEX));
+}
+
+wFORMS.behaviors.paging.helpers = {};
+
+/**
+ *	Find the page the given element is associated with.
+ */
+wFORMS.behaviors.paging.helpers.findPage = function(e){
+	if (e && (e.className.match("wfPage") || e.className.match("wfCurrentPage"))) {
+		wFORMS.standardizeElement(e);
+		return e;
+	} else {
+		if (e && e.parentNode) {
+			if (e.parentNode.className.match("wfPage") || e.parentNode.className.match("wfCurrentPage")) {
+				wFORMS.standardizeElement(e.parentNode);
+				return e.parentNode;
+			} else {
+				return wFORMS.behaviors.paging.helpers.findPage(e.parentNode);
+			}
+		}
+	}	
+	return null;
 }
