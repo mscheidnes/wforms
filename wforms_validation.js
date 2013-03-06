@@ -244,7 +244,7 @@ wFORMS.behaviors.validation.instance.prototype.onApply = function() {
  * @return	{boolean}	true if validation successful, false otherwise (and prevents event propagation)
  */
 wFORMS.behaviors.validation.instance.prototype.run = function(e, element) {
-	console.log('run validation');
+
 
 	// hack to stop to event propagation under paging
 	if (e && e.pagingStopPropagation) {
