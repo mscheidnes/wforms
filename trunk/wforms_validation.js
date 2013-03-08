@@ -103,9 +103,13 @@ wFORMS.behaviors.validation = {
 		if(wFORMS.behaviors.paging && wFORMS.behaviors.paging.showTabNavigation){
 
 			bInstance.errorPages = new Array();
+            // Record first page value outside of for loop in order
+            // allow only the first for loop that sets the value
+            // to be honored.  Necessary to prevent the first page value
+            // from being the last page with an error on it.
+            var firstPage = 9999;
 			for (var id in bInstance.elementsInError){
 				var page = wFORMS.behaviors.paging.helpers.findPage(document.getElementById(id));
-				var firstPage = 9999;
 				if(page){
 					var index = wFORMS.behaviors.paging.getPageIndex(page);
 					if(index < firstPage) {
