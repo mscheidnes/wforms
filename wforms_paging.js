@@ -50,6 +50,7 @@ wFORMS.behaviors.paging = {
 	CSS_TABS 	: 'wfTab',
 	CSS_TABSID	: 'wfTabNav',
 	CSS_TABSCURRENT	: 'wfTabCurrentPage',
+    CSS_TABSEPARATOR : ' | ',
 
 	/**
 	 * ID prefix for the next buttons
@@ -87,6 +88,12 @@ wFORMS.behaviors.paging = {
 	 */
 	ATTR_INDEX : 'wfPageIndex_activate',
 
+	/**
+	 * Attribute indicates selector for captcha active error message
+     * @final
+	 */
+    CAPTCHA_ERROR:'#tfa_captcha_text-E',
+    
 	/**
 	 * Custom messages used for creating links
      * @final
@@ -224,9 +231,24 @@ wFORMS.behaviors.paging.applyTo = function(f) {
 			};
 		}
 
-		if(b.behavior.showTabNavigation) {
-			b.generateTabs();
-		}
+        if(b.behavior.showTabNavigation) {
+          b.generateTabs();
+          
+          // Find and jump to last page if captcha error
+          // necessary to ensure we display captcha page
+          // if captcha is active and in failed state.
+          var pp = document.querySelector(wFORMS.behaviors.paging.CAPTCHA_ERROR);
+          if(pp){
+            var lastPage = 1;
+            for(var i=1;i<100;i++){ 
+                if(b.behavior.isLastPageIndex(i)){
+                 lastPage = i;
+                  break;
+               }
+            }                   
+            b.jumpTo(lastPage);
+          }
+        }
 		b.onApply();	
 		
 		// intercept the submit event
@@ -680,7 +702,7 @@ wFORMS.behaviors.paging.instance.prototype.jumpTo = function(i){
 	//If there's a page with an error, jump to that first.
 
 	vInstance = wFORMS.getBehaviorInstance(b.target, 'validation');
-	if(vInstance.errorPages && vInstance.errorPages[index] && !arguments[1]){
+	if(vInstance && vInstance.errorPages && vInstance.errorPages[index] && !arguments[1]){
 		var elem = document.getElementById(vInstance.errorPages[index][0]);
 		if(elem.scrollIntoView) {
 			//Fix for very stange rendering bug.  
@@ -729,10 +751,27 @@ wFORMS.behaviors.paging.instance.prototype.generateTabs = function(e){
 		
 		var tab_text = document.createTextNode(i+1);
 		tab.appendChild(tab_text);
-		
+        
+        // Add a clean tab separator, as using CSS borders will not work well.
+        // Necessary to allow customization of the tab separator even in browsers
+        // without good CSS support.
+		if(i<pages.length-1){
+			var text = document.createTextNode(_b.behavior.CSS_TABSEPARATOR);
+		}		
+        
 		base2.DOM.Element.addEventListener(tab,'click',function(){_b.jumpTo(i+1); return false; });
 		d.appendChild(tab);
-	});	
+        if(text){d.appendChild(text);}
+	});
+    
+    // Make sure page 1 is highlighted by default.
+	// Necessary to ensure we have consistent behavior 
+	// in highlighting the active page in the tab list.
+    var p = _b.behavior.getPageByIndex(1);
+    this.labelCurrentPageTab(p);
+    this.onPageChange(p);    
+	//
+    
 	return pages;
 }
 
