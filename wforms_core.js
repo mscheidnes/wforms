@@ -41,7 +41,7 @@ if (typeof(wFORMS) == "undefined") {
 	wFORMS = {};
 }
 wFORMS.NAME 	= "wFORMS";
-wFORMS.VERSION 	= "3.6.0";
+wFORMS.VERSION 	= "3.5.5";
 wFORMS.__repr__ = function () {
 	return "[" + this.NAME + " " + this.VERSION + "]";
 };
@@ -501,7 +501,6 @@ wFORMS.removeBehavior = function(f, behaviorName) {
  * TODO: Returns an array if more than one instance for the given form
  */
 wFORMS.getBehaviorInstance = function(f, behaviorName) {
-
 	if(!f || !wFORMS.instances[behaviorName]) 
 		return null;
 	

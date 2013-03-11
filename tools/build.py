@@ -16,7 +16,6 @@ wforms_modules = (
 	'wforms_calculation.js',
 	'wforms_autoformat.js',
 	'wforms_length_prompt.js',
-	'wforms_dependent_list.js',
 )
 
 # Order of os.path.dirname / os.path.abspath is not optional
