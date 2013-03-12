@@ -49,7 +49,9 @@ wFORMS.behaviors.paging = {
 	CSS_PAGETAB : 'wfPageTab',
 	CSS_TABS 	: 'wfTab',
 	CSS_TABSID	: 'wfTabNav',
+    CSS_TABNAVLABEL: 'wfTabNavLabel',
 	CSS_TABSCURRENT	: 'wfTabCurrentPage',
+    CSS_TABSEPARATOR_SPAN : 'wfTabSep',
     CSS_TABSEPARATOR : ' | ',
 
 	/**
@@ -723,11 +725,16 @@ wFORMS.behaviors.paging.instance.prototype.jumpTo = function(i){
 wFORMS.behaviors.paging.instance.prototype.generateTabs = function(e){
 
 	var _b = this;
+    
+    //Create div for CSS Tab Navigation bar elements
 	var d  = document.createElement('div');
 	d.id   = this.behavior.CSS_TABSID;
-	 
 	var d_text = document.createTextNode(this.behavior.MESSAGES.NAV_LABEL);
-	d.appendChild(d_text);
+    //Wrap label for Tab Navigation bar into a span for easy CSS styling.
+    var d_span = document.createElement('span');
+    d_span.className = this.behavior.CSS_TABNAVLABEL;
+    d_span.appendChild(d_text);
+	d.appendChild(d_span);
 	
 	if(e){
 		e.appendChild(d);
@@ -756,12 +763,15 @@ wFORMS.behaviors.paging.instance.prototype.generateTabs = function(e){
         // Necessary to allow customization of the tab separator even in browsers
         // without good CSS support.
 		if(i<pages.length-1){
+            var separator_wrap = document.createElement('span');
+            separator_wrap.className = _b.behavior.CSS_TABSEPARATOR_SPAN;
 			var text = document.createTextNode(_b.behavior.CSS_TABSEPARATOR);
+            separator_wrap.appendChild(text);
 		}		
         
 		base2.DOM.Element.addEventListener(tab,'click',function(){_b.jumpTo(i+1); return false; });
 		d.appendChild(tab);
-        if(text){d.appendChild(text);}
+        if(separator_wrap){d.appendChild(separator_wrap);}
 	});
     
     // Make sure page 1 is highlighted by default.
