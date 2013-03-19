@@ -966,8 +966,7 @@ wFORMS.behaviors.validation.instance.prototype.dateTimeRangeTestCommon = functio
 
 
 
-// document.addEventListener('DOMContentLoaded',enableResumeLater,false);
-base2.DOM.Element.addEventListener(document, 'DOMContentLoaded','wFORMS.behaviors.validation.enableResumeLater',false);
+
 
 wFORMS.behaviors.validation.enableResumeLater = function() {
 	
@@ -1106,3 +1105,5 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 		};
 	}
 }
+// document.addEventListener('DOMContentLoaded',enableResumeLater,false);
+base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.behaviors.validation.enableResumeLater,false);
