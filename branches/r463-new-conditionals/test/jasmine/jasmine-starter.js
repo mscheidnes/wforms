@@ -20,7 +20,7 @@
     };
 
     jasmine.getFixtures().fixturesPath = 'fixtures';
-//    jasmine.getFixtures().cleanFixtureAfterEach = false;
+    jasmine.getFixtures().cleanFixtureAfterEach = false;
 
     $(jasmine).on('fixture-loaded', function(event, fixtureFileName){
         wFORMS.initialized = false;
