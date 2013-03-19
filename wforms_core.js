@@ -276,6 +276,13 @@ wFORMS.helpers.contains = function(array, needle) {
 	return false;
 }
 
+wFORMS.helpers.isHTMLElement = function(o) {
+    return (
+    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
+        o && typeof o === "object" && o.nodeType === 1 && typeof o.nodeName==="string"
+    );
+};
+
 // Loader config
 wFORMS.LOADER    	  = {};
 wFORMS.LOADER.enabled = false;

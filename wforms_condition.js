@@ -6,6 +6,7 @@ wFORMS.behaviors['condition'] = (function(){
     'use strict';
 
     var DELIMITER = '`';
+    var CONDITIONAL_ATTRIBUTE_NAME = 'data-condition';
 
     //helper functions
     function map(enumerable, callback){
@@ -62,6 +63,12 @@ wFORMS.behaviors['condition'] = (function(){
 
     function treeReduce(treeNode, callback){
         function recursion(_treeNode){
+            var value = _treeNode.value;
+            if(! (value instanceof Array) && value.constructor !== Object){
+                //leaf node (terminal nodes)
+                return callback(_treeNode, null);
+            }//only treat those array, or plain object types as non-terminal nodes
+
             var children = map(_treeNode.value, function(value, key){
                 return {name: key, value: value};
             });
@@ -71,15 +78,6 @@ wFORMS.behaviors['condition'] = (function(){
             return callback(_treeNode, childrenValues);
         }
         return recursion({name: null, value: treeNode});
-    }
-
-    function inArray(array, value){
-        for(var i = 0, l = array.length; i < l; i ++){
-            if(value === array[i]){
-                return true;
-            }
-        }
-        return false;
     }
 
     function extend(){
@@ -93,17 +91,23 @@ wFORMS.behaviors['condition'] = (function(){
         return extendee;
     }
 
+    var inArray = wFORMS.helpers.contains;
+    var isHTMLElement = wFORMS.helpers.isHTMLElement;
+
     //classes
     var Conditional = (function(){
         function Conditional(domElement){
-
+            if( !isHTMLElement(domElement) || !domElement.hasAttribute(CONDITIONAL_ATTRIBUTE_NAME)){
+                throw {message: 'cannot initialize an object'};
+            }
+            this._conditionalDom = domElement;
+            this._conditionRuleString = domElement.getAttribute(CONDITIONAL_ATTRIBUTE_NAME);
         }
 
         function PolishExpression(operator, operands){
             this.operator = (operator + '').toUpperCase();
             this.operands = operands;
         }
-
         extend(PolishExpression.prototype, {
             toString: function(){
                 var components = map(this.operands, function(operand){
@@ -118,6 +122,7 @@ wFORMS.behaviors['condition'] = (function(){
         });
 
         //private functions
+        var COMPONENT_PATTERN = new RegExp(DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
         function _parseConditionRule(instance){
 
         }
@@ -129,22 +134,54 @@ wFORMS.behaviors['condition'] = (function(){
             },
 
             getTriggers: function(){
+                var triggerIdentifiers = [], match;
+                COMPONENT_PATTERN.lastIndex = 0;
+                while(match = COMPONENT_PATTERN.exec(this._conditionRuleString)){
+                    triggerIdentifiers.push(match[1]);
+                }
+
+                return map(triggerIdentifiers, function(identifier){
+                    return base2.DOM.Element.querySelector(document, identifier)
+                })
+            },
+
+            getConditionalDom: function(){
+                return this._conditionalDom;
+            },
+
+            getConditionalDomIdentifier: function(){
+                var id;
+                return this._conditionalDom.getAttribute('id') || (id = wFORMS.helpers.randomId() &&
+                    (this._conditionalDom.setAttribute('id', id) || id))
+            },
+
+            isConditionMet: function(){
 
             }
         });
 
         return extend(Conditional, {
+            /**
+             * Transform JSON object to Polish notation ( http://en.wikipedia.org/wiki/Polish_notation )
+             * @param relationshipObject
+             * @return {String}
+             */
             makeConditionRules: function(relationshipObject){
-                //transform object to tree
-                function transform(leafNodeValue){
-                    return DELIMITER + leafNodeValue + DELIMITER;
+                function transform(leafNode){
+                    var value = leafNode, id;
+                    if(isHTMLElement(leafNode)){ //special handling for dom elements
+                        value = leafNode.getAttribute('id') ||
+                            (id = wFORMS.helpers.randomId()) && (leafNode.setAttribute('id', id) || id);
+                    }
+
+                    return DELIMITER + value + DELIMITER;
                 }
 
                 var polishExpression = treeReduce(relationshipObject, function(treeNode, children){
                     if(!children){ // leaf nodes
                         return transform(treeNode.value);
                     }
-                    //if current treeNode is a one child node, and the only chlid is an operator node, then lift it up
+                    //if current treeNode is a one child node, and the only child is an operator node, then lift it up
                     if(children.length == 1 && inArray(['AND', 'OR'], (children[0].name + '').toUpperCase())){
                         return children[0].value;
                     }
@@ -173,8 +210,21 @@ wFORMS.behaviors['condition'] = (function(){
                 });
 
                 return polishExpression.toString();
-            }
+            },
+
+            /**
+             * underscore prefixed functions are for unit test purpose only
+             */
+            _parseConditionRule: _parseConditionRule
         });
+    })();
+
+    var Trigger = (function(){
+        function Trigger(domElement){
+
+        }
+
+        return Trigger;
     })();
 
     return { // the ultimate object that will become wFORMS.behaviors['condition']
@@ -182,14 +232,15 @@ wFORMS.behaviors['condition'] = (function(){
         },
 
         getConditional: function(domElement){
-
+            return new Conditional(domElement);
         },
 
         getTrigger: function(domElement){
 
         },
 
-        Conditional: Conditional
+        Conditional: Conditional,
+        Trigger: Trigger
     }
 })();
 
