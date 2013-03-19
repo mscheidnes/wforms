@@ -1,14 +1,12 @@
-<section id="test-length-prompt">
-    <form method="post" action="" id="testForm" class="wForm">
-        <fieldset>
-            <input type="text" id="ssn"  name="testField" class="" value="" autoformat="### ##-####"/>
-            <br/>
-            <input type="text" id="right"  name="testField" class="" value="" autoformat="### ##-####"
-                    style="direction: rtl;"/>
-        </fieldset>
+<form id="test-group1" method="post" action="" id="testForm" class="wForm">
+    <fieldset>
+        <label for="option1">option1</label><input type="checkbox" id="option1" name="option-group1"/>
+        <label for="option2">option1</label><input type="checkbox" id="option2" name="option-group1"/>
+        <label for="option3">option1</label><input type="checkbox" id="option3" name="option-group1"/>
+        <label >option4<input type="checkbox" name="option-group1"/></label>
+    </fieldset>
 
-        <fieldset data-condition="">
-            Conditional fieldset
-        </fieldset>
-    </form>
-</section>
+    <fieldset data-condition=" ( `#option1` AND `#option2` AND `#option3` ) ">
+        Conditional fieldset
+    </fieldset>
+</form>
