@@ -117,7 +117,121 @@
         it("a instance should be able to extract triggers from its data-condition attribute", function(){
             var conditionalDOM = base2.DOM.Element.querySelector($('#test-group1')[0], 'fieldset[data-condition]');
             var conditional = new wFORMS.behaviors['condition'].Conditional(conditionalDOM );
-            console.log(conditional.getTriggers());
+
+            $.each(conditional.getTriggers(), function(index, trigger){
+                expect(trigger instanceof wFORMS.behaviors['condition'].Trigger).toBeTruthy();
+            });
+        });
+
+        it("getTriggers() should still return triggers for invalid selectors", function(){
+            var conditionalDOM = base2.DOM.Element.querySelector($('#test-group2')[0], 'fieldset[data-condition]');
+            var conditional = new wFORMS.behaviors['condition'].Conditional(conditionalDOM );
+
+            var triggers = conditional.getTriggers();
+            // the 3rd trigger should still be a trigger instance
+            expect(triggers[2] instanceof wFORMS.behaviors['condition'].Trigger).toBeTruthy();
+            expect(triggers[2].getTriggerElement()).toBeNull();
         });
     });
+
+    describe('The Trigger class',
+        function(){
+            beforeEach(function(){
+                loadFixtures( 'condition.html' );
+
+                waitsFor(function(){
+                    return wFORMS.initialized === true;
+                }, 'wait for wForms initializing', 100);
+
+                runs(function(){
+                });
+            });
+
+            it("should be able to restored the trigger DOM object by its identifier", function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+                var triggerDOM = document.getElementById('option1');
+                expect(trigger.getTriggerElement()).toBe(triggerDOM);
+            });
+
+            it("should be able to restore its associated conditionals by looking at \"data-conditional\" attribute ",
+            function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+                var conditionals = trigger.getConditionals();
+                expect(conditionals.length).toBe(1);
+                expect(conditionals[0].getConditionalElement()).toBe($('#field1')[0]);
+            });
+
+            it("should be able to handle multiple conditionals",
+                function(){
+                    var trigger = new wFORMS.behaviors['condition'].Trigger('#option2');
+                    var conditionals = trigger.getConditionals();
+
+                    expect(conditionals.length).toBe(2);
+                    expect(conditionals[0].getConditionalElement()).toBe($('#field1')[0]);
+                    expect(conditionals[1].getConditionalElement()).toBe($('#invalid-fieldset')[0]);
+            });
+
+            it("should still return a Conditional instance for non-existing conditionals",
+                function(){
+                    var trigger = new wFORMS.behaviors['condition'].Trigger('#option3');
+                    var conditionals = trigger.getConditionals();
+
+                    expect(conditionals.length).toBe(3);
+                    $.each(conditionals, function(i, conditional){
+                        expect(conditional instanceof wFORMS.behaviors['condition'].Conditional).toBeTruthy();
+                    });
+                    expect(conditionals[0].getConditionalElement()).toBe($('#field1')[0]);
+                    expect(conditionals[1].getConditionalElement()).toBe($('#invalid-fieldset')[0]);
+                    expect(conditionals[2].getConditionalElement()).toBeNull();
+            });
+
+            it("should update its conditional pattern attribute by conditional instances", function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+
+                expect(trigger._getConditionalsPattern()).toBe('#field1');
+
+                var conditionals = $.map(['#field1', '#invalid-fieldset'], function(id){
+                    return new wFORMS.behaviors['condition'].Conditional(id);
+                });
+
+                trigger.replaceConditionals(conditionals);
+
+                expect(trigger._getConditionalsPattern()).toBe('#field1,#invalid-fieldset');
+            });
+
+            it("should be able to add a new conditional to its pattern attribute", function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+
+                var conditional = new wFORMS.behaviors['condition'].Conditional('#invalid-fieldset');
+
+                trigger.addConditional(conditional);
+
+                expect(trigger._getConditionalsPattern()).toBe('#field1,#invalid-fieldset');
+            });
+
+            it("adding the same conditional in will not get it duplicated", function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+
+                var conditional = new wFORMS.behaviors['condition'].Conditional('#field1');
+                trigger.addConditional(conditional);
+                expect(trigger._getConditionalsPattern()).toBe('#field1');
+
+                conditional = new wFORMS.behaviors['condition'].Conditional('#test-group1 fieldset[data-condition]');
+                trigger.addConditional(conditional);
+                expect(trigger._getConditionalsPattern()).toBe('#field1');
+            });
+
+            it("should be able to remove a conditional from its pattern attribute", function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+
+                var conditional = new wFORMS.behaviors['condition'].Conditional('#field1');
+
+                trigger.removeConditional(conditional);
+                expect(trigger._getConditionalsPattern()).toBe('');
+
+                trigger = new wFORMS.behaviors['condition'].Trigger('#option3');
+                trigger.removeConditional(conditional);
+                expect(trigger._getConditionalsPattern()).toBe('#invalid-fieldset,form .non-exist-conditonal');
+            });
+        });
 })();
