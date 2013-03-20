@@ -132,9 +132,39 @@
             expect(triggers[2] instanceof wFORMS.behaviors['condition'].Trigger).toBeTruthy();
             expect(triggers[2].getTriggerElement()).toBeNull();
         });
+
+        it("it should link itself to the triggers described in its conditional rule", function(){
+            var conditional = new wFORMS.behaviors['condition'].Conditional('#unlinked-conditional');
+            conditional.linkTriggers();
+
+            var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+            expect(trigger._getConditionalsPattern()).toBe('#field1,#unlinked-conditional');
+
+            trigger = new wFORMS.behaviors['condition'].Trigger('#option2');
+            expect(trigger._getConditionalsPattern()).toBe('#field1,#invalid-fieldset,#unlinked-conditional');
+
+            trigger = new wFORMS.behaviors['condition'].Trigger('#option3');
+            expect(trigger._getConditionalsPattern())
+                .toBe('#field1,#invalid-fieldset,form .non-exist-conditonal,#unlinked-conditional');
+        });
+
+        it("it should unlink itself from the triggers associated with this conditional", function(){
+            var conditional = new wFORMS.behaviors['condition'].Conditional('#field1');
+            conditional.unlinkTriggers();
+
+            var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
+            expect(trigger._getConditionalsPattern()).toBe('');
+
+            trigger = new wFORMS.behaviors['condition'].Trigger('#option2');
+            expect(trigger._getConditionalsPattern()).toBe('#invalid-fieldset');
+
+            trigger = new wFORMS.behaviors['condition'].Trigger('#option3');
+            expect(trigger._getConditionalsPattern())
+                .toBe('#invalid-fieldset,form .non-exist-conditonal');
+        });
     });
 
-    describe('The Trigger class',
+    xdescribe('The Trigger class',
         function(){
             beforeEach(function(){
                 loadFixtures( 'condition.html' );

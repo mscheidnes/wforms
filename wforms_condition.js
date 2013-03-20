@@ -146,6 +146,18 @@ wFORMS.behaviors['condition'] = (function(){
         //private functions
         var COMPONENT_PATTERN = new RegExp(DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
 
+        /**
+         * filter those detached triggers, leave only valid triggers
+         * @param instance Conditional
+         * @private
+         */
+        function _getActiveTriggers(instance){
+            var triggers = instance.getTriggers();
+            return filter(triggers, function(trigger){
+                return trigger.getTriggerElement() !== null;
+            });
+        }
+
         //public functions
         extend(Conditional.prototype, {
             syncTriggers: function(){
@@ -211,6 +223,22 @@ wFORMS.behaviors['condition'] = (function(){
                     return false; // if either of the elements doesn't exist, then not equal
                 }
                 return domElementAnother === domElementOne;
+            },
+
+            linkTriggers: function(){
+                map(_getActiveTriggers(this), function(conditional){
+                    return function(trigger){
+                        trigger.addConditional(conditional);
+                    }
+                }(this));
+            },
+
+            unlinkTriggers: function(){
+                map(_getActiveTriggers(this), function(conditional){
+                    return function(trigger){
+                        trigger.removeConditional(conditional);
+                    }
+                }(this));
             },
 
             isConditionMet: function(){
@@ -318,7 +346,7 @@ wFORMS.behaviors['condition'] = (function(){
             //if this trigger links to a valid DOM element?
             var domElement = instance.getTriggerElement();
             if(!isHTMLElement(domElement)){
-                throw {message: 'Cannot store Conditionals to this Trigger object. The inferred DOM object doesn\'t exists'};
+                throw {message: 'Cannot store Conditionals to this Trigger object. The inferred DOM object doesn\'t exist'};
             }
 
             var pattern = _conditionalToPattern(conditionals);
