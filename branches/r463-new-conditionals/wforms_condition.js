@@ -7,6 +7,7 @@ wFORMS.behaviors['condition'] = (function(){
 
     var DELIMITER = '`';
     var CONDITIONAL_ATTRIBUTE_NAME = 'data-condition';
+    var TRIGGER_CONDITIONALS = 'data-conditionals';
 
     //helper functions
     function map(enumerable, callback){
@@ -91,17 +92,38 @@ wFORMS.behaviors['condition'] = (function(){
         return extendee;
     }
 
+    function trim(str){
+        return str.replace(/(^\s+)|(\s+$)/g, '');
+    }
+
+    function getOrAssignID(domElement){
+        if( !isHTMLElement(domElement)){
+            throw {message: 'not a dom element'};
+        }
+        var id;
+        return domElement.getAttribute('id') || (id = wFORMS.helpers.randomId() &&
+            (domElement.setAttribute('id', id) || id))
+    }
+
     var inArray = wFORMS.helpers.contains;
     var isHTMLElement = wFORMS.helpers.isHTMLElement;
 
     //classes
     var Conditional = (function(){
-        function Conditional(domElement){
-            if( !isHTMLElement(domElement) || !domElement.hasAttribute(CONDITIONAL_ATTRIBUTE_NAME)){
-                throw {message: 'cannot initialize an object'};
+        /**
+         * @param domElementIdentifier string or DOM element
+         * @constructor
+         */
+        function Conditional(domElementIdentifier){
+            this._conditionalDomIdentifier = domElementIdentifier;
+            if(typeof domElementIdentifier !== 'string'){
+                var domElement = domElementIdentifier;
+                this._conditionalDomIdentifier = '#' + getOrAssignID(domElement);
+
+                if(!isHTMLElement(domElement) || !domElement.hasAttribute(CONDITIONAL_ATTRIBUTE_NAME)){
+                    throw {message: 'this element doesn\'t have a "'+CONDITIONAL_ATTRIBUTE_NAME+'" attribute'};
+                }
             }
-            this._conditionalDom = domElement;
-            this._conditionRuleString = domElement.getAttribute(CONDITIONAL_ATTRIBUTE_NAME);
         }
 
         function PolishExpression(operator, operands){
@@ -123,9 +145,6 @@ wFORMS.behaviors['condition'] = (function(){
 
         //private functions
         var COMPONENT_PATTERN = new RegExp(DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
-        function _parseConditionRule(instance){
-
-        }
 
         //public functions
         extend(Conditional.prototype, {
@@ -133,26 +152,65 @@ wFORMS.behaviors['condition'] = (function(){
 
             },
 
+            getConditionRuleString: function(){
+                var domElement = this.getConditionalElement();
+                if(!domElement){
+                    return null;
+                }
+                return domElement.getAttribute(CONDITIONAL_ATTRIBUTE_NAME)
+            },
+
             getTriggers: function(){
+                var conditionRuleString = this.getConditionRuleString();
+                if(!conditionRuleString ){
+                    return null;
+                }
                 var triggerIdentifiers = [], match;
-                COMPONENT_PATTERN.lastIndex = 0;
-                while(match = COMPONENT_PATTERN.exec(this._conditionRuleString)){
+                COMPONENT_PATTERN.lastIndex = 0; //reset regex
+
+                while(match = COMPONENT_PATTERN.exec( conditionRuleString )){
                     triggerIdentifiers.push(match[1]);
                 }
 
                 return map(triggerIdentifiers, function(identifier){
-                    return base2.DOM.Element.querySelector(document, identifier)
+                    var e;
+                    try{
+                        return new Trigger(identifier);
+                    }catch(e){
+                        return null;
+                    }
                 })
             },
 
-            getConditionalDom: function(){
-                return this._conditionalDom;
+            getConditionalElement: function(){
+                var e;
+                try{
+                    return base2.DOM.Element.querySelector(document, this._conditionalDomIdentifier)
+                }catch(e){
+                    return null;
+                }
             },
 
-            getConditionalDomIdentifier: function(){
-                var id;
-                return this._conditionalDom.getAttribute('id') || (id = wFORMS.helpers.randomId() &&
-                    (this._conditionalDom.setAttribute('id', id) || id))
+            getIdentifier: function(){
+                return this._conditionalDomIdentifier;
+            },
+
+            /**
+             * Test if this conditional instance equals to another one
+             * @param conditional
+             */
+            equals : function(conditional){
+                if(this.getIdentifier() === conditional.getIdentifier()){
+                    return true; // if the identifiers equal, then two conditional do as well.
+                }
+
+                var domElementOne = this.getConditionalElement();
+                var domElementAnother = conditional.getConditionalElement();
+
+                if(!domElementAnother || !domElementOne ){
+                    return false; // if either of the elements doesn't exist, then not equal
+                }
+                return domElementAnother === domElementOne;
             },
 
             isConditionMet: function(){
@@ -210,19 +268,118 @@ wFORMS.behaviors['condition'] = (function(){
                 });
 
                 return polishExpression.toString();
-            },
-
-            /**
-             * underscore prefixed functions are for unit test purpose only
-             */
-            _parseConditionRule: _parseConditionRule
+            }
         });
     })();
 
     var Trigger = (function(){
+        /**
+         *
+         * @param domElement a string, indicating the CSS selector for the DOM element, or the DOM element itself
+         * @constructor
+         */
         function Trigger(domElement){
-
+            var identifier = domElement;
+            if( typeof domElement !== 'string'){
+                //treat it as an existing DOM element
+                identifier = '#' + getOrAssignID(domElement);
+            }
+            this._triggerElementIdentifier = identifier;
         }
+
+        //private functions
+        function _retrieveConditionals(instance){
+            var triggerDOMElement = instance.getTriggerElement();
+            var conditionalsDef = triggerDOMElement.getAttribute(TRIGGER_CONDITIONALS);
+            return map(conditionalsDef.split(','), function(conditionalSelector){
+                var e;
+                try{
+                    return new Conditional(trim(conditionalSelector));
+                }catch(e){
+                    return null
+                }
+            });
+        }
+
+        function _conditionalToPattern(conditionals){
+            return map(conditionals, function(conditonal){
+                return conditonal.getIdentifier();
+            }).join(',');
+        }
+
+        function _storeConditionalsToPatternAttribute(instance, conditionals){
+            conditionals = filter(conditionals, function(conditional){
+                return conditional instanceof Conditional;
+            });
+            if(!conditionals){
+                return null;
+            }
+
+            //if this trigger links to a valid DOM element?
+            var domElement = instance.getTriggerElement();
+            if(!isHTMLElement(domElement)){
+                throw {message: 'Cannot store Conditionals to this Trigger object. The inferred DOM object doesn\'t exists'};
+            }
+
+            var pattern = _conditionalToPattern(conditionals);
+
+            domElement.setAttribute(TRIGGER_CONDITIONALS, pattern);
+            return pattern;
+        }
+
+        extend(Trigger.prototype, {
+            attachedConditionals: [],
+
+            /**
+             * For test purpose only, no need to use this function unless absolutely necessary.
+             * @return {*}
+             * @private
+             */
+            _getConditionalsPattern: function(){
+                return _conditionalToPattern(this.getConditionals());
+            },
+
+            getIdentifier: function(){
+                return this._triggerElementIdentifier();
+            },
+            getTriggerElement: function(){
+                var e;
+                try{
+                    return base2.DOM.Element.querySelector(document, this._triggerElementIdentifier);
+                }catch(e){
+                    return null;
+                }
+            },
+
+            getConditionals: function(){
+                return _retrieveConditionals(this);
+            },
+
+            replaceConditionals: function(conditionals){
+                return _storeConditionalsToPatternAttribute(this, conditionals);
+            },
+
+            addConditional: function(conditional){
+                var existingConditionals = this.getConditionals();
+                var duplicatedEntries = filter(existingConditionals, function(_conditional){
+                    return _conditional.equals(conditional);
+                });
+
+                if(duplicatedEntries.length !== 0){ // if conditional is already associated
+                    return null; //do nothing, don't add the conditional in
+                }
+
+                existingConditionals.push(conditional);
+                return _storeConditionalsToPatternAttribute(this, existingConditionals);
+            },
+            removeConditional: function(conditional){
+                var existingConditionals = this.getConditionals();
+                var unduplicatedEntries = filter(existingConditionals, function(_conditional, index){
+                    return !_conditional.equals(conditional);
+                });
+                return _storeConditionalsToPatternAttribute(this, unduplicatedEntries);
+            }
+        });
 
         return Trigger;
     })();
@@ -236,7 +393,7 @@ wFORMS.behaviors['condition'] = (function(){
         },
 
         getTrigger: function(domElement){
-
+            return new Trigger(domElement);
         },
 
         Conditional: Conditional,

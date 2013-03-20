@@ -1,12 +1,25 @@
-<form id="test-group1" method="post" action="" id="testForm" class="wForm">
+<form id="test-group1" method="post" action="" class="wForm">
     <fieldset>
-        <label for="option1">option1</label><input type="checkbox" id="option1" name="option-group1"/>
-        <label for="option2">option1</label><input type="checkbox" id="option2" name="option-group1"/>
-        <label for="option3">option1</label><input type="checkbox" id="option3" name="option-group1"/>
+        <label for="option1">option1</label>
+        <input type="checkbox" id="option1" name="option-group1"
+                                           data-conditionals="#field1"/>
+        <label for="option2">option1</label>
+        <input type="checkbox" id="option2" name="option-group1"
+               data-conditionals="#field1, #invalid-fieldset"/>
+        <label for="option3">option1</label>
+        <input type="checkbox" id="option3" name="option-group1"
+               data-conditionals="#field1, #invalid-fieldset, form .non-exist-conditonal"/>
         <label >option4<input type="checkbox" name="option-group1"/></label>
     </fieldset>
 
-    <fieldset data-condition=" ( `#option1` AND `#option2` AND `#option3` ) ">
+    <fieldset id="field1" data-condition=" ( `#option1` AND `#option2` AND `#option3` ) ">
+        Conditional fieldset
+    </fieldset>
+</form>
+
+<form id="test-group2" method="post" action="" class="wForm">
+    <fieldset id="invalid-fieldset"
+              data-condition=" ( `#option1` AND `#option2` OR `#non-exist-element`) ">
         Conditional fieldset
     </fieldset>
 </form>
