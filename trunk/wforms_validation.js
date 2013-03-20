@@ -670,13 +670,10 @@ wFORMS.behaviors.validation.instance.prototype.validateDateTime = function(eleme
 };
 
 wFORMS.behaviors.validation.instance.prototype.validateDate = function(element, value) {
-    console.log('validate-date:' + value);
     if (this.isEmpty(value)) {
         return true;
     }
     var date = this.analyzeDateComponents(value);
-    console.log('date:');
-    console.log(date);
     return !(date === null);
 };
 /**
