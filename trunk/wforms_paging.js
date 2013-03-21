@@ -105,7 +105,7 @@ wFORMS.behaviors.paging = {
 		CAPTION_PREVIOUS : 'Previous Page',
 		CAPTION_UNLOAD : 'Any data entered on ANY PAGE of this form will be LOST.',
 		NAV_LABEL : 'Page: ',
-		TAB_LABEL : 'Page ',
+		TAB_LABEL : 'Page '
 
 	},
 
