@@ -1,7 +1,7 @@
 (function(){
     'use strict';
 
-    xdescribe('The Conditional class should be able to generate a rule string based on a javascript object',
+    describe('The Conditional class should be able to generate a rule string based on a javascript object',
     function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -68,7 +68,7 @@
             };
 
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(case5JSON);
-            expect(ruleString).toBe(' ( `A` AND `B` AND `option1` AND `option2` ) ');
+            expect(ruleString).toBe(' ( `A` AND `B` AND `#option1` AND `#option2` ) ');
         });
 
         it('if a dom object doesn\'t have an ID, a random one will be generated for it. ', function(){
@@ -84,7 +84,7 @@
 
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(case6JSON);
             wFORMS.helpers.randomId = backup;
-            expect(ruleString).toBe( ' ( `A` AND `B` AND `option3` AND `id_a_random_one` ) ');
+            expect(ruleString).toBe( ' ( `A` AND `B` AND `#option3` AND `#id_a_random_one` ) ');
         })
     });
 
@@ -162,9 +162,74 @@
             expect(trigger._getConditionalsPattern())
                 .toBe('#invalid-fieldset,form .non-exist-conditonal');
         });
+
+        it('it should calculate the boolean value of its conditional rule', function(){
+            // conditional1 : ( `#option1` AND `#option2` AND `#non-exist-element`)
+            var conditional1 = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
+            // conditional2 : ( `#option1` AND `#option2` OR `#option3`)
+            var conditional2 = new wFORMS.behaviors['condition'].Conditional('#boolean-style2');
+
+            var $option1 = $('#option1'), $option2 = $('#option2'), $option3 = $('#option3');
+
+            expect(conditional1.isConditionMet()).toBeFalsy();
+            expect(conditional2.isConditionMet()).toBeFalsy();
+
+            $option3.attr('checked', 'checked');
+            expect(conditional1.isConditionMet()).toBeFalsy();
+            expect(conditional2.isConditionMet()).toBeTruthy();
+
+            $option3.removeAttr('checked');
+            $option1.attr('checked', 'checked');
+            expect(conditional1.isConditionMet()).toBeFalsy();
+            expect(conditional2.isConditionMet()).toBeFalsy();
+
+            $option2.attr('checked', 'checked');
+            expect(conditional1.isConditionMet()).toBeFalsy();
+            expect(conditional2.isConditionMet()).toBeTruthy();
+        });
+
+        it('it should calculate the boolean value of a nested conditional rule', function(){
+            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style3');
+            expect(conditional.isConditionMet()).toBeFalsy();
+
+            var $option1 = $('#option1'), $option2 = $('#option2'), $option3 = $('#option3');
+
+            $option1.attr('checked', 'checked');
+            expect(conditional.isConditionMet()).toBeFalsy();
+
+            $option2.attr('checked', 'checked');
+            expect(conditional.isConditionMet()).toBeTruthy();
+
+            $option2.removeAttr('checked');
+            $option3.attr('checked', 'checked');
+            expect(conditional.isConditionMet()).toBeTruthy();
+        });
+
+        it('it should be able to hide itself', function(){
+            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
+            conditional.hide();
+
+            expect(conditional.getConditionalElement().style.display).toBe('none');
+        });
+
+        it('it should be able to display itself', function(){
+            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
+            conditional.hide();
+            conditional.show();
+
+            expect(conditional.getConditionalElement().style.display).toBe('block');
+        });
+
+        it('when re-display itself, the original display mode should be kept', function(){
+            $('#boolean-style1').css('display', 'inline-block');
+            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
+            conditional.hide();
+            conditional.show();
+            expect(conditional.getConditionalElement().style.display).toBe('inline-block');
+        })
     });
 
-    xdescribe('The Trigger class',
+    describe('The Trigger class',
         function(){
             beforeEach(function(){
                 loadFixtures( 'condition.html' );
@@ -263,5 +328,52 @@
                 trigger.removeConditional(conditional);
                 expect(trigger._getConditionalsPattern()).toBe('#invalid-fieldset,form .non-exist-conditonal');
             });
+
+            it("should get a on/off value from a radio button", function(){
+                $('#trigger-type-radio1').attr('checked', 'checked');
+                var trigger1 = new wFORMS.behaviors['condition'].Trigger('#trigger-type-radio1');
+                var trigger2 = new wFORMS.behaviors['condition'].Trigger('#trigger-type-radio2');
+
+                expect(trigger1.getValue()).toBeTruthy();
+                expect(trigger2.getValue()).toBeFalsy();
+            });
+
+            it("should get a on/off value from check boxes", function(){
+                $('#option1').attr('checked', 'checked');
+                var trigger1 = new wFORMS.behaviors['condition'].Trigger('#option1');
+                var trigger2 = new wFORMS.behaviors['condition'].Trigger('#option2');
+
+                expect(trigger1.getValue()).toBeTruthy();
+                expect(trigger2.getValue()).toBeFalsy();
+            });
+
+            it("should get a on/off value from textarea", function(){
+                $("#trigger-textarea").attr('checked', 'checked');
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#trigger-textarea');
+
+                expect(trigger.getValue()).toBeFalsy();
+
+                $('#trigger-textarea').val('value');
+                expect(trigger.getValue()).toBeTruthy();
+            });
+
+            it("should get a on/off value from text input", function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#trigger-type-text');
+
+                expect(trigger.getValue()).toBeFalsy();
+
+                $('#trigger-type-text').val('value');
+                expect(trigger.getValue()).toBeTruthy();
+            });
+
+            it("should get a on/off value from SELECT element", function(){
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#trigger-select');
+
+                expect(trigger.getValue()).toBeFalsy();
+
+                $('#trigger-select').val('1');
+                expect(trigger.getValue()).toBeTruthy();
+            });
+
         });
 })();

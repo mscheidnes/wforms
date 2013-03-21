@@ -8,6 +8,15 @@ wFORMS.behaviors['condition'] = (function(){
     var DELIMITER = '`';
     var CONDITIONAL_ATTRIBUTE_NAME = 'data-condition';
     var TRIGGER_CONDITIONALS = 'data-conditionals';
+    var TRIGGER_DEFAULT_ENABLED = true;
+    var DEFAULT_NON_EXIST_TRIGGER_VALUE = false;
+    var DEFAULT_CONDITIONAL_DISPLAY_VALUE = 'block';
+
+    function initialization(){
+        //bind events
+        //false means handle the event in bubbling phase
+        base2.DOM.Element.addEventListener(document, 'click', EventHandlers.document, false);
+    }
 
     //helper functions
     function map(enumerable, callback){
@@ -160,10 +169,6 @@ wFORMS.behaviors['condition'] = (function(){
 
         //public functions
         extend(Conditional.prototype, {
-            syncTriggers: function(){
-
-            },
-
             getConditionRuleString: function(){
                 var domElement = this.getConditionalElement();
                 if(!domElement){
@@ -177,6 +182,7 @@ wFORMS.behaviors['condition'] = (function(){
                 if(!conditionRuleString ){
                     return null;
                 }
+
                 var triggerIdentifiers = [], match;
                 COMPONENT_PATTERN.lastIndex = 0; //reset regex
 
@@ -241,8 +247,45 @@ wFORMS.behaviors['condition'] = (function(){
                 }(this));
             },
 
-            isConditionMet: function(){
+            refresh: function(){
+                if(this.isConditionMet()){
+                    this.show();
+                }else{
+                    this.hide();
+                }
+            },
 
+            isConditionMet: function(){
+                var conditionRuleString = this.getConditionRuleString();
+                if(!conditionRuleString ){
+                    //doesn't have a rule string, cannot judge
+                    throw {message: "The inferred DOM element doesn't have a rule string"};
+                }
+                COMPONENT_PATTERN.lastIndex = 0; //reset regex
+
+                var rawBooleanExpression = conditionRuleString.replace(COMPONENT_PATTERN, function($, $sub){
+                    var trigger = new Trigger($sub);
+                    return trigger.getValue() ? 'true' : 'false';
+                });
+
+                var booleanExpression = rawBooleanExpression.replace(/AND/g, '&&').replace(/OR/g, '||');
+                return eval(booleanExpression);
+            },
+
+            show: function(){
+                var conditionalElement = this.getConditionalElement();
+                conditionalElement.style.display
+                    = conditionalElement.originalDisplaySettings || DEFAULT_CONDITIONAL_DISPLAY_VALUE;
+            },
+
+            hide: function(){
+                var conditionalElement = this.getConditionalElement();
+                var displayValue
+                    = base2.DOM.AbstractView.getComputedStyle(window, conditionalElement, '').getPropertyValue('display');
+                if(displayValue !== 'none'){
+                    conditionalElement.originalDisplaySettings  = conditionalElement.style.display;
+                }
+                conditionalElement.style.display = 'none';
             }
         });
 
@@ -258,6 +301,7 @@ wFORMS.behaviors['condition'] = (function(){
                     if(isHTMLElement(leafNode)){ //special handling for dom elements
                         value = leafNode.getAttribute('id') ||
                             (id = wFORMS.helpers.randomId()) && (leafNode.setAttribute('id', id) || id);
+                        value = '#' + value;
                     }
 
                     return DELIMITER + value + DELIMITER;
@@ -319,6 +363,9 @@ wFORMS.behaviors['condition'] = (function(){
         function _retrieveConditionals(instance){
             var triggerDOMElement = instance.getTriggerElement();
             var conditionalsDef = triggerDOMElement.getAttribute(TRIGGER_CONDITIONALS);
+            if(!conditionalsDef ){
+                return [];
+            }
             return map(conditionalsDef.split(','), function(conditionalSelector){
                 var e;
                 try{
@@ -379,6 +426,36 @@ wFORMS.behaviors['condition'] = (function(){
                 }
             },
 
+            getValue: function(){
+                var triggerElement = this.getTriggerElement();
+                if(!triggerElement){
+                    return DEFAULT_NON_EXIST_TRIGGER_VALUE;
+                }
+
+                if( triggerElement.tagName === 'INPUT') {
+                    var type = base2.DOM.Element.getAttribute(triggerElement, 'type');
+                    if( type === 'checkbox' || type === 'radio' ){
+                        return triggerElement.checked? true : false
+                    }else if(type === 'text' ){
+                        return trim(triggerElement.value).length !== 0;
+                    }
+                }else if(triggerElement.tagName === 'TEXTAREA'){
+                    return trim(triggerElement.value).length !== 0;
+                }else if(triggerElement.tagName === 'SELECT'){
+                    if(triggerElement.selectedIndex > 0) {
+                        return true;
+                    }
+                    for(var i = 0, l = triggerElement.options.length; i < l; i++) {
+                        var option = triggerElement.options[i];
+                        if(option.selected && trim(option.value).length > 0) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                return false;
+            },
+
             getConditionals: function(){
                 return _retrieveConditionals(this);
             },
@@ -406,14 +483,93 @@ wFORMS.behaviors['condition'] = (function(){
                     return !_conditional.equals(conditional);
                 });
                 return _storeConditionalsToPatternAttribute(this, unduplicatedEntries);
+            },
+
+            activate: function(){
+                var triggerElement = this.getTriggerElement();
+                triggerElement && (triggerElement.condition_trigger_enabled = true);
+            },
+
+            deactivate: function(){
+                var triggerElement = this.getTriggerElement();
+                triggerElement && (triggerElement.condition_trigger_enabled = false);
+            },
+
+            trigger: function(){
+                var triggerElement = this.getTriggerElement();
+                if(!triggerElement ){
+                    return;
+                }
+
+                if( typeof triggerElement.condition_trigger_enabled === 'undefined'){
+                    triggerElement.condition_trigger_enabled = TRIGGER_DEFAULT_ENABLED;
+                }
+
+                if(!triggerElement.condition_trigger_enabled ){
+                    return;
+                }
+
+                var activeConditionals = filter(this.getConditionals(), function(conditional){
+                    return conditional && conditional.getConditionalElement();
+                });
+
+                map(activeConditionals, function(conditional){
+                    conditional.refresh();
+                });
             }
         });
 
         return Trigger;
     })();
 
+
+    var EventHandlers = {
+        document: function(event){
+            var target = event.target;
+            if(!target){
+                return;
+            }
+
+            var conditionalsPattern = base2.DOM.Element.getAttribute(target, TRIGGER_CONDITIONALS);
+            if(conditionalsPattern ){ // if the element has a TRIGGER_CONDITIONALS attribute,
+                // respond to this event
+                return (new Trigger(target)).trigger();
+            }
+
+            //else check if target is a radio button
+            if(target.tagName === 'INPUT' && base2.DOM.Element.getAttribute(target, 'type') === 'radio' ){
+                var name = base2.DOM.Element.getAttribute(target, 'name');
+                //then we have to trigger the radio button in the same group
+                var radioButtons = base2.DOM.Element.querySelectorAll(document,
+                    'input[type="radio"][name="' + name +'"]');
+
+                radioButtons.forEach(function(radioButton){
+                    return (new Trigger(radioButton)).trigger();
+                })
+            }
+        }
+    };
+
+    var _timestamp = (new Date()).getTime();
+    var _intervalHandler = window.setInterval(function(){
+        if(wFORMS.initialized){
+            window.clearInterval(_intervalHandler);
+            initialization();
+        }
+        if((new Date()).getTime() - _timestamp > 5000){
+            window.clearInterval(_intervalHandler);
+            throw({message: '[Condition] behaviour cannot initialized due to time out'});
+        }
+    }, 50);
+
     return { // the ultimate object that will become wFORMS.behaviors['condition']
         applyTo: function(domElement){
+            var triggersElements = base2.DOM.Element.querySelectorAll(domElement, "[" + TRIGGER_CONDITIONALS + "]");
+
+            triggersElements.forEach(function(triggerElement){
+                var trigger = new Trigger(triggerElement);
+                trigger.trigger();
+            });
         },
 
         getConditional: function(domElement){
