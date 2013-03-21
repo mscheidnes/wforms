@@ -692,8 +692,6 @@ wFORMS.behaviors.validation.instance.prototype.analyzeDateComponents = function(
         }
     }
 
-    console.log(cfg);
-
     var splitter = /[\/\.\-\s]/;
     var dArr = value.split(splitter);
     if(dArr.length != 3){
