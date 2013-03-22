@@ -201,7 +201,6 @@ wFORMS.behaviors['condition'] = (function(){
             },
 
             getConditionalElement: function(){
-                var e;
                 try{
                     return base2.DOM.Element.querySelector(document, this._conditionalDomIdentifier)
                 }catch(e){
@@ -418,7 +417,6 @@ wFORMS.behaviors['condition'] = (function(){
                 return this._triggerElementIdentifier();
             },
             getTriggerElement: function(){
-                var e;
                 try{
                     return base2.DOM.Element.querySelector(document, this._triggerElementIdentifier);
                 }catch(e){
@@ -584,6 +582,3 @@ wFORMS.behaviors['condition'] = (function(){
         Trigger: Trigger
     }
 })();
-
-//conditional
-//trigger
