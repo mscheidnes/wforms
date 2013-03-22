@@ -670,13 +670,11 @@ wFORMS.behaviors.validation.instance.prototype.validateDateTime = function(eleme
 };
 
 wFORMS.behaviors.validation.instance.prototype.validateDate = function(element, value) {
-    console.log('validate-date:' + value);
     if (this.isEmpty(value)) {
         return true;
     }
     var date = this.analyzeDateComponents(value);
-    console.log('date:');
-    console.log(date);
+
     return !(date === null);
 };
 /**
@@ -694,8 +692,6 @@ wFORMS.behaviors.validation.instance.prototype.analyzeDateComponents = function(
             MDY_YEAR_POSITION : 3
         }
     }
-
-    console.log(cfg);
 
     var splitter = /[\/\.\-\s]/;
     var dArr = value.split(splitter);
