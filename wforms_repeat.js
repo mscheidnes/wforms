@@ -122,6 +122,7 @@ wFORMS.behaviors.repeat = {
 	 */
 	CSS_PRESERVE_RADIO_NAME: "preserveRadioName",
 	
+
 	/**
 	 * Custom function that could be overridden. 
 	 * Evaluates after section is duplicated
@@ -147,6 +148,11 @@ wFORMS.behaviors.repeat = {
 		return true;
 	},
 
+	/*
+	 * list callback registered by 3rd party code.
+	 */
+	_callbacks : { 'onRepeat':[],'onMasterIdChange': [], 'onRepeatIdCreate': [] },
+
 	/**
 	 * Creates new instance of the behavior
      * @param	{HTMLElement}	f	Form element
@@ -155,6 +161,10 @@ wFORMS.behaviors.repeat = {
 	instance : function(f) {
 		this.behavior = wFORMS.behaviors.repeat; 
 		this.target = f;		
+		/*
+ 		 * Keeps track of all ids changed during one repeat run. Passed on to onRepeat observers and reset after each run.
+		 */
+		this._idUpdates = { 'master': {}, 'repeat': {} };
 	}
 }
 
@@ -370,22 +380,13 @@ _i.prototype.duplicateSection = function(elem){
 	// Insert in DOM		
 	newElem = elem.parentNode.insertBefore(newElem, this.getInsertNode(elem));
 	
+	// Call registered observers (better way to handle callbacks)
+	this.callRepeatCompleteObservers(elem, newElem);
+
+	// duplicateSection
+
 	wFORMS.applyBehaviors(newElem);
-		/*
-	// Associates repeated input sections with their calculations.
-	if(wFORMS.behaviors.calculation) {
-		_c = wFORMS.behaviors.calculation;
-		inputItem = newElem.querySelector('input');
-		if(inputItem) {
-			if(inputItem.className.search(_c.VARIABLE_SELECTOR_PREFIX) != -1) {
-//				var b1 = wFORMS.getBehaviorInstance(inputItem.form,'calculation');
-				console.log('repeat applyto');
-				var b2 =_c.applyTo(inputItem.form);
-//				console.log(b2);
-			}
-		}
-	}
-	*/
+
 	// Calls custom function
 	this.behavior.onRepeat(newElem);
 	
@@ -450,9 +451,14 @@ _i.prototype.updateMasterSection = function(elem){
 	} else {
 		elem.doItOnce=true;
 	}
-	var suffix = this.createSuffix(elem);
-	elem.id = this.clearSuffix(elem.id) + suffix;
+	var oldId = elem.id;
+
+	var suffix = this.createSuffix(elem); 
+	elem.id = this.clearSuffix(elem.id) + suffix; // ...[0] 
 	
+	if(elem.id!=oldId) { 
+		this.callMasterIdChangeObservers(oldId, elem.id);
+	}
 	this.updateMasterElements(elem, suffix);
 }
 _i.prototype.updateMasterElements  = function(elem, suffix){
@@ -474,6 +480,8 @@ _i.prototype.updateMasterElements  = function(elem, suffix){
 		if(n.hasClass(this.behavior.CSS_REPEATABLE)) {
 			suffix += "[0]";
 		}
+
+		var oldId = n.id;
 		if(!n.hasClass(this.behavior.CSS_REMOVEABLE)){
 			// Iterates over updateable attribute names
 			for(var j = 0; j < this.behavior.UPDATEABLE_ATTR_ARRAY.length; j++){
@@ -498,6 +506,11 @@ _i.prototype.updateMasterElements  = function(elem, suffix){
 			}			
 			this.updateMasterElements(n, suffix);
 		}
+
+		if(n.id!=oldId) { 
+			this.callMasterIdChangeObservers(oldId, n.id);
+		}
+
 		// restore suffix for siblings if needed.
 		suffix = siblingSuffix;
 	}
@@ -514,7 +527,9 @@ _i.prototype.updateDuplicatedSection = function(elem, index, suffix){
 	
 	// Caches master section ID in the dublicate
 	elem[this.behavior.ATTR_MASTER_SECTION]=elem.id;
-		
+	
+	var oldId = elem.id;
+
 	// Updates element ID (possible problems when repeat element is Hint or switch etc)
 	elem.id = this.clearSuffix(elem.id) + suffix;
 	// Updates classname	
@@ -528,7 +543,11 @@ _i.prototype.updateDuplicatedSection = function(elem, index, suffix){
 		var _preserveRadioName = true;
 	else
 		var _preserveRadioName = this.behavior.preserveRadioName;
-		
+	
+	if(elem.id!=oldId) { 
+		this.callRepeatIdCreateObservers(oldId, elem.id);
+	}
+
 	this.updateSectionChildNodes(elem, suffix, _preserveRadioName);
 }
 
@@ -539,6 +558,8 @@ _i.prototype.updateDuplicatedSection = function(elem, index, suffix){
  * repeat section IDs and names should store parent section number
  * @param	elems	Array of the elements should be updated
  * @param	suffix	Suffix value should be added to attributes
+
+ * id/ tfa_1[0] + suffix [1] =>  tfa_1[1]
  */
 _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName){
 	
@@ -585,6 +606,8 @@ _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName)
 				e.checked = false;
 			}
 		}
+
+		var oldId = e.id;
 		
 		// Fix #152 - Radio name with IE6, IE7?
 		if(e.tagName == 'INPUT' && e.type == 'radio' && !preserveRadioName && /*@cc_on @if(@_jscript_version < 5.8)! @end @*/false) {
@@ -616,6 +639,10 @@ _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName)
 		} 
 		
 		this.updateAttributes(e, suffix, preserveRadioName);
+		
+		if(e.id!=oldId) { 
+			this.callRepeatIdCreateObservers(oldId, e.id);
+		}
 		
 		if(e.hasClass(this.behavior.CSS_REPEATABLE)){
 			this.updateSectionChildNodes(e, this.createSuffix(e), preserveRadioName);
@@ -868,6 +895,93 @@ _b.getMasterSection = function(elem){
 	return document.getElementById(elem[this.ATTR_MASTER_SECTION]);
 }
 
+/**
+ * Register a callback for when an element changes id due to repeat behavior.
+ * @param   f  a function that takes 3 arguments: the element, the old id and the new id.
+ */
+ _b.observeMasterIdChange = function(f) {
+ 	
+ 	// remove first if already present (ensures callback is added only once)
+	this.stopObservingMasterIdChange(f);
+ 	this._callbacks.onMasterIdChange.push(f);
+}
+
+_b.stopObservingMasterIdChange = function(f) {
+	
+	for(var i=0;i<this._callbacks.onMasterIdChange.length;i++) {
+		if(this._callbacks.onMasterIdChange[i].toString() == f.toString()) {
+			this._callbacks.onMasterIdChange.splice(i,1);
+			return;
+		}
+	}
+}
+
+_i.prototype.callMasterIdChangeObservers = function(old, updated) {
+
+	this._idUpdates.master[old] = updated;
+
+	for(var i=0;i<this.behavior._callbacks.onMasterIdChange.length;i++) {
+		this.behavior._callbacks.onMasterIdChange[i].call(window,old,updated);
+	}
+}
+/**
+ * Register a callback for when a new element gets an id due to repeat behavior.
+ * @param   f  a function that takes 3 arguments: the element, the  id of the original element, the id of the new copy.
+ */
+_b.observeRepeatIdCreate = function(f) {
+	// remove first if already present (ensures callback is added only once)
+	this.stopObservingRepeatIdCreate(f);
+	// add to stack of callbacks.
+	this._callbacks.onRepeatIdCreate.push(f);
+}
+
+_b.stopObservingRepeatIdCreate = function(f) {
+
+	for(var i=0;i<this._callbacks.onRepeatIdCreate.length;i++) {
+		if(this._callbacks.onRepeatIdCreate[i].toString() == f.toString()) {
+			this._callbacks.onRepeatIdCreate.splice(i,1);
+			return;
+		}
+	}
+}
+
+_i.prototype.callRepeatIdCreateObservers = function(original, copy) {
+
+	this._idUpdates.repeat[original] = copy;
+
+	for(var i=0;i<this.behavior._callbacks.onRepeatIdCreate.length;i++) {
+		this.behavior._callbacks.onRepeatIdCreate[i].call(window,original,copy);
+	}
+}
+
+/**
+ * Register a callback for when a new repeated element is created 
+ * @param   f  a function that takes 3 arguments: the orginal element, its repeated copy, a json object listing how IDs have changed 
+ */
+_b.observeRepeatComplete = function(f) {
+	
+	this.stopObservingRepeatComplete(f);
+	this._callbacks.onRepeat.push(f);
+
+}
+
+_b.stopObservingRepeatComplete = function(f) {
+
+	for(var i=0;i < this._callbacks.onRepeat.length;i++) {
+		if(this._callbacks.onRepeat[i].toString() == f.toString()) {
+			this._callbacks.onRepeat.splice(i,1);
+			return;
+		}
+	}
+}
+
+_i.prototype.callRepeatCompleteObservers = function(original,copy) {
+	for(var i=0;i<this.behavior._callbacks.onRepeat.length;i++) {
+		this.behavior._callbacks.onRepeat[i].call(window,original,copy,this._idUpdates);
+	}
+	// reset
+	this._idUpdates = { 'master': {}, 'repeat': {} };
+}
 
 /**
  * Executes the behavior
