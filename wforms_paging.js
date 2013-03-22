@@ -45,15 +45,6 @@ wFORMS.behaviors.paging = {
 	 */
 	CSS_BUTTON_PLACEHOLDER : 'wfPagingButtons',
 	
-
-	CSS_PAGETAB : 'wfPageTab',
-	CSS_TABS 	: 'wfTab',
-	CSS_TABSID	: 'wfTabNav',
-    CSS_TABNAVLABEL: 'wfTabNavLabel',
-	CSS_TABSCURRENT	: 'wfTabCurrentPage',
-    CSS_TABSEPARATOR_SPAN : 'wfTabSep',
-    CSS_TABSEPARATOR : ' | ',
-
 	/**
 	 * ID prefix for the next buttons
      * @final
@@ -91,28 +82,14 @@ wFORMS.behaviors.paging = {
 	ATTR_INDEX : 'wfPageIndex_activate',
 
 	/**
-	 * Attribute indicates selector for captcha active error message
-     * @final
-	 */
-    CAPTCHA_ERROR:'#tfa_captcha_text-E',
-    
-	/**
 	 * Custom messages used for creating links
      * @final
 	 */
 	MESSAGES : {
 		CAPTION_NEXT : 'Next Page',
 		CAPTION_PREVIOUS : 'Previous Page',
-		CAPTION_UNLOAD : 'Any data entered on ANY PAGE of this form will be LOST.',
-		NAV_LABEL : 'Page: ',
-		TAB_LABEL : 'Page '
-
+		CAPTION_UNLOAD : 'Any data entered on ANY PAGE of this form will be LOST.'
 	},
-
-	/**
-	 *
-	 */
-	showTabNavigation: false,
 
 	/**
      * Indicates that form should be validated on Next clicked
@@ -164,12 +141,8 @@ wFORMS.behaviors.paging = {
 wFORMS.behaviors.paging.applyTo = function(f) {
 	var b = null;
 	var behavior = wFORMS.behaviors.paging;
-	
-	if(behavior.showTabNavigation) {
-		behavior.runValidationOnPageNext = false;
-	}
-	
 	var isValidationAccepted = (wFORMS.behaviors.validation && wFORMS.behaviors.paging.runValidationOnPageNext);
+	
 	
 	// Iterates over the elements with specified class names
 	f.querySelectorAll(wFORMS.behaviors.paging.SELECTOR).forEach(
@@ -232,25 +205,6 @@ wFORMS.behaviors.paging.applyTo = function(f) {
 				// don't return anything to skip the warning 
 			};
 		}
-
-        if(b.behavior.showTabNavigation) {
-          b.generateTabs();
-          
-          // Find and jump to last page if captcha error
-          // necessary to ensure we display captcha page
-          // if captcha is active and in failed state.
-          var pp = document.querySelector(wFORMS.behaviors.paging.CAPTCHA_ERROR);
-          if(pp){
-            var lastPage = 1;
-            for(var i=1;i<100;i++){ 
-                if(b.behavior.isLastPageIndex(i)){
-                 lastPage = i;
-                  break;
-               }
-            }                   
-            b.jumpTo(lastPage);
-          }
-        }
 		b.onApply();	
 		
 		// intercept the submit event
@@ -265,10 +219,9 @@ wFORMS.behaviors.paging.applyTo = function(f) {
  */
 wFORMS.behaviors.paging.instance.prototype.onApply = function() {}
 
-/** On submit advance the page instead, until the last page (Note: pressing return on Firefox and some other browsers triggers on submit) */
+/** On submit advance the page instead, until the last page. */
 wFORMS.behaviors.paging.instance.prototype.onSubmit = function (e, b) {
-
-	if (!wFORMS.behaviors.paging.isLastPageIndex(b.currentPageIndex) && wFORMS.behaviors.paging.runValidationOnPageNext) {
+	if (!wFORMS.behaviors.paging.isLastPageIndex(b.currentPageIndex)) {
 		var currentPage = wFORMS.behaviors.paging.getPageByIndex(b.currentPageIndex);
 		var nextPage = b.findNextPage(b.currentPageIndex);
 		
@@ -506,7 +459,6 @@ wFORMS.behaviors.paging.instance.prototype.activatePage = function(index /*, scr
 				}
 				
 				// run page change event handlers
-				_self.labelCurrentPageTab(p);
 				_self.onPageChange(p);
 				if(index > _currentPageIndex){
 					_self.onPageNext(p);
@@ -690,113 +642,8 @@ wFORMS.behaviors.paging.instance.prototype.findPreviousPage = function(index){
 }
 
 
-wFORMS.behaviors.paging.instance.prototype.jumpTo = function(i){
-	var b = this;
-	var index = i;
-	
-	if(b.currentPageIndex!=index) {	
-		b.behavior.hidePage(b.behavior.getPageByIndex(b.currentPageIndex));
-		b.setupManagedControls(index);
-		b.behavior.showPage(b.behavior.getPageByIndex(index));
-		b.currentPageIndex = index;
-	}
-	
-	//If there's a page with an error, jump to that first.
-
-	vInstance = wFORMS.getBehaviorInstance(b.target, 'validation');
-	if(vInstance && vInstance.errorPages && vInstance.errorPages[index] && !arguments[1]){
-		var elem = document.getElementById(vInstance.errorPages[index][0]);
-		if(elem.scrollIntoView) {
-			//Fix for very stange rendering bug.  
-			//Page would lock up in Chrome if scrollIntoView was called
-			setTimeout(function(){elem.scrollIntoView();},1);
-		}
-	};
-	var p = b.behavior.getPageByIndex(index);
-	this.labelCurrentPageTab(p);
-	this.onPageChange(p);
-}
 
 
-/**
- * Create a list of tabs to move users around the form.
- * Append into element e
- */
-wFORMS.behaviors.paging.instance.prototype.generateTabs = function(e){
-
-	var _b = this;
-    
-    //Create div for CSS Tab Navigation bar elements
-	var d  = document.createElement('div');
-	d.id   = this.behavior.CSS_TABSID;
-	var d_text = document.createTextNode(this.behavior.MESSAGES.NAV_LABEL);
-    //Wrap label for Tab Navigation bar into a span for easy CSS styling.
-    var d_span = document.createElement('span');
-    d_span.className = this.behavior.CSS_TABNAVLABEL;
-    d_span.appendChild(d_text);
-	d.appendChild(d_span);
-	
-	if(e){
-		e.appendChild(d);
-	}else{
-		this.target.parentNode.insertBefore(d,this.target);
-	}
-	
-	var pages = base2.DOM.Element.querySelectorAll(this.target,"."+this.behavior.CSS_PAGE+", ."+this.behavior.CSS_CURRENT_PAGE);
-	pages.forEach(function(elem,i){
-		var tab = document.createElement('a');
-		tab.setAttribute("class",_b.behavior.CSS_TABS);
-		tab.setAttribute("id",_b.behavior.CSS_PAGETAB+"_"+(i+1));
-		tab.setAttribute("href","#");
-        
-		var label = base2.DOM.Element.querySelector(elem,'h4');
-        var label_text = null;
-		if(label){
-         label_text = label.innerText?label.innerText:label.textContent;
-		}
-		tab.setAttribute("title",label_text?label_text:_b.behavior.MESSAGES.TAB_LABEL+(i+1));
-		
-		var tab_text = document.createTextNode(i+1);
-		tab.appendChild(tab_text);
-        
-        // Add a clean tab separator, as using CSS borders will not work well.
-        // Necessary to allow customization of the tab separator even in browsers
-        // without good CSS support.
-		if(i<pages.length-1){
-            var separator_wrap = document.createElement('span');
-            separator_wrap.className = _b.behavior.CSS_TABSEPARATOR_SPAN;
-			var text = document.createTextNode(_b.behavior.CSS_TABSEPARATOR);
-            separator_wrap.appendChild(text);
-		}		
-        
-		base2.DOM.Element.addEventListener(tab,'click',function(){_b.jumpTo(i+1); return false; });
-		d.appendChild(tab);
-        if(separator_wrap){d.appendChild(separator_wrap);}
-	});
-    
-    // Make sure page 1 is highlighted by default.
-	// Necessary to ensure we have consistent behavior 
-	// in highlighting the active page in the tab list.
-    var p = _b.behavior.getPageByIndex(1);
-    this.labelCurrentPageTab(p);
-    this.onPageChange(p);    
-	//
-    
-	return pages;
-}
-
-wFORMS.behaviors.paging.instance.prototype.labelCurrentPageTab = function(p){
-	_b = this;
-	currentIndex = this.currentPageIndex;
-	
-	base2.DOM.Element.querySelectorAll(this.target.parentNode,'a[id^="'+this.behavior.CSS_PAGETAB+'"]').forEach(function(i){
-		if(!i.removeClass || !i.hasClass || !i.addClass){wFORMS.standardizeElement(i);}
-		i.removeClass(_b.behavior.CSS_TABSCURRENT);
-		if(i.getAttribute("id")==(_b.behavior.CSS_PAGETAB+"_"+currentIndex)){
-		  i.addClass(_b.behavior.CSS_TABSCURRENT);
-		}
-	});	
-}
 
 /**
  * Executes the behavior
@@ -805,26 +652,4 @@ wFORMS.behaviors.paging.instance.prototype.labelCurrentPageTab = function(p){
  */
 wFORMS.behaviors.paging.instance.prototype.run = function(e, element){
 	this.activatePage(element.getAttribute(wFORMS.behaviors.paging.ATTR_INDEX));
-}
-
-wFORMS.behaviors.paging.helpers = {};
-
-/**
- *	Find the page the given element is associated with.
- */
-wFORMS.behaviors.paging.helpers.findPage = function(e){
-	if (e && (e.className.match("wfPage") || e.className.match("wfCurrentPage"))) {
-		wFORMS.standardizeElement(e);
-		return e;
-	} else {
-		if (e && e.parentNode) {
-			if (e.parentNode.className.match("wfPage") || e.parentNode.className.match("wfCurrentPage")) {
-				wFORMS.standardizeElement(e.parentNode);
-				return e.parentNode;
-			} else {
-				return wFORMS.behaviors.paging.helpers.findPage(e.parentNode);
-			}
-		}
-	}	
-	return null;
 }
