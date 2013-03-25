@@ -5,6 +5,7 @@ if (typeof(wFORMS) == "undefined") {
 wFORMS.behaviors['condition'] = (function(){
     'use strict';
 
+    //Constant
     var DELIMITER = '`';
     var CONDITIONAL_ATTRIBUTE_NAME = 'data-condition';
     var TRIGGER_CONDITIONALS = 'data-conditionals';
@@ -12,11 +13,24 @@ wFORMS.behaviors['condition'] = (function(){
     var DEFAULT_NON_EXIST_TRIGGER_VALUE = false;
     var DEFAULT_CONDITIONAL_DISPLAY_VALUE = 'block';
 
+    //Private members
+    var initialized = false;
     function initialization(){
+        if( initialized ){
+            return;
+        }
         //bind events
         //false means handle the event in bubbling phase
         base2.DOM.Element.addEventListener(document, 'click', EventHandlers.document, false);
+        base2.DOM.Element.addEventListener(document, 'keydown', EventHandlers.document, false);
+
+        //attach event
+        //TODO
+
+        initialized = true;
     }
+
+
 
     //helper functions
     function map(enumerable, callback){
@@ -49,26 +63,6 @@ wFORMS.behaviors['condition'] = (function(){
             }
         });
         return result;
-    }
-
-    function matchAll(enumerable, callback){
-        var allMatched = true;
-        map(enumerable, function(value, key){
-            if(!callback.apply(null, arguments)){
-                allMatched = false;
-            }
-        });
-        return allMatched;
-    }
-
-    function pluck(object, propertyNames){
-        var _result = {};
-        map(object, function(e, key){
-            if(inArray(propertyNames, key)){
-                _result[key] = e;
-            }
-        });
-        return _result
     }
 
     function treeReduce(treeNode, callback){
@@ -528,7 +522,7 @@ wFORMS.behaviors['condition'] = (function(){
                 return;
             }
 
-            var conditionalsPattern = base2.DOM.Element.getAttribute(target, TRIGGER_CONDITIONALS);
+            var conditionalsPattern = target.getAttribute(TRIGGER_CONDITIONALS);
             if(conditionalsPattern ){ // if the element has a TRIGGER_CONDITIONALS attribute,
                 // respond to this event
                 return (new Trigger(target)).trigger();
@@ -545,6 +539,12 @@ wFORMS.behaviors['condition'] = (function(){
                     return (new Trigger(radioButton)).trigger();
                 })
             }
+        },
+
+        onRepeatableDuplicated: function(eventData){
+            var repeated = eventData.repeated;
+
+            // case 1, master node update, no conditionals
         }
     };
 
@@ -579,6 +579,11 @@ wFORMS.behaviors['condition'] = (function(){
         },
 
         Conditional: Conditional,
-        Trigger: Trigger
+        Trigger: Trigger,
+
+        mockup: function(){
+
+        }
+
     }
 })();

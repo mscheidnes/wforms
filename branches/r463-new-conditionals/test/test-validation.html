@@ -39,6 +39,7 @@
 	  	function setUp() {
             var form = document.getElementById('testForm');
 			bInstance = wFORMS.getBehaviorInstance(form, 'validation');
+            wFORMS.behaviors.validation.onFail = function(){};
 		}
 		
 		// remove any remaining error message
