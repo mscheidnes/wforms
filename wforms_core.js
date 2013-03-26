@@ -511,20 +511,10 @@ wFORMS.getBehaviorInstance = function(f, behaviorName) {
 		}	
 	}
 	return null;
-}
+};
 
 base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.onLoadHandler,false);
 // document.addEventListener('DOMContentLoaded',wFORMS.onLoadHandler,false);
 
 // Enable JS only stylesheet.
 wFORMS.helpers.activateStylesheet('wforms-jsonly.css');
-
-
-//Constant Definition
-(function(ext){
-    for(key in ext){
-        wFORMS[key] = ext[key];
-    }
-})({
-    INPUT_CONTROL_WRAPPER_SELECTOR: '.wForm .inputWrapper'
-});

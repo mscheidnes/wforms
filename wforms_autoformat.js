@@ -276,11 +276,9 @@ wFORMS.behaviors.autoformat = {
     },
 
     _attachGhostPromptLayer : function(element){
-        var positioningDiv = element.parentNode;
-        //test '.wForm .inputWrapper'
-        if(!base2.DOM.Element.matchesSelector(positioningDiv, wFORMS.INPUT_CONTROL_WRAPPER_SELECTOR)){
-            positioningDiv = wFORMS.behaviors.autoformat._mirrorWrapperDiv(element);
-        }
+        //always create self-dominated positioning div
+        var positioningDiv = wFORMS.behaviors.autoformat._mirrorWrapperDiv(element);
+
         element.addClass('autoformatprompt-control');
         var newDiv = document.createElement('div');
         positioningDiv.appendChild(newDiv);
@@ -779,7 +777,6 @@ wFORMS.behaviors.autoformat.InfoEntry.prototype.showPrompt = function(){
 
     this.element.parentNode.style.height = elementHeight + 'px';
     this.element.parentNode.style.width = elementWidth + 'px';
-
     this.updatePatternPrompt();
 };
 
