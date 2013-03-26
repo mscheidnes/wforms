@@ -15,7 +15,7 @@
 	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
     <script type="text/javascript" src="../wforms_core.js"></script>
     <script type="text/javascript" src="../wforms_autoformat.js"></script>
-
+    <style>input {background-color: transparent;}</style>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js" ></script>
 
     <script type="text/javascript" language="JavaScript">
@@ -121,6 +121,11 @@
             <div><input type="text" id="alternate"  name="testField" autoformat="$#$#$#$#$#" class="" value="" size="30"/>
             <label>$#$#$#$#$#</label></div>
 
+            <h4>right-to-left</h4>
+            <div><input type="text" id="rtl1"  name="testField" autoformat="###.##" class="" value="" size="30" dir="rtl" />
+            <label>###.##</label></div>
+            <div dir="rtl"><input type="text" id="rtl2"  name="testField" autoformat="###.##" class="" value="" size="30"  />
+            <label>###.##</label></div>
         </form>
 
         </div>

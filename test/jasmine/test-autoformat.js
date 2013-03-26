@@ -44,10 +44,16 @@
 
         it("should display the pattern characters in the ghostly shadow layer", function(){
             var $ghostlyShadow = $ssnInput.next();
-
             runs(function(){
                 $ssnInput.focus();
             });
+
+            waitsFor(function(){
+                $ssnInput.focus();
+                return $ssnInput.is(':focus')
+            }, 'the target is not focused');
+
+            waits(10);
 
             runs(function(){
                 expect($ghostlyShadow.children().length).toEqual($ssnInput.attr('autoformat').length);
@@ -56,23 +62,40 @@
 
         it("should display the ghostly prompt and align the input text to the right if the input is right-directional",
             function(){
-                $rightDirectionalInput.focus();
-                var $ghostPrompt = $rightDirectionalInput.next('.autoformatprompt');
-                var rightMarginBeforeTyping = $rightDirectionalInput.next('.autoformatprompt').css('right');
-                //there should be a value for the right position, but not for the left position
-                expect($ghostPrompt[0].style.right).not.toBeEmpty();
-                expect($ghostPrompt[0].style.left).toBe('');
+                var rightMarginBeforeTyping, rightMarginAfterTyping;
 
-                //type a character
-                UTIL.dispatchKeypressEvent($rightDirectionalInput[0], 49, 0);
+                runs(function(){
+                    $rightDirectionalInput.focus();
+                });
 
-                var rightMarginAfterTyping = $ghostPrompt.css('right');
-                //after a new character is typed, the ghostly prompt should shift left
-                expect(UTIL.getValue(rightMarginBeforeTyping)).toBeLessThan(UTIL.getValue(rightMarginAfterTyping));
+                waitsFor(function(){
+                    $rightDirectionalInput.focus();
+                    return $rightDirectionalInput.is(':focus')
+                }, 'the target is not focused');
+
+                waits(10);
+
+                runs(function(){
+                    var $ghostPrompt = $rightDirectionalInput.next('.autoformatprompt');
+                    //there should be a value for the right position, but not for the left position
+                    expect($ghostPrompt[0].style.right).not.toBeEmpty();
+                    expect($ghostPrompt[0].style.left).toBe('');
+                    rightMarginBeforeTyping = $rightDirectionalInput.next('.autoformatprompt').css('right');
+
+                    //type a character
+                    UTIL.dispatchKeypressEvent($rightDirectionalInput[0], 49, 0);
+                });
+
+                waits(10);
+
+                runs(function(){
+                    var $ghostPrompt = $rightDirectionalInput.next('.autoformatprompt');
+
+                    rightMarginAfterTyping = $ghostPrompt.css('right');
+                    //after a new character is typed, the ghostly prompt should shift left
+                    expect(UTIL.getValue(rightMarginBeforeTyping)).toBeLessThan(UTIL.getValue(rightMarginAfterTyping));
+                })
             });
-
-
-
     });
 })();
 
