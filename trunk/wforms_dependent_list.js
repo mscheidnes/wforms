@@ -121,7 +121,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.applyFiltersTo = function(dep
 wFORMS.behaviors.dependent_list.instance.prototype.filter = function(control, dependent) { 
     
     var b       = this;
-    var _filter = function(choice) {
+    var _filter = function(choice, mode) {
 
         var isSelected = choice.checked || choice.selected;
 
@@ -131,30 +131,40 @@ wFORMS.behaviors.dependent_list.instance.prototype.filter = function(control, de
         if(!inc && !exc) {
             // simple match by label, make up the selector.
             var label = b.getChoiceLabel(choice);
-            inc   = "optgroup[label='"+label+"']";
+            inc = "optgroup[label='"+label+"']";
         }
        
         if(inc) {
             if(isSelected) {
-                b.include(dependent, inc);
+                if(mode=='selected') {
+                    b.include(dependent, inc);    
+                }
             } else {
-                b.exclude(dependent, inc);
+                if(mode=='deselected') {
+                    b.exclude(dependent, inc);
+                }
             }
         }
         if(exc) {
             if(isSelected) {
-                b.exclude(dependent, exc);
+                if(mode=='selected') {
+                    b.exclude(dependent, exc);
+                }
             } else {
-                b.include(dependent, exc);
+                if(mode=='deselected') {
+                    b.include(dependent, exc);
+                }
             }
         }
     };
 
     if(control.tagName=='INPUT') {
-        _filter(control);
+        _filter(control,'deselected');
+        _filter(control,'selected');
     } else {
         var choices = control.querySelectorAll('input[type=checkbox],input[type=radio],option');
-        choices.forEach(_filter);
+        choices.forEach(function(n){_filter(n,'deselected')});
+        choices.forEach(function(n){_filter(n,'selected')});
     }
 }
 
@@ -168,7 +178,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.include = function(dependent,
             // hack to handle visibility.
             if(filtered.parentNode.tagName=='SPAN') {
                 var span = filtered.parentNode;
-                span.parentNode.appendChild(filtered);
+                span.parentNode.insertBefore(filtered,span);
                 span.parentNode.removeChild(span);
             }
         }
@@ -178,7 +188,6 @@ wFORMS.behaviors.dependent_list.instance.prototype.include = function(dependent,
         fields.forEach(function(field) {
             field.disabled = false;
         });
-
     });
 }
 
@@ -199,7 +208,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.exclude = function(dependent,
         if(filtered.tagName=='OPTGROUP' || filtered.tagName == 'OPTION') {
             // can't hide them. Use a hack to ensure they're not displayed.
             if(filtered.parentNode.tagName!='SPAN') {
-                filtered.parentNode.appendChild(document.createElement('span')).appendChild(filtered);
+                filtered.parentNode.insertBefore(document.createElement('span'), filtered).appendChild(filtered);
             }
         }
 

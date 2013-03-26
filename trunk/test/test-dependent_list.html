@@ -50,21 +50,21 @@
         var c = document.getElementById('simple1');
         var d = document.getElementById('simple2');
         
-        c.selectedIndex = 1;
+        c.selectedIndex = 2;
         b.filter(c,d);
 
         assertFalse( document.getElementById('simpleA').disabled );
         assertTrue( document.getElementById('simpleB').disabled );
         assertTrue( document.getElementById('simpleC').disabled );
 
-        c.selectedIndex = 2;
+        c.selectedIndex = 3;
         b.filter(c,d);
 
         assertTrue( document.getElementById('simpleA').disabled );
         assertFalse( document.getElementById('simpleB').disabled );
         assertTrue( document.getElementById('simpleC').disabled );
 
-        c.selectedIndex = 3;
+        c.selectedIndex = 4;
         b.filter(c,d);
 
         assertTrue( document.getElementById('simpleA').disabled );
@@ -82,6 +82,7 @@
         
         <select id="simple1" data-filter-dependent="#simple2">
             <option>Select one</option>
+            <option data-filter-include="optgroup">All</option>
             <option id="optionA">Simple A</option>
             <option>Simple B</option>
             <option>Simple C</option>
@@ -110,9 +111,9 @@
         <!-- ADVANCED SET UP -->
         <select id="advanced1" data-filter-dependent="#advanced2">
             <option>Select one</option>
-            <option data-filter-include="#advancedA">Include A (by Id) and B</option>
-            <option data-filter-exclude="#advancedB">Exclude All</option>
-            <option data-filter-include="#advancedC">Include C and B</option>
+            <option data-filter-include="#advancedA">Include A (by Id) &AMP; B</option>
+            <option>Just B</option>
+            <option data-filter-include="#advancedC">Include B &AMP;C</option>
         </select> <br/>
 
         <select id="advanced2" data-filter-control="#advanced1">
@@ -129,6 +130,30 @@
             <optgroup id="advancedC" label="advanced C">
                 <option>advanced - C - 1</option>
                 <option>advanced - C - 2</option>
+            </optgroup>
+        </select> <br/>
+
+        <select id="advanced3" data-filter-dependent="#advanced4">
+            <option>Select one</option>
+            <option>Include D,E</option>
+            <option data-filter-exclude="#advancedE">Exclude E, F</option>
+            <option data-filter-include="#advancedF">Include D,E,F</option>
+        </select> <br/>
+
+        <select id="advanced4" data-filter-control="#advanced3">
+            <option>Select one</option>
+            <optgroup id="advancedD" label="advanced D">
+                <option>advanced - D - 1</option>
+                <option>advanced - D - 2</option>
+                <option>advanced - D - 3</option>
+            </optgroup>
+            <optgroup id="advancedE" label="advanced E">
+                <option>advanced - E - 1</option>
+                <option>advanced - E - 2</option>
+            </optgroup>
+            <optgroup id="advancedF" label="advanced F">
+                <option>advanced - F - 1</option>
+                <option>advanced - F - 2</option>
             </optgroup>
         </select> <br/>
 
