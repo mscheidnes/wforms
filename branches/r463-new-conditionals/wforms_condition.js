@@ -26,7 +26,9 @@ wFORMS.behaviors['condition'] = (function(){
         base2.DOM.Element.addEventListener(document, 'keydown', EventHandlers.document, false);
             //attach event handler for
 
-        wFORMS.behaviors.repeat.observeRepeatComplete(EventHandlers.onRepeatableDuplicated);
+        if(wFORMS.behaviors.repeat){
+            wFORMS.behaviors.repeat.observeRepeatComplete(EventHandlers.onRepeatableDuplicated);
+        }
 
         initialized = true;
     }
@@ -773,16 +775,15 @@ wFORMS.behaviors['condition'] = (function(){
             var conditionalsPattern = target.getAttribute(TRIGGER_CONDITIONALS);
             if(conditionalsPattern ){ // if the element has a TRIGGER_CONDITIONALS attribute,
                 // respond to this event
-                return (new Trigger(target)).trigger();
+                (new Trigger(target)).trigger();
             }
 
-            //else check if target is a radio button
+            //then check if target is a radio button
             if(target.tagName === 'INPUT' && base2.DOM.Element.getAttribute(target, 'type') === 'radio' ){
                 var name = base2.DOM.Element.getAttribute(target, 'name');
                 //then we have to trigger the radio button in the same group
                 var radioButtons = base2.DOM.Element.querySelectorAll(document,
                     'input[type="radio"][name="' + name +'"]');
-
                 radioButtons.forEach(function(radioButton){
                     return (new Trigger(radioButton)).trigger();
                 })
