@@ -151,7 +151,7 @@ wFORMS.behaviors.repeat = {
 	/*
 	 * list callback registered by 3rd party code.
 	 */
-	_callbacks : { 'onRepeat':[],'onMasterIdChange': [], 'onRepeatIdCreate': [] },
+	_callbacks : { 'onRepeat':[], 'onRemove':[], 'onMasterIdChange': [], 'onRepeatIdCreate': [] },
 
 	/**
 	 * Creates new instance of the behavior
@@ -401,7 +401,11 @@ _i.prototype.removeSection = function(elem){
 	if(elem){
 		// Removes section
 		var elem = elem.parentNode.removeChild(elem);
-		// Calls custom function
+
+		// Better event management
+		this.callRemoveCompleteObservers(elem);
+
+		// Calls custom function (@DEPRECATED)
 		this.behavior.onRemove(elem);
 	}
 }
@@ -981,6 +985,33 @@ _i.prototype.callRepeatCompleteObservers = function(original,copy) {
 	}
 	// reset
 	this._idUpdates = { 'master': {}, 'repeat': {} };
+}
+
+/**
+ * Register a callback for when a repeated element is removed 
+ * @param   f  a function that takes 1 argument: the removed copy (already detached from the document)
+ */
+_b.observeRemoveComplete = function(f) {
+	
+	this.stopObservingRemoveComplete(f);
+	this._callbacks.onRemove.push(f);
+
+}
+
+_b.stopObservingRemoveComplete = function(f) {
+
+	for(var i=0;i < this._callbacks.onRemove.length;i++) {
+		if(this._callbacks.onRemove[i].toString() == f.toString()) {
+			this._callbacks.onRemove.splice(i,1);
+			return;
+		}
+	}
+}
+
+_i.prototype.callRemoveCompleteObservers = function(copy) {
+	for(var i=0;i<this.behavior._callbacks.onRemove.length;i++) {
+		this.behavior._callbacks.onRemove[i].call(window,copy);
+	}
 }
 
 /**
