@@ -1,7 +1,7 @@
 (function(){
     'use strict';
 
-    describe('The Conditional class should be able to generate a rule string based on a javascript object',
+    xdescribe('The Conditional class should be able to generate a rule string based on a javascript object',
     function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -88,7 +88,7 @@
         })
     });
 
-    describe('The Conditional class',
+    xdescribe('The Conditional class',
     function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -229,7 +229,7 @@
         })
     });
 
-    describe('The Trigger class',
+    xdescribe('The Trigger class',
         function(){
             beforeEach(function(){
                 loadFixtures( 'condition.html' );
@@ -376,4 +376,23 @@
             });
 
         });
+
+    describe('When a section of HTML is repeated', function(){
+
+        beforeEach(function(){
+            loadFixtures( 'condition.html' );
+
+            waitsFor(function(){
+                return wFORMS.initialized === true;
+            }, 'wait for wForms initializing', 100);
+
+            runs(function(){
+            });
+        });
+
+        it("has to be one", function(){
+
+        });
+
+    });
 })();

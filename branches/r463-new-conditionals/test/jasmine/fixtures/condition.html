@@ -67,3 +67,28 @@
         Conditional fieldset boolean-style3  ( `#option1` AND (`#option2` OR `#option3`))
     </fieldset>
 </form>
+
+<form id="repeatable-test" method="post" action="" class="wForm">
+    <fieldset >
+        <input type="checkbox" id="trigger-outside" data-conditionals="#conditional-3"/>
+    </fieldset>
+
+    <fieldset id="master-node" class="repeat">
+        <label> Trigger-1 <input id="trigger-1" type="checkbox" data-conditionals="#conditional-1, #conditional-2" />
+        </label>
+
+        <div id="conditional-1" style="background:#f08080" data-condition="`#trigger-1`">
+            Conditional A
+        </div>
+
+        <div id="conditional-3" style="background:#f08080" data-condition="`#trigger-outside`">
+            Conditional C
+        </div>
+    </fieldset>
+    <div id="conditional-2" style="background:#f08080" data-condition="`#trigger-1`">
+        Conditional B
+    </div>
+    <fieldset>
+
+    </fieldset>
+</form>
