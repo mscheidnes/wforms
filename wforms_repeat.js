@@ -844,7 +844,7 @@ _i.prototype.setInDuplicateGroup = function(elem){
  */
 _i.prototype.setElementHandled = function(elem){
 	return elem.setAttribute(this.behavior.ATTR_HANDLED, true);
-}
+};
 
 /**
  * Remove handled attribute from element
@@ -853,7 +853,7 @@ _i.prototype.setElementHandled = function(elem){
  */
 _i.prototype.removeHandled = function(elem){
 	return elem.removeAttribute(this.behavior.ATTR_HANDLED);
-}
+};
 
 /**
  * Returns true if element is duplicate of initial group, false otherwise
@@ -865,7 +865,7 @@ _b.isDuplicate = function(elem){
 			elem.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 		}
 	return elem.hasClass(this.CSS_REMOVEABLE);
-}
+};
 
 
 /**
@@ -876,7 +876,7 @@ _b.isDuplicate = function(elem){
  */
 _b.isInDuplicateGroup = function(elem){
 	return elem.getAttribute(this.ATTR_DUPLICATE_ELEM) ? true : false;
-}
+};
 
 
 /**
@@ -967,7 +967,7 @@ _b.observeRepeatComplete = function(f) {
 	this.stopObservingRepeatComplete(f);
 	this._callbacks.onRepeat.push(f);
 
-}
+};
 
 _b.stopObservingRepeatComplete = function(f) {
 

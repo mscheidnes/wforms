@@ -15,21 +15,189 @@ wFORMS.behaviors['condition'] = (function(){
 
     //Private members
     var initialized = false;
+
     function initialization(){
         if( initialized ){
             return;
         }
-        //bind events
+            //bind events
         //false means handle the event in bubbling phase
         base2.DOM.Element.addEventListener(document, 'click', EventHandlers.document, false);
         base2.DOM.Element.addEventListener(document, 'keydown', EventHandlers.document, false);
+            //attach event handler for
 
-        //attach event
-        //TODO
+        wFORMS.behaviors.repeat.observeRepeatComplete(EventHandlers.onRepeatableDuplicated);
 
         initialized = true;
     }
 
+
+    /**
+     * Rename the references to the triggers in conditionals, when a trigger changed its name
+     * @param masterRenameTable
+     * @param referenceConditionalClones
+     * @param involvedConditionals
+     * @private
+     */
+    function _renameTriggers(masterRenameTable, referenceConditionalClones, involvedConditionals){
+        involvedConditionals = involvedConditionals || [];
+        var renamedTriggers = reduce(masterRenameTable, function(renamed, original, sum){
+            if( !(new Trigger(renamed)).isValid() ){
+                return sum;
+            }
+            sum[original] = renamed;
+            return sum;
+        }, {});
+        var renamedConditionals = reduce(masterRenameTable, function(renamed, original, sum){
+            if( !(new Conditional(renamed)).isValid() ){
+                return sum;
+            }
+            sum[original] = renamed;
+            return sum;
+        }, {});
+
+        map(renamedTriggers, function(newName, original){
+            var trigger = new Trigger(newName);
+            var conditionals = trigger.getConditionals();
+            map(conditionals, function(conditional){
+                //if the conditional is also renamed, get its new name, or otherwise use the current name.
+                var currentConditionalName = renamedConditionals[conditional.getIdentifier()]
+                    || conditional.getIdentifier();
+
+                var conditionalsToChange = [currentConditionalName];
+
+                //Does this conditional has a clone? if it does, also update its clone.
+                if(referenceConditionalClones[currentConditionalName]){
+                    conditionalsToChange.push(referenceConditionalClones[currentConditionalName]);
+                }
+                map(conditionalsToChange, function(identifier){
+                    conditional = new Conditional(identifier);
+                    conditional.unlinkTriggers();
+                    conditional.replaceTrigger(original, newName);
+                    involvedConditionals.push(identifier);
+                    conditional.linkTriggers();
+                });
+            });
+        })
+    }
+
+    /**
+     * Rename the conditional references in the triggers, so the triggers can still link to the conditionals, when the
+     * conditionals are renamed.
+     * @private
+     */
+    function _renameConditionals(idMappings, involvedConditionals){
+        var repeat = idMappings.repeat;
+        var renamedConditionals = reduce(repeat, function(renamed, original, sum){
+            if( !(new Conditional(renamed)).isValid() ){
+                return sum;
+            }
+            sum[original] = renamed;
+            return sum;
+        }, {});
+
+        var conditionals = map(renamedConditionals, function(newClone, oldName){
+            return newClone;
+        });
+        if(!isObjectEmpty(idMappings.master)){
+            //if this is not the first time a master node is repeated, also regard those conditionals in the master node
+            conditionals = conditionals.concat(map(renamedConditionals, function(newClone, oldName){
+                return oldName;
+            }));
+        }
+        map(conditionals, function(identifier){
+            var conditional = new Conditional(identifier);
+            conditional.unlinkTriggers();
+            conditional.linkTriggers();
+            involvedConditionals.push(identifier);
+        })
+    }
+
+    /**
+     * Try to modify the condition rule on the conditionals, so the conditionals in the duplicated section will get its
+     * triggers redirected to the ones that are in the same duplicated section; the conditionals outside of the
+     * duplicated section will regard the duplicated trigger along with the original trigger together by forming a
+     * compound trigger expression.
+     *
+     * @param repeatMapping
+     * @param masterNode
+     * @param duplicateNode
+     * @param involvedConditionals
+     * @private
+     */
+    function _consolidateTriggers(repeatMapping, masterNode, duplicateNode, involvedConditionals){
+        involvedConditionals = involvedConditionals || [];
+        //find mappings of triggers to their clones
+        var clonedTriggers = reduce(repeatMapping, function(cloneName, original, sum){
+            if( !(new Trigger(original)).isValid() ){
+                return sum;
+            }
+            sum[original] = cloneName;
+            return sum;
+        }, {});
+
+        map(clonedTriggers, function(cloneName, original){
+            var trigger = new Trigger(original);
+            var conditionals = trigger.getConditionals();
+
+            map(conditionals, function(conditional){
+                if(!conditional.isValid()){
+                    return;
+                }
+                var conditionalElement = conditional.getConditionalElement();
+                if(!conditionalElement){
+                    return;
+                }
+                if( isDescendantOf(conditionalElement, masterNode ) ){ // the conditional is in master node, keep
+                    return;
+                }
+                var replacement;
+                if( isDescendantOf(conditionalElement, duplicateNode)){
+                    //Case 1: inside repeatable
+                    replacement = cloneName;
+                }else{
+                    //Case 2: outside repeatable
+                    replacement = {'OR' : [original, cloneName]}; //ATTENTION!!! 'OR' is hard coded here.
+                }
+                conditional.unlinkTriggers();
+                conditional.replaceTrigger(original, replacement );
+                conditional.linkTriggers();
+                involvedConditionals.push(conditional.getIdentifier()); // remember this conditional, will update it later
+            });
+        });
+    }
+
+    /**
+     * Convert id strings in the idMappings to css selectors (prepend '#' to them)
+     * @param idMappings
+     * @return {*}
+     * @private
+     */
+    function _preprocessParameter(idMappings){
+        function _replace(renamed, original, sum){
+            sum['#' + original] = '#' + renamed;
+            return sum;
+        }
+        idMappings.master = reduce(idMappings.master, _replace, {});
+        idMappings.repeat = reduce(idMappings.repeat, _replace, {});
+        return idMappings;
+    }
+
+    /**
+     * Sometimes the id selector might have element[0][1] style, however [*] has already had semantics in css selector,
+     * have to escape them.
+     * @param selector
+     * @return {*}
+     * @private
+     */
+    function _escapeQuerySelector(selector){
+        if( !selector || selector === ''){
+            return null;
+        }
+        return selector.replace(/\[(\d+)\]/g, function($, $1){
+            return '\\[' + $1 + '\\]';
+        });
+    }
 
 
     //helper functions
@@ -99,6 +267,26 @@ wFORMS.behaviors['condition'] = (function(){
         return str.replace(/(^\s+)|(\s+$)/g, '');
     }
 
+    function reduce(enumerable, callback, sum){
+        sum = sum || {};
+        map(enumerable, function(value, key){
+            sum = callback.call(window, value, key, sum);
+        });
+        return sum;
+    }
+
+    function removeDuplicates(enumerable){
+        var  hash = {};
+        var result = [];
+        map(enumerable, function(value){
+            if(!hash[value]){
+                result.push(value);
+                hash[value] = 1;
+            }
+        });
+        return result;
+    }
+
     function getOrAssignID(domElement){
         if( !isHTMLElement(domElement)){
             throw {message: 'not a dom element'};
@@ -106,6 +294,20 @@ wFORMS.behaviors['condition'] = (function(){
         var id;
         return domElement.getAttribute('id') || (id = wFORMS.helpers.randomId() &&
             (domElement.setAttribute('id', id) || id))
+    }
+
+    function isDescendantOf(child, parent){
+        while(child){
+            if( child.parentNode === parent){
+                return true;
+            }
+            child = child.parentNode;
+        }
+        return false;
+    }
+
+    function isObjectEmpty(object){
+        return (filter(object, function(){return true})).length === 0;
     }
 
     var inArray = wFORMS.helpers.contains;
@@ -127,6 +329,8 @@ wFORMS.behaviors['condition'] = (function(){
                     throw {message: 'this element doesn\'t have a "'+CONDITIONAL_ATTRIBUTE_NAME+'" attribute'};
                 }
             }
+
+            this._conditionalDomIdentifier = _escapeQuerySelector(this._conditionalDomIdentifier);
         }
 
         function PolishExpression(operator, operands){
@@ -279,6 +483,41 @@ wFORMS.behaviors['condition'] = (function(){
                     conditionalElement.originalDisplaySettings  = conditionalElement.style.display;
                 }
                 conditionalElement.style.display = 'none';
+            },
+
+            isValid : function(){
+                return this.getConditionalElement() && this.getConditionRuleString();
+            },
+
+            /**
+             * replace a trigger in the condition rule to another trigger or compound trigger expression.
+             * @param oldTrigger
+             * @param replacement can be a single selector or compound object
+             */
+            replaceTrigger : function(oldTrigger, replacement){
+                if(typeof replacement === 'string'){
+                    //then convert a single selector to relationship object
+                    replacement = {'AND' : replacement}; //here setting the operator to AND or OR doesn't matter
+                    //then later it will become `replacement`
+                }
+
+                replacement = Conditional.makeConditionRules(replacement);
+
+                var conditionRuleString = this.getConditionRuleString();
+                if(!conditionRuleString ){
+                    //doesn't have a rule string, cannot judge
+                    throw {message: "The inferred DOM element doesn't have a rule string"};
+                }
+
+                COMPONENT_PATTERN.lastIndex = 0; //reset regex
+                conditionRuleString = conditionRuleString.replace(COMPONENT_PATTERN, function($, $sub){
+                    if($sub === oldTrigger){
+                        return replacement;
+                    }
+                    return $;
+                });
+
+                (this.getConditionalElement()).setAttribute(CONDITIONAL_ATTRIBUTE_NAME, conditionRuleString);
             }
         });
 
@@ -349,12 +588,15 @@ wFORMS.behaviors['condition'] = (function(){
                 //treat it as an existing DOM element
                 identifier = '#' + getOrAssignID(domElement);
             }
-            this._triggerElementIdentifier = identifier;
+            this._triggerElementIdentifier = _escapeQuerySelector(identifier);
         }
 
         //private functions
         function _retrieveConditionals(instance){
             var triggerDOMElement = instance.getTriggerElement();
+            if(!triggerDOMElement){
+                return [];
+            }
             var conditionalsDef = triggerDOMElement.getAttribute(TRIGGER_CONDITIONALS);
             if(!conditionalsDef ){
                 return [];
@@ -508,6 +750,12 @@ wFORMS.behaviors['condition'] = (function(){
                 map(activeConditionals, function(conditional){
                     conditional.refresh();
                 });
+            },
+
+            isValid : function(){
+                var triggerDOMElement;
+                return (triggerDOMElement = this.getTriggerElement())
+                    && triggerDOMElement.getAttribute(TRIGGER_CONDITIONALS);
             }
         });
 
@@ -541,10 +789,34 @@ wFORMS.behaviors['condition'] = (function(){
             }
         },
 
-        onRepeatableDuplicated: function(eventData){
-            var repeated = eventData.repeated;
+        onRepeatableDuplicated: function(masterNode, duplicateNode, idMappings){
+            var involvedConditionals = [];
 
-            // case 1, master node update, no conditionals
+            //pre-process raw parameter
+            idMappings = _preprocessParameter(idMappings);
+
+            //find conditional correspondence
+            var conditionalMapping = reduce(idMappings.repeat, function(mappedTo, original, sum){
+                if(!(new Conditional(original)).isValid()){
+                    return sum;
+                }
+                sum[original] = mappedTo;
+                return sum;
+            }, {});
+
+            //1 rename triggers in their associated conditionals and the clones of those conditionals
+            _renameTriggers(idMappings.master, conditionalMapping, involvedConditionals);
+
+            //2 update the conditionals' references if they are renamed
+            _renameConditionals(idMappings, involvedConditionals);
+
+            //3 handle cloned triggers
+            _consolidateTriggers(idMappings.repeat, masterNode, duplicateNode, involvedConditionals);
+
+            map(removeDuplicates(involvedConditionals), function(conditionalIdentifier){
+                var conditional = new Conditional(conditionalIdentifier);
+                conditional.refresh();
+            })
         }
     };
 
