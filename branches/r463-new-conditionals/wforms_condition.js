@@ -75,6 +75,9 @@ wFORMS.behaviors['condition'] = (function(){
                 }
                 map(conditionalsToChange, function(identifier){
                     conditional = new Conditional(identifier);
+                    if(!conditional.isValid()){
+                        return;
+                    }
                     conditional.unlinkTriggers();
                     conditional.replaceTrigger(original, newName);
                     involvedConditionals.push(identifier);
@@ -225,7 +228,7 @@ wFORMS.behaviors['condition'] = (function(){
      */
     function _preprocessParameter(idMappings){
         function _replace(renamed, original, sum){
-            sum['#' + original] = '#' + renamed;
+            sum[_escapeQuerySelector('#' + original)] = _escapeQuerySelector('#' + renamed);
             return sum;
         }
         idMappings.master = reduce(idMappings.master, _replace, {});
