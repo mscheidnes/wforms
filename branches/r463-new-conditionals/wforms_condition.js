@@ -20,14 +20,15 @@ wFORMS.behaviors['condition'] = (function(){
         if( initialized ){
             return;
         }
-            //bind events
+        //bind events
         //false means handle the event in bubbling phase
         base2.DOM.Element.addEventListener(document, 'click', EventHandlers.document, false);
         base2.DOM.Element.addEventListener(document, 'keydown', EventHandlers.document, false);
-            //attach event handler for
 
+        //attach event handler for repeatables
         if(wFORMS.behaviors.repeat){
             wFORMS.behaviors.repeat.observeRepeatComplete(EventHandlers.onRepeatableDuplicated);
+            wFORMS.behaviors.repeat.observeRemoveComplete(EventHandlers.onRepeatableRemoved);
         }
 
         initialized = true;
@@ -165,6 +166,53 @@ wFORMS.behaviors['condition'] = (function(){
                 conditional.replaceTrigger(original, replacement );
                 conditional.linkTriggers();
                 involvedConditionals.push(conditional.getIdentifier()); // remember this conditional, will update it later
+            });
+        });
+    }
+
+
+    /**
+     * When a repeatable section is removed, detach the conditionals inside it form their associated triggers
+     * @param removedNode the removed DOM node which is already detached form document.
+     * @private
+     */
+    function _detachConditionals(removedNode){
+        var conditionalDOMs = base2.DOM.Element.querySelectorAll(removedNode, '['+ CONDITIONAL_ATTRIBUTE_NAME +']');
+        var conditionals = [];
+        conditionalDOMs.forEach(function(conditionalDOM){
+            conditionals.push(new Conditional(conditionalDOM, removedNode));
+        });
+
+        map(conditionals, function(conditional){
+            conditional.unlinkTriggers();
+        });
+    }
+
+    /**
+     * When a repeatable section is removed, detach the triggers inside it form their associated conditionals
+     * @param removedNode the removed DOM node which is already detached form document.
+     * @private
+     */
+    function _detachTriggers(removedNode){
+        var triggerDOMs = base2.DOM.Element.querySelectorAll(removedNode, '['+ TRIGGER_CONDITIONALS +']');
+        var triggers = [];
+        triggerDOMs.forEach(function(triggerDOM){
+            triggers.push(new Trigger(triggerDOM, removedNode));
+        });
+
+        map(triggers, function(trigger){
+            var conditionals = trigger.getConditionals();
+
+            map(conditionals, function(conditional){
+                if(!conditional.isValid()){ // if the conditional is not valid, it might have been removed
+                    return;
+                }
+                var conditionalElement = conditional.getConditionalElement();
+                if(!isDescendantOf(conditionalElement, removedNode)){
+                    // if this trigger links to a conditional outside of removedNode, detach this trigger from that
+                    // conditional
+                    conditional.detach(trigger.getIdentifier());
+                }
             });
         });
     }
@@ -319,9 +367,12 @@ wFORMS.behaviors['condition'] = (function(){
     var Conditional = (function(){
         /**
          * @param domElementIdentifier string or DOM element
+         * @param referenceDOMTree by default this should be document, however may not exist in document, this can
+         * happen when the section the trigger is in is detached.
          * @constructor
          */
-        function Conditional(domElementIdentifier){
+        function Conditional(domElementIdentifier, referenceDOMTree){
+
             this._conditionalDomIdentifier = domElementIdentifier;
             if(typeof domElementIdentifier !== 'string'){
                 var domElement = domElementIdentifier;
@@ -333,6 +384,7 @@ wFORMS.behaviors['condition'] = (function(){
             }
 
             this._conditionalDomIdentifier = _escapeQuerySelector(this._conditionalDomIdentifier);
+            this.referenceDOMTree = referenceDOMTree || document;
         }
 
         function PolishExpression(operator, operands){
@@ -354,6 +406,9 @@ wFORMS.behaviors['condition'] = (function(){
 
         //private functions
         var COMPONENT_PATTERN = new RegExp(DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
+        var COMPOUND_COMPONENT_PATTERN = new RegExp('((AND)|(OR))\\s*' + DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
+        var BRACKETED_SINGLE_TRIGGER_PATTERN
+            = new RegExp('\\(\\s*' + DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER + '\\s*\\)', 'g');
 
         /**
          * filter those detached triggers, leave only valid triggers
@@ -402,7 +457,7 @@ wFORMS.behaviors['condition'] = (function(){
 
             getConditionalElement: function(){
                 try{
-                    return base2.DOM.Element.querySelector(document, this._conditionalDomIdentifier)
+                    return base2.DOM.Element.querySelector(this.referenceDOMTree, this._conditionalDomIdentifier)
                 }catch(e){
                     return null;
                 }
@@ -520,6 +575,32 @@ wFORMS.behaviors['condition'] = (function(){
                 });
 
                 (this.getConditionalElement()).setAttribute(CONDITIONAL_ATTRIBUTE_NAME, conditionRuleString);
+            },
+
+            /**
+             * Detach a trigger from the conditional rule
+             * @param trigger
+             */
+            detach: function(trigger){
+                var conditionRuleString = this.getConditionRuleString();
+                if(!conditionRuleString ){
+                    //doesn't have a rule string, cannot proceed
+                    throw {message: "The inferred DOM element doesn't have a rule string"};
+                }
+                COMPOUND_COMPONENT_PATTERN.lastIndex = 0;
+                conditionRuleString = conditionRuleString.replace(COMPOUND_COMPONENT_PATTERN, function($){
+                    var triggerName = _escapeQuerySelector(arguments[4]);
+                    if(triggerName === trigger){
+                        return '';
+                    }
+                    return $;
+                });
+                //also remove redundant bracketed sole triggers
+                BRACKETED_SINGLE_TRIGGER_PATTERN.lastIndex = 0;
+                conditionRuleString = conditionRuleString.replace(BRACKETED_SINGLE_TRIGGER_PATTERN, function($, $1){
+                    return DELIMITER + $1 + DELIMITER;
+                });
+                (this.getConditionalElement()).setAttribute(CONDITIONAL_ATTRIBUTE_NAME, conditionRuleString);
             }
         });
 
@@ -582,15 +663,19 @@ wFORMS.behaviors['condition'] = (function(){
         /**
          *
          * @param domElement a string, indicating the CSS selector for the DOM element, or the DOM element itself
+         * @param referenceDOMTree by default this should be document, however may not exist in document, this can
+         * happen when the section the trigger is in is detached.
          * @constructor
          */
-        function Trigger(domElement){
+        function Trigger(domElement, referenceDOMTree){
             var identifier = domElement;
             if( typeof domElement !== 'string'){
                 //treat it as an existing DOM element
                 identifier = '#' + getOrAssignID(domElement);
             }
             this._triggerElementIdentifier = _escapeQuerySelector(identifier);
+
+            this.referenceDOMTree = referenceDOMTree || document;
         }
 
         //private functions
@@ -652,11 +737,11 @@ wFORMS.behaviors['condition'] = (function(){
             },
 
             getIdentifier: function(){
-                return this._triggerElementIdentifier();
+                return this._triggerElementIdentifier;
             },
             getTriggerElement: function(){
                 try{
-                    return base2.DOM.Element.querySelector(document, this._triggerElementIdentifier);
+                    return base2.DOM.Element.querySelector(this.referenceDOMTree, this._triggerElementIdentifier);
                 }catch(e){
                     return null;
                 }
@@ -764,7 +849,6 @@ wFORMS.behaviors['condition'] = (function(){
         return Trigger;
     })();
 
-
     var EventHandlers = {
         document: function(event){
             var target = event.target;
@@ -818,6 +902,14 @@ wFORMS.behaviors['condition'] = (function(){
                 var conditional = new Conditional(conditionalIdentifier);
                 conditional.refresh();
             })
+        },
+
+        onRepeatableRemoved: function(removedCopy){
+            //detach those removed conditionals
+            _detachConditionals(removedCopy);
+
+            //detach those removed triggers
+            _detachTriggers(removedCopy);
         }
     };
 
