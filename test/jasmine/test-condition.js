@@ -377,7 +377,7 @@
 
         });
 
-    describe('When a section of HTML is repeated', function(){
+    describe('A conditional within a repeatable section', function(){
 
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -390,9 +390,44 @@
             });
         });
 
-        it("has to be one", function(){
+        it("should be able to controlled by a trigger outside of a repeatable section", function(){
+            var conditional = new wFORMS.behaviors.condition.Conditional('#conditional-3');
+            expect(conditional.isConditionMet()).toBeFalsy();
 
+            var $triggerOutside = $('#trigger-outside');
+            $triggerOutside.attr('checked', 'checked');
+            expect(conditional.isConditionMet()).toBeTruthy();
         });
+
+        it("should be able to controlled by a trigger inside of a repeatable section", function(){
+            var conditional = new wFORMS.behaviors.condition.Conditional('#conditional-1');
+            expect(conditional.isConditionMet()).toBeFalsy();
+
+            var $triggerOutside = $('#trigger-1');
+            $triggerOutside.attr('checked', 'checked');
+            expect(conditional.isConditionMet()).toBeTruthy();
+        });
+
+        it("if linked to an outside trigger, when duplicated, "
+            + "both duplications should be able to be controlled by the same trigger", function(){
+            var $masterNode = $('#master-node');
+            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            bInstance.run();
+
+//            var conditionalMaster = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[0\\]');
+//            var conditionalRepeat = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[1\\]');
+//            expect(conditionalMaster.isValid()).toBeTruthy();
+//            expect(conditionalRepeat.isValid()).toBeTruthy();
+//            expect(conditionalMaster.isConditionMet()).toBeFalsy();
+//            expect(conditionalRepeat.isConditionMet()).toBeFalsy();
+//            $('#trigger-outside').attr('checked', 'checked'); // the same trigger
+//            (new wFORMS.behaviors.condition.Trigger('#trigger-outside')).trigger();
+
+
+//            console.log(conditionalMaster.getConditionalElement());
+//            expect(conditionalMaster.isConditionMet()).toBeTruthy();
+//            expect(conditionalRepeat.isConditionMet()).toBeTruthy();
+        })
 
     });
 })();
