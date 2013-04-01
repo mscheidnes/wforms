@@ -413,7 +413,7 @@
         });
 
         it("if linked to an outside trigger, when duplicated, "
-            + "both duplications should be able to be controlled by the same trigger", function(){
+            + "both duplications should be controlled by the same trigger", function(){
             var $masterNode = $('#master-node');
             var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
             bInstance.run();
@@ -502,4 +502,75 @@
         });
 
     });
+
+    describe('A duplicated repeatable section', function(){
+        beforeEach(function(){
+            loadFixtures( 'condition.html' );
+
+            waitsFor(function(){
+                return wFORMS.initialized === true;
+            }, 'wait for wForms initializing', 100);
+
+            waitsFor(function(){
+                return wFORMS.behaviors.condition.isInitialized() === true;
+            }, 'wait for Condition behavior initialization', 100);
+
+            runs(function(){
+            });
+        });
+
+        it('when removed, the trigger should unlink the removed conditionals', function(){
+            var trigger = new wFORMS.behaviors.condition.Trigger('#trigger-outside');
+
+            var conditionalIdentifiers = $.map(trigger.getConditionals(), function(conditional){
+                return conditional.getIdentifier();
+            });
+
+            expect(conditionalIdentifiers.length).toBe(1);
+
+            //make a duplication
+            var $masterNode = $('#master-node');
+            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            bInstance.run();
+
+            conditionalIdentifiers = $.map(trigger.getConditionals(), function(conditional){
+                return conditional.getIdentifier();
+            });
+
+            expect(conditionalIdentifiers.length).toBe(3);
+
+            expect($.inArray('#conditional-3\\[1\\]', conditionalIdentifiers) >= 0).toBeTruthy();
+            expect($.inArray('#conditional-3\\[0\\]', conditionalIdentifiers) >= 0).toBeTruthy();
+
+            //remove the duplication
+            var removeLink = base2.DOM.Element.querySelector(document, '.removeLink');
+            $(removeLink).trigger('click');
+            conditionalIdentifiers = $.map(trigger.getConditionals(), function(conditional){
+                return conditional.getIdentifier();
+            });
+            expect(conditionalIdentifiers.length).toBe(2);
+            expect($.inArray('#conditional-3\\[1\\]', conditionalIdentifiers) >= 0).toBeFalsy();
+            expect($.inArray('#conditional-3\\[0\\]', conditionalIdentifiers) >= 0).toBeTruthy();
+        });
+
+        it('when removed, the conditional should reduce a compound trigger sub-clause '
+            + 'if one of the component in the clause is removed', function(){
+
+            //make a duplication
+            var $masterNode = $('#master-node');
+            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            bInstance.run();
+
+            var conditional = new wFORMS.behaviors.condition.Conditional('#conditional-2');
+
+            expect(conditional.getConditionalElement().getAttribute('data-condition'))
+                .toBe(' ( `#trigger-1\\[0\\]` OR `#trigger-1\\[1\\]` ) ');
+
+            //remove the duplication
+            var removeLink = base2.DOM.Element.querySelector(document, '.removeLink');
+            $(removeLink).trigger('click');
+            expect(conditional.getConditionalElement().getAttribute('data-condition'))
+                .toBe(' `#trigger-1\\[0\\]` ');
+        })
+    })
 })();
