@@ -1,7 +1,7 @@
 (function(){
     'use strict';
 
-    xdescribe('The Conditional class should be able to generate a rule string based on a javascript object',
+    describe('The Conditional class should be able to generate a rule string based on a javascript object',
     function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -88,7 +88,7 @@
         })
     });
 
-    xdescribe('The Conditional class',
+    describe('The Conditional class',
     function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -229,7 +229,7 @@
         })
     });
 
-    xdescribe('The Trigger class',
+    describe('The Trigger class',
         function(){
             beforeEach(function(){
                 loadFixtures( 'condition.html' );
@@ -386,6 +386,10 @@
                 return wFORMS.initialized === true;
             }, 'wait for wForms initializing', 100);
 
+            waitsFor(function(){
+                return wFORMS.behaviors.condition.isInitialized() === true;
+            }, 'wait for Condition behavior initialization', 100);
+
             runs(function(){
             });
         });
@@ -414,20 +418,88 @@
             var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
             bInstance.run();
 
-//            var conditionalMaster = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[0\\]');
-//            var conditionalRepeat = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[1\\]');
-//            expect(conditionalMaster.isValid()).toBeTruthy();
-//            expect(conditionalRepeat.isValid()).toBeTruthy();
-//            expect(conditionalMaster.isConditionMet()).toBeFalsy();
-//            expect(conditionalRepeat.isConditionMet()).toBeFalsy();
-//            $('#trigger-outside').attr('checked', 'checked'); // the same trigger
-//            (new wFORMS.behaviors.condition.Trigger('#trigger-outside')).trigger();
+            var conditionalMaster = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[0\\]');
+            var conditionalRepeat = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[1\\]');
+            expect(conditionalMaster.isValid()).toBeTruthy();
+            expect(conditionalRepeat.isValid()).toBeTruthy();
+            expect(conditionalMaster.isConditionMet()).toBeFalsy();
+            expect(conditionalRepeat.isConditionMet()).toBeFalsy();
+            $('#trigger-outside').attr('checked', 'checked'); // the same trigger
+            (new wFORMS.behaviors.condition.Trigger('#trigger-outside')).trigger();
 
 
-//            console.log(conditionalMaster.getConditionalElement());
-//            expect(conditionalMaster.isConditionMet()).toBeTruthy();
-//            expect(conditionalRepeat.isConditionMet()).toBeTruthy();
-        })
+            expect(conditionalMaster.isConditionMet()).toBeTruthy();
+            expect(conditionalRepeat.isConditionMet()).toBeTruthy();
+        });
+
+        it("if linked to an inside trigger, when duplicated, "
+            + "each conditional should be controlled by the respective trigger", function(){
+            var $masterNode = $('#master-node');
+            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            bInstance.run();
+
+            var conditionalMaster = new wFORMS.behaviors.condition.Conditional('#conditional-1\\[0\\]');
+            var conditionalRepeat = new wFORMS.behaviors.condition.Conditional('#conditional-1\\[1\\]');
+            expect(conditionalMaster.isValid()).toBeTruthy();
+            expect(conditionalRepeat.isValid()).toBeTruthy();
+            expect(conditionalMaster.isConditionMet()).toBeFalsy();
+            expect(conditionalRepeat.isConditionMet()).toBeFalsy();
+            var $trigger1 = $('#trigger-1\\[0\\]');
+            $trigger1[0].checked = true; // the trigger inside master node
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[0\\]')).trigger();
+
+            expect(conditionalMaster.isConditionMet()).toBeTruthy();
+            expect(conditionalRepeat.isConditionMet()).toBeFalsy();
+
+            $trigger1[0].checked = false;
+
+            var $trigger2 = $('#trigger-1\\[1\\]');
+            $trigger2[0].checked = true; // the trigger inside duplicated node
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[1\\]')).trigger();
+            expect(conditionalMaster.isConditionMet()).toBeFalsy();
+            expect(conditionalRepeat.isConditionMet()).toBeTruthy();
+
+            $trigger1[0].checked = true;
+
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[0\\]')).trigger();
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[1\\]')).trigger();
+
+            expect(conditionalMaster.isConditionMet()).toBeTruthy();
+            expect(conditionalRepeat.isConditionMet()).toBeTruthy();
+        });
+
+        it("if a conditional links to a trigger that is duplicated, "
+            + "the trigger will be expanded with its duplication using OR logic", function(){
+            var conditional = new wFORMS.behaviors.condition.Conditional('#conditional-2');
+
+            expect( conditional.getConditionalElement().getAttribute('data-condition') ).toBe("`#trigger-1`");
+
+            var $masterNode = $('#master-node');
+            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            bInstance.run();
+
+            expect( conditional.getConditionalElement().getAttribute('data-condition') )
+                .toBe(" ( `#trigger-1\\[0\\]` OR `#trigger-1\\[1\\]` ) ");
+
+            expect(conditional.isConditionMet()).toBeFalsy();
+
+            var $trigger1 = $('#trigger-1\\[0\\]');
+            $trigger1[0].checked = true; // the trigger inside master node
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[0\\]')).trigger();
+
+            expect(conditional.isConditionMet()).toBeTruthy();
+
+            $trigger1[0].checked = false;
+            var $trigger2 = $('#trigger-1\\[1\\]');
+            $trigger2[0].checked = true; // the trigger inside duplicated node
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[1\\]')).trigger();
+            expect(conditional.isConditionMet()).toBeTruthy();
+
+            $trigger1[0].checked = true;
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[0\\]')).trigger();
+            (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[1\\]')).trigger();
+            expect(conditional.isConditionMet()).toBeTruthy();
+        });
 
     });
 })();
