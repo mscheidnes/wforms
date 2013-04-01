@@ -951,6 +951,10 @@ wFORMS.behaviors['condition'] = (function(){
 
         mockup: function(){
 
+        },
+
+        isInitialized: function(){
+            return initialized;
         }
 
     }
