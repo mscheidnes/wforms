@@ -403,6 +403,10 @@ wFORMS.behaviors['condition'] = (function(){
                     return ' ' + operand + ' ';
                 });
 
+                if(this.operator === 'NOT'){
+                    return ' ( NOT(' + components[0] + ') ) '
+                }
+
                 return ' (' + components.join(this.operator) + ') '
             }
         });
@@ -613,7 +617,7 @@ wFORMS.behaviors['condition'] = (function(){
              * @param relationshipObject
              * @return {String}
              */
-            makeConditionRules: function(relationshipObject){
+            makeConditionRulesOld: function(relationshipObject){
                 function transform(leafNode){
                     var value = leafNode, id;
                     if(isHTMLElement(leafNode)){ //special handling for dom elements
@@ -629,6 +633,7 @@ wFORMS.behaviors['condition'] = (function(){
                     if(!children){ // leaf nodes
                         return transform(treeNode.value);
                     }
+
                     //if current treeNode is a one child node, and the only child is an operator node, then lift it up
                     if(children.length == 1 && inArray(['AND', 'OR'], (children[0].name + '').toUpperCase())){
                         return children[0].value;
@@ -636,7 +641,7 @@ wFORMS.behaviors['condition'] = (function(){
 
                     { //dealing with a rare case that the client might put multiple logical operators in one object
                         var logicalOperators = filter(children, function(child){
-                            return inArray(['AND', 'OR'], (child.name + '').toUpperCase());
+                            return inArray(['AND', 'OR', 'NOT'], (child.name + '').toUpperCase());
                         });
                         if(logicalOperators.length !== 0 ){
                             //Then the default boolean relationship is hardcoded to 'AND'
@@ -650,14 +655,91 @@ wFORMS.behaviors['condition'] = (function(){
                         return child.value;
                     });
 
+                    if( (treeNode.name + '').toUpperCase() === 'NOT'){
+                        console.log( childrenValues );
+                    }
+
                     //convert operator node to Polish Expression
-                    if(inArray(['AND', 'OR'], (treeNode.name + '').toUpperCase())){
+                    if(inArray(['AND', 'OR', 'NOT'], (treeNode.name + '').toUpperCase())){
                         return new PolishExpression(treeNode.name, childrenValues);
                     }
                     return childrenValues;
                 });
 
+                console.log(polishExpression);
                 return polishExpression.toString();
+            },
+
+            makeConditionRules: function(relationshipObject){
+
+                function transform(leafNode){
+                    var value = leafNode, id;
+                    if(isHTMLElement(leafNode)){ //special handling for dom elements
+                        value = leafNode.getAttribute('id') ||
+                            (id = wFORMS.helpers.randomId()) && (leafNode.setAttribute('id', id) || id);
+                        value = '#' + value;
+                    }
+
+                    return DELIMITER + value + DELIMITER;
+                }
+
+                function _isObjectDescribingGroup(object){
+                    if(object instanceof Array){
+                        return true;
+                    }
+                    if(object.constructor !== Object){
+                        return false;
+                    }
+                    var properties = map(object, function(value, key){
+                        return key;
+                    });
+
+                    return properties.length >= 2;
+                }
+
+                function _isLeaf(node){
+                    var notTerminalProperties = filter(node || {}, function(value, key){
+                        return inArray(['NOT', 'AND', 'OR'], key);
+                    });
+
+                    return notTerminalProperties && notTerminalProperties.length > 0;
+                }
+
+                function _getGroup(){
+
+                }
+
+                function recursive(node){
+                    node = node || {};
+                    var name = node.name;
+                    var value = node.value;
+                    if( _isLeaf(value)){
+                        return transform(value);
+                    }
+                    var children;
+
+                    if(value instanceof Array){
+                        children = map(value, function(i, v){
+                            return {name: null, value: v};
+                        });
+                    }else{
+                        children = filter(value, function(v, k){
+                            if( !inArray(['NOT', 'AND', 'OR'], k) ){
+                                return false;
+                            }
+                            return { name: k, value: v};
+                        })
+                    }
+
+                    var childrenValues = map(children, recursive);
+                    if(name){
+                        return new PolishExpression(name, childrenValues);
+                    }
+                    return childrenValues[0];
+                }
+                var result = recursive(relationshipObject);
+
+                console.log(result)
             }
         });
     })();
