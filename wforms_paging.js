@@ -235,7 +235,7 @@ wFORMS.behaviors.paging.applyTo = function(f) {
 
         if(b.behavior.showTabNavigation) {
           b.generateTabs();
-          
+        }
           // Find and jump to last page if captcha error
           // necessary to ensure we display captcha page
           // if captcha is active and in failed state.
@@ -250,7 +250,6 @@ wFORMS.behaviors.paging.applyTo = function(f) {
             }                   
             b.jumpTo(lastPage);
           }
-        }
 		b.onApply();	
 		
 		// intercept the submit event
