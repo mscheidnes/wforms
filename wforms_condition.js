@@ -404,7 +404,11 @@ wFORMS.behaviors['condition'] = (function(){
                 });
 
                 if(this.operator === 'NOT'){
-                    return ' ( NOT(' + components[0] + ') ) '
+                    var component = this.operands[0];
+                    if(component instanceof PolishExpression){
+                        return ' ( NOT' + components[0] + ') '
+                    }
+                    return ' ( NOT (' + components[0] + ') ) '
                 }
 
                 return ' (' + components.join(this.operator) + ') '
@@ -694,7 +698,7 @@ wFORMS.behaviors['condition'] = (function(){
                         return key;
                     });
 
-                    return properties.length >= 2;
+                    return properties.length > 1;
                 }
 
                 function _isLeaf(node){
@@ -702,44 +706,59 @@ wFORMS.behaviors['condition'] = (function(){
                         return inArray(['NOT', 'AND', 'OR'], key);
                     });
 
-                    return notTerminalProperties && notTerminalProperties.length > 0;
+                    return !notTerminalProperties || notTerminalProperties.length === 0;
                 }
 
-                function _getGroup(){
+                function _expandGroup(node){
+                    return filter(map(node, function(value, key){
+                        var obj = {};
+                        obj[key] = value;
+                        return obj;
+                    }), function(entry){
+                        var keys = map(entry, function(value, key){
+                            return key;
+                        });
+                        return inArray(['NOT', 'AND', 'OR'], keys[0]);
+                    });
+                }
 
+                function _unpackObject(object){
+                    var transformed = {};
+                    map(object, function(value, key){
+                        transformed.name = key;
+                        transformed.value = value;
+                    });
+                    return transformed;
                 }
 
                 function recursive(node){
                     node = node || {};
-                    var name = node.name;
-                    var value = node.value;
-                    if( _isLeaf(value)){
-                        return transform(value);
+                    if( _isLeaf(node)){
+                        return transform(node);
                     }
-                    var children;
-
-                    if(value instanceof Array){
-                        children = map(value, function(i, v){
-                            return {name: null, value: v};
-                        });
-                    }else{
-                        children = filter(value, function(v, k){
-                            if( !inArray(['NOT', 'AND', 'OR'], k) ){
-                                return false;
-                            }
-                            return { name: k, value: v};
-                        })
+                    if (_isObjectDescribingGroup(node)){
+                        return map(_expandGroup(node), recursive);
                     }
 
-                    var childrenValues = map(children, recursive);
-                    if(name){
-                        return new PolishExpression(name, childrenValues);
+                    var nonTerminal = _unpackObject(node);
+                    var value = nonTerminal.value;
+                    if(!(value instanceof Array)){
+                        value = [value];
                     }
-                    return childrenValues[0];
+
+                    var children = [];
+                    map(value, function(element){
+                        var result = recursive(element);
+                        if(result instanceof Array){
+                            children = children.concat(result);
+                        }else{
+                            children.push(result);
+                        }
+                    });
+                    return new PolishExpression(nonTerminal.name, children);
                 }
                 var result = recursive(relationshipObject);
-
-                console.log(result)
+                return (result && result.toString()) || null;
             }
         });
     })();
