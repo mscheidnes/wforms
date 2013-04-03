@@ -103,13 +103,19 @@
             expect(ruleString).toBe(' ( NOT( `A` ) ) ');
         });
 
-        it('the NOT logic only takes 1 operand', function(){
+        xit('the NOT logic only takes 1 operand', function(){
             var caseJSON = {
                 'NOT': {'AND' : ['A', 'B']}
             };
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(caseJSON);
-//            expect(ruleString).toBe(' ( NOT( `A` ) ) ');
-            console.log(ruleString );
+            expect(ruleString).toBe(' ( NOT ( `A` AND `B` ) ) ');
+        });
+
+        it('the NOT logic only takes 1 operand', function(){
+            var caseJSON = {'AND' : ['A', {'OR': ['B'], 'AND' : ['C', 'D']}]};
+            var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(caseJSON);
+            console.log(ruleString);
+
         });
     });
 
