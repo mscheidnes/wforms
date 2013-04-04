@@ -66,15 +66,25 @@
               data-condition=" ( `#option1` AND (`#option2` OR `#option3`)) ">
         Conditional fieldset boolean-style3  ( `#option1` AND (`#option2` OR `#option3`))
     </fieldset>
+
+    <fieldset id="boolean-style4"
+              data-condition=" ( `#option1` AND `#option2` AND NOT(`#option3`) ) ">">
+        Conditional fieldset boolean-style4   ( `#option1` AND `#option2` AND NOT(`#option3`) )
+    </fieldset>
+
+    <fieldset id="boolean-style5"
+              data-condition=" ( `#option1` AND NOT( `#option2` OR NOT(`#option3`) ) )">">
+        Conditional fieldset boolean-style5   ( `#option1` AND `#option2` AND NOT(`#option3`) )
+    </fieldset>
 </form>
 
 <form id="repeatable-test" method="post" action="" class="wForm">
     <fieldset >
-        <input type="checkbox" id="trigger-outside" data-conditionals="#conditional-3"/>
+        <input type="checkbox" id="trigger-outside" data-conditionals="#conditional-3,#conditional-4"/>
     </fieldset>
 
     <fieldset id="master-node" class="repeat">
-        <label> Trigger-1 <input id="trigger-1" type="checkbox" data-conditionals="#conditional-1, #conditional-2" />
+        <label> Trigger-1 <input id="trigger-1" type="checkbox" data-conditionals="#conditional-1, #conditional-2,#conditional-4" />
         </label>
 
         <div id="conditional-1" style="background:#f08080" data-condition="`#trigger-1`">
@@ -87,6 +97,10 @@
     </fieldset>
     <div id="conditional-2" style="background:#f08080" data-condition="`#trigger-1`">
         Conditional B
+    </div>
+
+    <div id="conditional-4" style="background:#f08080" data-condition="`#trigger-outside` OR NOT ( `#trigger-1` ) ">
+        Conditional D
     </div>
     <fieldset>
 

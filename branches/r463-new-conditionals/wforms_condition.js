@@ -173,7 +173,6 @@ wFORMS.behaviors['condition'] = (function(){
         });
     }
 
-
     /**
      * When a repeatable section is removed, detach the conditionals inside it form their associated triggers
      * @param removedNode the removed DOM node which is already detached form document.
@@ -286,25 +285,6 @@ wFORMS.behaviors['condition'] = (function(){
         return result;
     }
 
-    function treeReduce(treeNode, callback){
-        function recursion(_treeNode){
-            var value = _treeNode.value;
-            if(! (value instanceof Array) && value.constructor !== Object){
-                //leaf node (terminal nodes)
-                return callback(_treeNode, null);
-            }//only treat those array, or plain object types as non-terminal nodes
-
-            var children = map(_treeNode.value, function(value, key){
-                return {name: key, value: value};
-            });
-            var childrenValues = map(children, function(entry){
-                return {name: entry.name, value: recursion(entry)};
-            });
-            return callback(_treeNode, childrenValues);
-        }
-        return recursion({name: null, value: treeNode});
-    }
-
     function extend(){
         var extendee = arguments[0];
         for(var i = 1; i < arguments.length; i++){
@@ -411,12 +391,16 @@ wFORMS.behaviors['condition'] = (function(){
                     return ' ( NOT (' + components[0] + ') ) '
                 }
 
-                return ' (' + components.join(this.operator) + ') '
+                if(components.length > 1){
+                    return ' (' + components.join(this.operator) + ') ';
+                }
+                return components[0];
             }
         });
 
         //private functions
-        var COMPONENT_PATTERN = new RegExp(DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
+//        var COMPONENT_PATTERN = new RegExp(DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
+        var COMPONENT_PATTERN = new RegExp(' ?' + DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER + ' ?', 'g');
         var COMPOUND_COMPONENT_PATTERN = new RegExp('((AND)|(OR))\\s*' + DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER, 'g');
         var BRACKETED_SINGLE_TRIGGER_PATTERN
             = new RegExp('\\(\\s*' + DELIMITER + '([^'+DELIMITER+']+)' + DELIMITER + '\\s*\\)', 'g');
@@ -533,7 +517,9 @@ wFORMS.behaviors['condition'] = (function(){
                     return trigger.getValue() ? 'true' : 'false';
                 });
 
-                var booleanExpression = rawBooleanExpression.replace(/AND/g, '&&').replace(/OR/g, '||');
+                var booleanExpression = rawBooleanExpression.replace(/AND/g, ' && ').replace(/OR/g, ' || ')
+                    .replace(/NOT/g, ' ! ');
+
                 return eval(booleanExpression);
             },
 
@@ -584,7 +570,6 @@ wFORMS.behaviors['condition'] = (function(){
                     }
                     return $;
                 });
-
                 (this.getConditionalElement()).setAttribute(CONDITIONAL_ATTRIBUTE_NAME, conditionRuleString);
             },
 
@@ -621,61 +606,7 @@ wFORMS.behaviors['condition'] = (function(){
              * @param relationshipObject
              * @return {String}
              */
-            makeConditionRulesOld: function(relationshipObject){
-                function transform(leafNode){
-                    var value = leafNode, id;
-                    if(isHTMLElement(leafNode)){ //special handling for dom elements
-                        value = leafNode.getAttribute('id') ||
-                            (id = wFORMS.helpers.randomId()) && (leafNode.setAttribute('id', id) || id);
-                        value = '#' + value;
-                    }
-
-                    return DELIMITER + value + DELIMITER;
-                }
-
-                var polishExpression = treeReduce(relationshipObject, function(treeNode, children){
-                    if(!children){ // leaf nodes
-                        return transform(treeNode.value);
-                    }
-
-                    //if current treeNode is a one child node, and the only child is an operator node, then lift it up
-                    if(children.length == 1 && inArray(['AND', 'OR'], (children[0].name + '').toUpperCase())){
-                        return children[0].value;
-                    }
-
-                    { //dealing with a rare case that the client might put multiple logical operators in one object
-                        var logicalOperators = filter(children, function(child){
-                            return inArray(['AND', 'OR', 'NOT'], (child.name + '').toUpperCase());
-                        });
-                        if(logicalOperators.length !== 0 ){
-                            //Then the default boolean relationship is hardcoded to 'AND'
-                            return new PolishExpression('AND', map(logicalOperators, function(operatorEntry){
-                                return operatorEntry.value;
-                            }));
-                        }
-                    }
-
-                    var childrenValues = map(children, function(child){
-                        return child.value;
-                    });
-
-                    if( (treeNode.name + '').toUpperCase() === 'NOT'){
-                        console.log( childrenValues );
-                    }
-
-                    //convert operator node to Polish Expression
-                    if(inArray(['AND', 'OR', 'NOT'], (treeNode.name + '').toUpperCase())){
-                        return new PolishExpression(treeNode.name, childrenValues);
-                    }
-                    return childrenValues;
-                });
-
-                console.log(polishExpression);
-                return polishExpression.toString();
-            },
-
             makeConditionRules: function(relationshipObject){
-
                 function transform(leafNode){
                     var value = leafNode, id;
                     if(isHTMLElement(leafNode)){ //special handling for dom elements
@@ -702,8 +633,11 @@ wFORMS.behaviors['condition'] = (function(){
                 }
 
                 function _isLeaf(node){
+                    if(typeof node === 'string' || isHTMLElement(node)){
+                        return true;
+                    }
                     var notTerminalProperties = filter(node || {}, function(value, key){
-                        return inArray(['NOT', 'AND', 'OR'], key);
+                        return inArray(['NOT', 'AND', 'OR'], (key || '').toUpperCase());
                     });
 
                     return !notTerminalProperties || notTerminalProperties.length === 0;
@@ -712,7 +646,7 @@ wFORMS.behaviors['condition'] = (function(){
                 function _expandGroup(node){
                     return filter(map(node, function(value, key){
                         var obj = {};
-                        obj[key] = value;
+                        obj[(key || '').toUpperCase()] = value;
                         return obj;
                     }), function(entry){
                         var keys = map(entry, function(value, key){
@@ -737,7 +671,8 @@ wFORMS.behaviors['condition'] = (function(){
                         return transform(node);
                     }
                     if (_isObjectDescribingGroup(node)){
-                        return map(_expandGroup(node), recursive);
+                        //deal with an exceptional case that a node represents a compound relationship by itself
+                        return new PolishExpression('AND', map(_expandGroup(node), recursive));
                     }
 
                     var nonTerminal = _unpackObject(node);
