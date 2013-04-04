@@ -17,7 +17,7 @@
         var case1JSON = {
             'AND': ['A', 'B', 'C']
         };
-        xit("should be able to convert json object " + JSON.stringify(case1JSON), function(){
+        it("should be able to convert json object " + JSON.stringify(case1JSON), function(){
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(case1JSON);
 
             expect(ruleString ).toBe(' ( `A` AND `B` AND `C` ) ');
@@ -30,7 +30,7 @@
                 'AND' : ['F', 'G', {'OR': ['H', 'I', 'J']}]
             }]
         };
-        xit("should be able to handle nested relationship " + JSON.stringify(case2JSON), function(){
+        it("should be able to handle nested relationship " + JSON.stringify(case2JSON), function(){
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(case2JSON);
             expect(ruleString).toBe(' ( `A` AND `B` AND `C` AND ( `C` OR `D` ) AND `E` AND ( `F` AND `G` AND ( `H` OR `I` OR `J` ) ) ) ');
         });
@@ -40,7 +40,7 @@
                 'or' : ['C', 'D']
             }]
         };
-        xit("should not discriminate letter case of the logical operators " + JSON.stringify(case3JSON), function(){
+        it("should not discriminate letter case of the logical operators " + JSON.stringify(case3JSON), function(){
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(case3JSON);
             expect(ruleString).toBe(' ( `A` AND `B` AND `C` AND ( `C` OR `D` ) ) ');
         });
@@ -52,14 +52,14 @@
             }, 'C'],
             'OR' : ['D', 'E']
         };
-        xit('when a logical describer contains multiple logical operators, '
+        it('when a logical describer contains multiple logical operators, '
             + 'the result of each logical operation will be joined together by "AND" '
             + JSON.stringify(case4JSON), function(){
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(case4JSON);
             expect(ruleString).toBe(' ( ( `A` AND `B` AND ( ( `F` OR `G` ) AND ( `H` AND `I` ) ) AND `C` ) AND ( `D` OR `E` ) ) ');
         });
 
-        xit('should be able to deal with mixed DOM and string operands. '
+        it('should be able to deal with mixed DOM and string operands. '
             + 'DOM operands will be replaced by their ids', function(){
             var $inputs = $('#test-group1').find('input:checkbox');
 
@@ -71,7 +71,7 @@
             expect(ruleString).toBe(' ( `A` AND `B` AND `#option1` AND `#option2` ) ');
         });
 
-        xit('if a dom object doesn\'t have an ID, a random one will be generated for it. ', function(){
+        it('if a dom object doesn\'t have an ID, a random one will be generated for it. ', function(){
             var $inputs = $('#test-group1').find('input:checkbox');
 
             var case6JSON = {
@@ -87,23 +87,23 @@
             expect(ruleString).toBe( ' ( `A` AND `B` AND `#option3` AND `#id_a_random_one` ) ');
         });
 
-        xit('should be able to handle NOT logic (negation)', function(){
+        it('should be able to handle NOT logic (negation)', function(){
             var case7JSON = {
                 'NOT': ['A']
             };
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(case7JSON);
-            expect(ruleString).toBe(' ( NOT( `A` ) ) ');
+            expect(ruleString).toBe(' ( NOT ( `A` ) ) ');
         });
 
-        xit('the NOT logic only takes 1 operand', function(){
+        it('the NOT logic only takes 1 operand', function(){
             var caseJSON = {
                 'NOT': ['A', 'B', 'C']
             };
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(caseJSON);
-            expect(ruleString).toBe(' ( NOT( `A` ) ) ');
+            expect(ruleString).toBe(' ( NOT ( `A` ) ) ');
         });
 
-        xit('the NOT logic only takes 1 operand', function(){
+        it('the NOT logic only takes 1 operand', function(){
             var caseJSON = {
                 'NOT': {'AND' : ['A', 'B']}
             };
@@ -111,15 +111,17 @@
             expect(ruleString).toBe(' ( NOT ( `A` AND `B` ) ) ');
         });
 
-        it('the NOT logic only takes 1 operand', function(){
-            var caseJSON = {'AND' : ['A', {'OR': ['B'], 'AND' : ['C', 'D']}]};
+        it('the NOT operator should be able to co-exist with other operators in the same object', function(){
+            var caseJSON = {
+                'NOT' : { 'AND' : ['A', {'NOT': 'B', 'AND' : ['C', 'D']}]}
+            };
             var ruleString = wFORMS.behaviors.condition.Conditional.makeConditionRules(caseJSON);
-            console.log(ruleString);
+            expect(ruleString).toBe(' ( NOT ( `A` AND ( ( NOT ( `B` ) ) AND ( `C` AND `D` ) ) ) ) ');
 
         });
     });
 
-    xdescribe('The Conditional class',
+    describe('The Conditional class',
     function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -199,68 +201,80 @@
             var conditional1 = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
             // conditional2 : ( `#option1` AND `#option2` OR `#option3`)
             var conditional2 = new wFORMS.behaviors['condition'].Conditional('#boolean-style2');
+            // conditional3 : ( `#option1` AND `#option2` AND NOT(`#option3`) )
+            var conditional3 = new wFORMS.behaviors['condition'].Conditional('#boolean-style4');
 
             var $option1 = $('#option1'), $option2 = $('#option2'), $option3 = $('#option3');
 
             expect(conditional1.isConditionMet()).toBeFalsy();
             expect(conditional2.isConditionMet()).toBeFalsy();
+            expect(conditional3.isConditionMet()).toBeFalsy();
 
             $option3.attr('checked', 'checked');
             expect(conditional1.isConditionMet()).toBeFalsy();
             expect(conditional2.isConditionMet()).toBeTruthy();
+            expect(conditional3.isConditionMet()).toBeFalsy();
 
             $option3.removeAttr('checked');
             $option1.attr('checked', 'checked');
             expect(conditional1.isConditionMet()).toBeFalsy();
             expect(conditional2.isConditionMet()).toBeFalsy();
+            expect(conditional3.isConditionMet()).toBeFalsy();
 
             $option2.attr('checked', 'checked');
             expect(conditional1.isConditionMet()).toBeFalsy();
             expect(conditional2.isConditionMet()).toBeTruthy();
+            expect(conditional3.isConditionMet()).toBeTruthy();
         });
 
         it('it should calculate the boolean value of a nested conditional rule', function(){
             var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style3');
+            var conditional5 = new wFORMS.behaviors['condition'].Conditional('#boolean-style5');
+
             expect(conditional.isConditionMet()).toBeFalsy();
+            expect(conditional5.isConditionMet()).toBeFalsy();
 
             var $option1 = $('#option1'), $option2 = $('#option2'), $option3 = $('#option3');
 
             $option1.attr('checked', 'checked');
             expect(conditional.isConditionMet()).toBeFalsy();
+            expect(conditional5.isConditionMet()).toBeFalsy();
 
             $option2.attr('checked', 'checked');
             expect(conditional.isConditionMet()).toBeTruthy();
+            expect(conditional5.isConditionMet()).toBeFalsy();
 
             $option2.removeAttr('checked');
             $option3.attr('checked', 'checked');
             expect(conditional.isConditionMet()).toBeTruthy();
+            expect(conditional5.isConditionMet()).toBeTruthy();
         });
 
-        it('it should be able to hide itself', function(){
-            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
-            conditional.hide();
-
-            expect(conditional.getConditionalElement().style.display).toBe('none');
-        });
-
-        it('it should be able to display itself', function(){
-            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
-            conditional.hide();
-            conditional.show();
-
-            expect(conditional.getConditionalElement().style.display).toBe('block');
-        });
-
-        it('when re-display itself, the original display mode should be kept', function(){
-            $('#boolean-style1').css('display', 'inline-block');
-            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
-            conditional.hide();
-            conditional.show();
-            expect(conditional.getConditionalElement().style.display).toBe('inline-block');
-        })
+//        it('it should be able to hide itself', function(){
+//            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
+//            conditional.hide();
+//
+//            expect(conditional.getConditionalElement().style.display).toBe('none');
+//        });
+//
+//        it('it should be able to display itself', function(){
+//            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
+//            conditional.hide();
+//            conditional.show();
+//
+//            expect(conditional.getConditionalElement().style.display).toBe('block');
+//        });
+//
+//        it('when re-display itself, the original display mode should be kept', function(){
+//            $('#boolean-style1').css('display', 'inline-block');
+//            var conditional = new wFORMS.behaviors['condition'].Conditional('#boolean-style1');
+//            conditional.hide();
+//            conditional.show();
+//            expect(conditional.getConditionalElement().style.display).toBe('inline-block');
+//        })
     });
 
-    xdescribe('The Trigger class',
+    describe('The Trigger class',
         function(){
             beforeEach(function(){
                 loadFixtures( 'condition.html' );
@@ -273,7 +287,7 @@
                 });
             });
 
-            it("should be able to restored the trigger DOM object by its identifier", function(){
+            it("should be able to retrieve the trigger DOM object by its identifier", function(){
                 var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
                 var triggerDOM = document.getElementById('option1');
                 expect(trigger.getTriggerElement()).toBe(triggerDOM);
@@ -408,7 +422,7 @@
 
         });
 
-    xdescribe('A conditional within a repeatable section', function(){
+    describe('A conditional within a repeatable section', function(){
 
         beforeEach(function(){
             loadFixtures( 'condition.html' );
@@ -502,39 +516,51 @@
         it("if a conditional links to a trigger that is duplicated, "
             + "the trigger will be expanded with its duplication using OR logic", function(){
             var conditional = new wFORMS.behaviors.condition.Conditional('#conditional-2');
+            var conditional4 = new wFORMS.behaviors.condition.Conditional('#conditional-4');
 
             expect( conditional.getConditionalElement().getAttribute('data-condition') ).toBe("`#trigger-1`");
+            expect( conditional4.getConditionalElement().getAttribute('data-condition') )
+                .toBe("`#trigger-outside` OR NOT ( `#trigger-1` ) ");
 
             var $masterNode = $('#master-node');
             var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
             bInstance.run();
 
+            //after duplication conditional-2
             expect( conditional.getConditionalElement().getAttribute('data-condition') )
-                .toBe(" ( `#trigger-1\\[0\\]` OR `#trigger-1\\[1\\]` ) ");
+                .toBe(' ( `#trigger-1\\[0\\]` OR `#trigger-1\\[1\\]` ) ');
 
             expect(conditional.isConditionMet()).toBeFalsy();
+
+            //after duplication conditional-4
+            expect( conditional4.getConditionalElement().getAttribute('data-condition') )
+                .toBe('`#trigger-outside` OR NOT ( ( `#trigger-1\\[0\\]` OR `#trigger-1\\[1\\]` ) ) ');
+            expect(conditional4.isConditionMet()).toBeTruthy();
 
             var $trigger1 = $('#trigger-1\\[0\\]');
             $trigger1[0].checked = true; // the trigger inside master node
             (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[0\\]')).trigger();
 
             expect(conditional.isConditionMet()).toBeTruthy();
+            expect(conditional4.isConditionMet()).toBeFalsy();
 
             $trigger1[0].checked = false;
             var $trigger2 = $('#trigger-1\\[1\\]');
             $trigger2[0].checked = true; // the trigger inside duplicated node
             (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[1\\]')).trigger();
             expect(conditional.isConditionMet()).toBeTruthy();
+            expect(conditional4.isConditionMet()).toBeFalsy();
 
             $trigger1[0].checked = true;
             (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[0\\]')).trigger();
             (new wFORMS.behaviors.condition.Trigger('#trigger-1\\[1\\]')).trigger();
             expect(conditional.isConditionMet()).toBeTruthy();
+            expect(conditional4.isConditionMet()).toBeFalsy();
         });
 
     });
 
-    xdescribe('A duplicated repeatable section', function(){
+    describe('A duplicated repeatable section', function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
 
@@ -557,7 +583,7 @@
                 return conditional.getIdentifier();
             });
 
-            expect(conditionalIdentifiers.length).toBe(1);
+            expect(conditionalIdentifiers.length).toBe(2);
 
             //make a duplication
             var $masterNode = $('#master-node');
@@ -568,7 +594,7 @@
                 return conditional.getIdentifier();
             });
 
-            expect(conditionalIdentifiers.length).toBe(3);
+            expect(conditionalIdentifiers.length).toBe(4);
 
             expect($.inArray('#conditional-3\\[1\\]', conditionalIdentifiers) >= 0).toBeTruthy();
             expect($.inArray('#conditional-3\\[0\\]', conditionalIdentifiers) >= 0).toBeTruthy();
@@ -579,7 +605,7 @@
             conditionalIdentifiers = $.map(trigger.getConditionals(), function(conditional){
                 return conditional.getIdentifier();
             });
-            expect(conditionalIdentifiers.length).toBe(2);
+            expect(conditionalIdentifiers.length).toBe(3);
             expect($.inArray('#conditional-3\\[1\\]', conditionalIdentifiers) >= 0).toBeFalsy();
             expect($.inArray('#conditional-3\\[0\\]', conditionalIdentifiers) >= 0).toBeTruthy();
         });
@@ -593,19 +619,20 @@
             bInstance.run();
 
             var conditional = new wFORMS.behaviors.condition.Conditional('#conditional-2');
+            var conditional4 = new wFORMS.behaviors.condition.Conditional('#conditional-4');
 
             expect(conditional.getConditionalElement().getAttribute('data-condition'))
                 .toBe(' ( `#trigger-1\\[0\\]` OR `#trigger-1\\[1\\]` ) ');
+            expect(conditional4.getConditionalElement().getAttribute('data-condition'))
+                .toBe('`#trigger-outside` OR NOT ( ( `#trigger-1\\[0\\]` OR `#trigger-1\\[1\\]` ) ) ');
 
             //remove the duplication
             var removeLink = base2.DOM.Element.querySelector(document, '.removeLink');
             $(removeLink).trigger('click');
             expect(conditional.getConditionalElement().getAttribute('data-condition'))
                 .toBe(' `#trigger-1\\[0\\]` ');
+            expect(conditional4.getConditionalElement().getAttribute('data-condition'))
+                .toBe('`#trigger-outside` OR NOT ( `#trigger-1\\[0\\]` ) ');
         })
-    });
-
-    xdescribe('test', function(){
-
     });
 })();
