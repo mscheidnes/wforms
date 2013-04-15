@@ -24,7 +24,6 @@ wFORMS.behaviors['condition'] = (function(){
         //false means handle the event in bubbling phase
         base2.DOM.Element.addEventListener(document, 'click', EventHandlers.document, false);
         base2.DOM.Element.addEventListener(document, 'keydown', EventHandlers.document, false);
-
         //attach event handler for repeatables
         if(wFORMS.behaviors.repeat){
             wFORMS.behaviors.repeat.observeRepeatComplete(EventHandlers.onRepeatableDuplicated);
@@ -322,7 +321,7 @@ wFORMS.behaviors['condition'] = (function(){
 
     function getOrAssignID(domElement){
         if( !isHTMLElement(domElement)){
-            throw {message: 'not a dom element'};
+            throw new Error('not a dom element');
         }
         var id;
         return domElement.getAttribute('id') || (id = wFORMS.helpers.randomId() &&
@@ -362,7 +361,7 @@ wFORMS.behaviors['condition'] = (function(){
                 this._conditionalDomIdentifier = '#' + getOrAssignID(domElement);
 
                 if(!isHTMLElement(domElement) || !domElement.hasAttribute(CONDITIONAL_ATTRIBUTE_NAME)){
-                    throw {message: 'this element doesn\'t have a "'+CONDITIONAL_ATTRIBUTE_NAME+'" attribute'};
+                    throw new Error( 'this element doesn\'t have a "'+CONDITIONAL_ATTRIBUTE_NAME+'" attribute');
                 }
             }
 
@@ -508,7 +507,7 @@ wFORMS.behaviors['condition'] = (function(){
                 var conditionRuleString = this.getConditionRuleString();
                 if(!conditionRuleString ){
                     //doesn't have a rule string, cannot judge
-                    throw {message: "The inferred DOM element doesn't have a rule string"};
+                    throw new Error("The inferred DOM element doesn't have a rule string");
                 }
                 COMPONENT_PATTERN.lastIndex = 0; //reset regex
 
@@ -560,7 +559,7 @@ wFORMS.behaviors['condition'] = (function(){
                 var conditionRuleString = this.getConditionRuleString();
                 if(!conditionRuleString ){
                     //doesn't have a rule string, cannot judge
-                    throw {message: "The inferred DOM element doesn't have a rule string"};
+                    throw new Error("The inferred DOM element doesn't have a rule string");
                 }
 
                 COMPONENT_PATTERN.lastIndex = 0; //reset regex
@@ -581,7 +580,7 @@ wFORMS.behaviors['condition'] = (function(){
                 var conditionRuleString = this.getConditionRuleString();
                 if(!conditionRuleString ){
                     //doesn't have a rule string, cannot proceed
-                    throw {message: "The inferred DOM element doesn't have a rule string"};
+                    throw new Error("The inferred DOM element doesn't have a rule string");
                 }
                 COMPOUND_COMPONENT_PATTERN.lastIndex = 0;
                 conditionRuleString = conditionRuleString.replace(COMPOUND_COMPONENT_PATTERN, function($){
@@ -754,7 +753,7 @@ wFORMS.behaviors['condition'] = (function(){
             //if this trigger links to a valid DOM element?
             var domElement = instance.getTriggerElement();
             if(!isHTMLElement(domElement)){
-                throw {message: 'Cannot store Conditionals to this Trigger object. The inferred DOM object doesn\'t exist'};
+                throw new Error('Cannot store Conditionals to this Trigger object. The inferred DOM object doesn\'t exist');
             }
 
             var pattern = _conditionalToPattern(conditionals);
@@ -960,7 +959,7 @@ wFORMS.behaviors['condition'] = (function(){
         }
         if((new Date()).getTime() - _timestamp > 5000){
             window.clearInterval(_intervalHandler);
-            throw({message: '[Condition] behaviour cannot initialized due to time out'});
+            throw new Error('[Condition] behaviour cannot initialized due to time out');
         }
     }, 50);
 
