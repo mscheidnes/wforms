@@ -382,18 +382,26 @@ html .wForm form .wfCurrentPage {
 
 .wForm .autoformatprompt{
     position: absolute;
-    z-index: 126;
-    padding: 3px 0px 0px 2px;
+    z-index: 127;
+    padding: 3px 0 0 0;
     white-space: nowrap;
 }
 
 .wForm .autoformatprompt-control{
     background-color: transparent;
     position: relative;
-    z-index: 127;
+    z-index: 128;
 }
 .wForm .autoformatprompt-hook{
     z-index: 125;
+}
+
+.wForm .autoformat-background{
+    z-index: 126;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
 }
 
 /* "Response Submitted" confirmation page */
