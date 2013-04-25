@@ -199,8 +199,7 @@ wFORMS.behaviors.lengthPrompt = {
 };
 
 (function(ext){
-    'use strict';
-    for(var key in ext){
+    for(key in ext){
         wFORMS.behaviors.lengthPrompt.instance.prototype[key] = ext[key];
     }
 })({
