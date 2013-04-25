@@ -17,6 +17,8 @@ wforms_modules = (
 	'wforms_autoformat.js',
 	'wforms_length_prompt.js',
 	'wforms_dependent_list.js',
+	'wforms_prefill.js',
+	'wforms_replace_variables.js'
 )
 
 # Order of os.path.dirname / os.path.abspath is not optional
