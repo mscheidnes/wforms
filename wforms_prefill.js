@@ -22,6 +22,9 @@ wFORMS.behaviors.prefill = {
  * @return {object} an instance of the behavior 
  */	
 wFORMS.behaviors.prefill.applyTo = function(f) {
+    if(typeof needJSPrfilling === 'undefined' || !needJSPrfilling){
+        return;
+    }
 	var bi = new wFORMS.behaviors.prefill.instance(f);
 	
 	var _bs = wFORMS.getBehaviorInstance(f,'switch');
