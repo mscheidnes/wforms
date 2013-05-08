@@ -124,9 +124,8 @@ wFORMS.helpers.normalizeNumberToUSLocale = function(value) {
 
 wFORMS.helpers.isNumericValue = function (value){
 	value = wFORMS.helpers.normalizeNumberToUSLocale(value);
-	
 	// now match against en_US number format
-	if(String(value).match(/^\s*(\+|-)?[0-9]*[\.]?[0-9]*\s*$/)){			
+	if(String(value) !== "" && String(value).match(/^\s*(\+|-)?[0-9]*[\.]?[0-9]*\s*$/)){
 		return true;
 	}
 	return false;

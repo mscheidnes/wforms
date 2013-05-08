@@ -188,7 +188,7 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 	var f = this.target;
 	var formula = calculation.formula;
 	var _processedVariables = new Array();
-	
+
 	for(var i=0; i<calculation.variables.length;i++) {
 		var v = calculation.variables[i];
 		var varval = 0;
@@ -231,21 +231,21 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 				if(_self.hasValueInClassName(variable)) {
 					var value = _self.getValueFromClassName(variable);
 				} else {
-					var value = wFORMS.helpers.getFieldValue(variable);					
-				} 
-				if(!value) value=0;
-				
+					value = wFORMS.helpers.getFieldValue(variable);
+				}
+
+                //need to test if value is string, because an empty string is regards as false
+				if((typeof value !== 'string') && !value) value=0;
 				if(value.constructor==Array) { // array (multiple select)
 
 					for(var j=0;j<value.length;j++) { 
-						if(wFORMS.helpers.isNumericValue(value[j])){
+						if(value[j] && wFORMS.helpers.isNumericValue(value[j])){
 							varval += wFORMS.helpers.getNumericValue(value[j]);
 						} else {
 							(!varval)?(varval=value[j]):(varval=String(varval).concat(value[j]));
 						}
 					}
 				} else {
-					
 					if(wFORMS.helpers.isNumericValue(value)){
 						varval += wFORMS.helpers.getNumericValue(value);
 					} else {
@@ -253,8 +253,8 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 					}
 				}
 			}
-		);		
-		
+		);
+
 		// prepend variable assignment to the formula
 		if(wFORMS.helpers.isNumericValue(varval)) {
 			formula = 'var '+ v.name +' = '+ varval +'; '+ formula;
@@ -262,7 +262,7 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 			formula = 'var '+ v.name +' = "'+ varval.replace(/\"/g, '\\"') +'"; '+ formula;
 		}
 	} 
-	  
+
 	try {
 		var calc = function () {return eval(formula)};
 		var result = calc();
@@ -326,10 +326,8 @@ wFORMS.behaviors.calculation.instance.prototype.getValueFromClassName = function
 				return null;
 			
 			var value = element.className.split(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)[1].split(' ')[0];								
-			if(element.type=='checkbox')
-				return element.checked?value:null;
-			if(element.type=='radio')
-				return element.checked?value:null;
+			if(element.type=='checkbox' || element.type=='radio')
+				return element.checked?value: (wFORMS.helpers.isNumericValue(value) ? 0 : '' );
 			return value;
 			break;
 		case "SELECT":		
