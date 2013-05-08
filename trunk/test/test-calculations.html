@@ -9,7 +9,7 @@
 <script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
 
 <link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
-<link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
+
 
 
 <script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
@@ -43,7 +43,7 @@
 		assertNotUndefined('Instance of behavior should be available.', bInstance);
 		assertNotUndefined('Instance target should be set',bInstance.target);
 		assertEquals('Instance target should be the form','testForm',bInstance.target.id);
-		assertEquals('Found calculations',14, bInstance.calculations.length);
+		assertEquals('Found calculations',15, bInstance.calculations.length);
 		
 		// Each calculation should have a field, formula and variables 
 		for(var i=0; i<bInstance.calculations.length;i++) {	
@@ -54,6 +54,33 @@
 		}
 	}
 	
+	function testHelpers() {
+		var b = wFORMS.helpers.isNumericValue(0);
+		assertTrue(b);
+
+		b = wFORMS.helpers.isNumericValue("0");
+		assertTrue(b);
+
+		b = wFORMS.helpers.isNumericValue("");
+		assertFalse('empty string is not numeric',b);
+		
+		b = wFORMS.helpers.isNumericValue(null);
+		assertFalse('null is not numeric',b);
+
+		b = wFORMS.helpers.isNumericValue(undefined);
+		assertFalse('undefined is not numeric',b);
+
+		b = wFORMS.helpers.isNumericValue(3.4);
+		assertTrue(b);
+
+		b = wFORMS.helpers.isNumericValue("3.4");
+		assertTrue(b);
+
+		b = wFORMS.helpers.isNumericValue("34");
+		assertTrue(b);
+	}
+
+
 	function testTextInput() {
 		// Check calculations with field default values
 		assertEquals('10', document.getElementById('totalA').value);
@@ -191,6 +218,28 @@
 		
 		// Test
 		assertEquals('11.5', document.getElementById('totalF').value);
+	}
+
+	function testStringConcatenation() {
+
+		assertEquals('', document.getElementById('totalColor').value);
+
+		// Change radio value 
+		document.getElementById('checkbox21a').checked = true;
+		
+		// Update calculations
+		bInstance.run(null,document.getElementById('checkbox21a'));
+
+		assertEquals('red', document.getElementById('totalColor').value);
+
+		// Change radio value 
+		document.getElementById('checkbox22b').checked = true;
+		
+		// Update calculations
+		bInstance.run(null,document.getElementById('checkbox22b'));
+
+
+		assertEquals('redblue', document.getElementById('totalColor').value);
 	}
 	
 	function testSimpleFormulas() {
@@ -504,6 +553,22 @@
 				</span>
 			</div>
 			
+			<div class="oneField">
+				<p>Text Value for calculation stored in the class attribute.</p>
+				<label class="preField">Checkboxes (F):</label> 
+				<span class="oneChoice">
+					<input type="checkbox" id="checkbox21a" value="ww" class="calc-COLOR calcval-red" />
+					<label for="checkbox21a" class="postField">Red</label>
+				</span>
+				<span class="oneChoice">
+					<input type="checkbox" id="checkbox22b" value="zz" class="calc-COLOR calcval-blue" />
+					<label for="checkbox22b" class="postField">Blue</label>
+				</span>
+				<span class="oneChoice">
+					<input type="checkbox" id="checkbox23c" value="ee" class="calc-COLOR calcval-yellow" />
+					<label for="checkbox23c" class="postField">Yellow</label>			
+				</span>
+			</div>
 			<br/>
 		</fieldset>
 
@@ -624,6 +689,15 @@
 			<input type="hidden" class="calc-Donation" value="1" />
 						
 			<input type="text" id="inputWithLongFormula" class="formula=RegOne+RegTwo+ChildrensProgram+AdultOneMeals+AdultTwoMeals+ChildAPreschoolLunch+ChildAChildLunch+ChildAAdultLunch+ChildBPreschoolLunch+ChildBChildLunch+ChildBAdultLunch+ChildCPreschoolLunch+ChildCChildLunch+ChildCAdultLunch+ChildDPreschoolLunch+ChildDChildLunch+ChildDAdultLunch+ChildEPreschoolLunch+ChildEChildLunch+ChildEAdultLunch+Donation calc-Total" /> 
+		</fieldset>
+
+
+		<fieldset><legend>String Concatenation</legend>
+
+			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
+				<label for="" class="preField">Color Selected:</label>
+				<input type="text" readonly="readonly" value="" id="totalColor" class="formula=COLOR" />
+			</div>
 		</fieldset>
 	</form>
 </body>
