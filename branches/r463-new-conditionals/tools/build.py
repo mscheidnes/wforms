@@ -12,6 +12,7 @@ wforms_modules = (
 	'wforms_paging.js',
 	'wforms_repeat.js',
 	'wforms_switch.js',
+	'wforms_condition.js',
 	'wforms_validation.js',
 	'wforms_calculation.js',
 	'wforms_autoformat.js',
