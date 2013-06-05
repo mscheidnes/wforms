@@ -9,14 +9,12 @@
 
 	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
     <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
-	<link href="../css/nicerblank/wforms.css" rel="stylesheet" type="text/css"></link>
 	
 	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
 	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
     <script type="text/javascript" src="../wforms_core.js"></script>
     <script type="text/javascript" src="../wforms_length_prompt.js"></script>
 
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js" ></script>
 
     <script type="text/javascript" language="JavaScript">
         var checkTimer = setInterval(function(){
@@ -25,6 +23,9 @@
                 setUpPageStatus = 'complete';
             }
         }, 50);
+        
+        /* setUpPage function is required in order to get test execution delayed until setUpPageStatus variable is set to 'complete'; */
+        function setUpPage() { }
 
         function setUp() {}
 
@@ -32,9 +33,9 @@
 
         function testApplyTo(){
             var ids = ['ssn', 'email', 'url', 'textarea_test'];
-
             var i = ids.length;
             while(i--){
+
                 assertTrue('', ids[i] in wFORMS.behaviors.lengthPrompt._globalCache );
             }
         }
@@ -55,19 +56,12 @@
         <form method="post" action="" id="testForm" >
 
             <fieldset>
-                <p><script type="text/javascript" language="JavaScript">
-                        document.write($('<div></div>').text('<input type="text" id="ssn"  name="testField" maxlength="13" class="" value=""/>').html());
-                    </script>
-                </p>
                 <input type="text" id="ssn"  name="testField" maxlength="13" class="" value=""/> <br/>
                 <input type="email" id="email"  name="testField" maxlength="7" class="" value=""/> <br/>
                 <input type="url" id="url"  name="testField" maxlength="5" class="" value=""/>
             </fieldset> .
             <fieldset>
-                <p><script type="text/javascript" language="JavaScript">
-                        document.write($('<div></div>').text('<textarea id="textarea_test"  name="testField" maxlength="25" class=""></textarea>').html());
-                    </script>
-                </p>
+
                 <textarea id="textarea_test"  name="testField" maxlength="25" class=""></textarea>
             </fieldset> .
 
