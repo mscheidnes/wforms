@@ -16,7 +16,6 @@
     <script type="text/javascript" src="../wforms_core.js"></script>
     <script type="text/javascript" src="../wforms_autoformat.js"></script>
     <style>input {background-color: transparent;}</style>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js" ></script>
 
     <script type="text/javascript" language="JavaScript">
         var bInstance = null;
@@ -40,8 +39,6 @@
 
             var i = ids.length;
             while(i--){
-                console.log(ids[i]);
-                console.log(wFORMS.behaviors.autoformat._globalCache[ids[i]]);
                 assertTrue('', ids[i] in wFORMS.behaviors.autoformat._globalCache );
             }
         }
@@ -73,17 +70,17 @@
         }
 
         function testCaretManipulation(){
-            var $input = document.getElementById('ssn');
+            var input = document.getElementById('ssn');
 
-            $input.value = "dummy_data";
+            input.value = "dummy_data";
 
-            var caret = wFORMS.behaviors.autoformat.getCaretPosition($input);
+            // this test is inconsistent accross browsers. It returns either 0 (IE10, Firefox) or 10 (Chrome, Safari).
+            // var caret = wFORMS.behaviors.autoformat.getCaretPosition(input);
+            // assertEquals('', 0, caret);
 
-            assertEquals('', 0, caret);
+            wFORMS.behaviors.autoformat.setCaretPosition(input, 3);
 
-            wFORMS.behaviors.autoformat.setCaretPosition($input, 3);
-
-            assertEquals('', 3, wFORMS.behaviors.autoformat.getCaretPosition($input));
+            assertEquals('', 3, wFORMS.behaviors.autoformat.getCaretPosition(input));
         }
     </script>
 
