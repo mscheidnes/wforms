@@ -291,8 +291,10 @@ wFORMS.behaviors.autoformat = {
         for(i = 0, l = backgroundProperties.length; i < l; i++){
             property = backgroundProperties[i];
             var propertyValue = elementComputedStyle.getPropertyValue(property );
-            cssAttribute = property.replace(/\-([a-z])/g, function($1,$2){return $2.toUpperCase()});
-            newDiv.style[cssAttribute] = propertyValue;
+            if(typeof propertyValue != 'undefined') {
+                cssAttribute = property.replace(/\-([a-z])/g, function($1,$2){return $2.toUpperCase()});
+                newDiv.style[cssAttribute] = propertyValue;
+            }
         }
 
         element.style.background = 'transparent'; //and clear the input element's background
@@ -331,9 +333,12 @@ wFORMS.behaviors.autoformat = {
         'margin-left', 'margin-right', 'margin-top', 'margin-bottom'];
         for(var i = 0, l = transferredAttributes.length; i < l; i++){
             var property = transferredAttributes[i];
+
             var propertyValue = elementComputedStyle.getPropertyValue(property );
-            var cssAttribute = property.replace(/\-([a-z])/g, function($1,$2){return $2.toUpperCase()});
-            positioningDiv.style[cssAttribute] = propertyValue;
+            if(typeof propertyValue != 'undefined') {
+                var cssAttribute = property.replace(/\-([a-z])/g, function($1,$2){return $2.toUpperCase()});
+                positioningDiv.style[cssAttribute] = propertyValue;     
+            }
         }
         //clear the following styles, since they are delegated to the wrapper element
         element.style.border = 'none';
