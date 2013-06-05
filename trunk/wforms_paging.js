@@ -172,7 +172,7 @@ wFORMS.behaviors.paging.applyTo = function(f) {
 	var isValidationAccepted = (wFORMS.behaviors.validation && wFORMS.behaviors.paging.runValidationOnPageNext);
 	
 	// Iterates over the elements with specified class names
-	f.querySelectorAll(wFORMS.behaviors.paging.SELECTOR).forEach(
+	base2.DOM.Element.querySelectorAll(f,wFORMS.behaviors.paging.SELECTOR).forEach(
 		function(elem){
 			if(!b) {
 				b = new wFORMS.behaviors.paging.instance(f)
@@ -239,7 +239,7 @@ wFORMS.behaviors.paging.applyTo = function(f) {
           // Find and jump to last page if captcha error
           // necessary to ensure we display captcha page
           // if captcha is active and in failed state.
-          var pp = document.querySelector(wFORMS.behaviors.paging.CAPTCHA_ERROR);
+          var pp = base2.DOM.Element.querySelector(document,wFORMS.behaviors.paging.CAPTCHA_ERROR);
           if(pp){
             var lastPage = 1;
             for(var i=1;i<100;i++){ 
