@@ -72,8 +72,7 @@ wFORMS.behaviors.calculation.applyTo = function(f) {
 		wFORMS.behaviors.repeat.onRemove = b._repeatRemoveHandler; 
 	}
 	
-	
-	f.querySelectorAll(wFORMS.behaviors.calculation.CALCULATION_SELECTOR).forEach(
+	base2.DOM.Element.querySelectorAll(f,wFORMS.behaviors.calculation.CALCULATION_SELECTOR).forEach(
 		function(elem){
 			// extract formula
 			var formula = elem.className.substr(elem.className.indexOf('formula=')+8).split(' ')[0];
