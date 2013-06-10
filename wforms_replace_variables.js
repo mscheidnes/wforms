@@ -14,7 +14,7 @@
         }
     };
 
-    wFORMS.behaviors.resplaceVariable = {
+    wFORMS.behaviors.replaceVariable = {
         instance: function(){
             return instance;
         }
