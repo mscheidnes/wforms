@@ -433,6 +433,10 @@
 
 		assertEquals('20', document.getElementById('totalNANBNC').value);
 		
+		document.getElementById('testInputFieldNB').value = ' 2.4 ';	
+		bInstance.run(null,document.getElementById('testInputFieldNB'));	
+
+		assertEquals('22.4', document.getElementById('totalNANBNC').value);
 
 	}
 	
