@@ -41,7 +41,7 @@ if (typeof(wFORMS) == "undefined") {
 	wFORMS = {};
 }
 wFORMS.NAME 	= "wFORMS";
-wFORMS.VERSION 	= "3.6.7";
+wFORMS.VERSION 	= "3.6.8";
 wFORMS.__repr__ = function () {
 	return "[" + this.NAME + " " + this.VERSION + "]";
 };
@@ -131,13 +131,24 @@ wFORMS.helpers.isNumericValue = function (value){
 	return false;
 }
 
+wFORMS.helpers.isEmptyValue = function (value){
+	value = String(value);
+	value = value.replace(/^\s+|\s+$/g,'');
+	return (value==="");
+}
+
+
 wFORMS.helpers.getNumericValue = function (value){
 	var h = wFORMS.helpers;
 	
 	if(h.isNumericValue(value)){
 		value = h.normalizeNumberToUSLocale(value);
 	}
-	return parseFloat(value);
+	var n = parseFloat(value);
+	if(isNaN(n)) {
+		n = 0;
+	} 
+	return n;
 }
 
 
