@@ -874,6 +874,7 @@ wFORMS.behaviors.validation.instance.prototype.numberRangeTest = function(elemen
         return true;
     }
     lboundRaw = element.getAttribute(wFORMS.behaviors.validation.LOWER_BOUND_ATTRIBUTE);
+    
     if(lboundRaw && (this.validateFloat(lboundRaw) || this.validateInteger(lboundRaw))){
         lbound = parseFloat(lboundRaw);
     }
@@ -881,6 +882,7 @@ wFORMS.behaviors.validation.instance.prototype.numberRangeTest = function(elemen
         lbound = -Infinity;
     }
     uboundRaw = element.getAttribute(wFORMS.behaviors.validation.UPPER_BOUND_ATTRIBUTE);
+    
     if(uboundRaw  && (this.validateFloat(uboundRaw) || this.validateInteger(uboundRaw))){
         ubound = parseFloat(uboundRaw);
     }

@@ -387,7 +387,7 @@
 			testField.value='not an integer';
 			
 			// Test validation rule
-			assertFalse(bInstance.run(null, testForm));
+			assertFalse('instance did not run correctly',bInstance.run(null, testForm));
 			// Test error message creation
 			assertNotNull(document.getElementById('testField-E'));
 			// Test error message content
@@ -395,11 +395,11 @@
 
 			testField.value='554654dfg565';
 			// Test validation rule
-			assertFalse(bInstance.run(null, testForm));
+			assertFalse('instance did not run correctly (#2)',bInstance.run(null, testForm));
 
 			testField.value='4.5';
 			// Test validation rule
-			assertFalse(bInstance.run(null, testForm));
+			assertFalse('instance did not run correctly (#3)',bInstance.run(null, testForm));
 
 			testField.value='44444';
 			// Test validation rule
@@ -420,7 +420,7 @@
             //test range
             testField.setAttribute('max', '1');
             //Should fail
-            assertFalse(bInstance.run(null, testForm));
+            assertFalse('instance did not run correctly (#4)', bInstance.run(null, testForm));
 
             testField.setAttribute('max', '25.5');
             //Should pass
@@ -440,7 +440,7 @@
             testField.setAttribute('min', '-4');
             testField.setAttribute('max', '0');
             //Should fail
-            assertFalse(bInstance.run(null, testForm));
+            assertFalse('instance did not run correctly (#5)',bInstance.run(null, testForm));
 
             testField.removeAttribute('max');
             testField.removeAttribute('min');

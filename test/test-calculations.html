@@ -43,7 +43,7 @@
 		assertNotUndefined('Instance of behavior should be available.', bInstance);
 		assertNotUndefined('Instance target should be set',bInstance.target);
 		assertEquals('Instance target should be the form','testForm',bInstance.target.id);
-		assertEquals('Found calculations',15, bInstance.calculations.length);
+		assertEquals('Found calculations',16, bInstance.calculations.length);
 		
 		// Each calculation should have a field, formula and variables 
 		for(var i=0; i<bInstance.calculations.length;i++) {	
@@ -222,7 +222,8 @@
 
 	function testStringConcatenation() {
 
-		assertEquals('', document.getElementById('totalColor').value);
+		// not yet identified as string concatenation (has no value is provided yet)
+		assertEquals('0', document.getElementById('totalColor').value);
 
 		// Change radio value 
 		document.getElementById('checkbox21a').checked = true;
@@ -389,12 +390,12 @@
 	
 		assertEquals(Number('100'),_bh.getNumericValue('100'));
 		assertEquals(Number('100'),_bh.getNumericValue('100l'));
-		assertTrue(isNaN(_bh.getNumericValue('l00l')));
+		assertEquals(0, _bh.getNumericValue('l00l'));
 		
 		assertEquals(Number('100.01'),_bh.getNumericValue('100.01'));
 		assertEquals(Number('100.0'),_bh.getNumericValue('100.0l'));
-		assertFalse(isNaN(_bh.getNumericValue('100l.0l')));  //What should the behavior be with this case?
-		assertTrue(isNaN(_bh.getNumericValue('l00.0l')));
+		assertEquals(100,_bh.getNumericValue('100l.0l'));  
+		assertEquals(0,_bh.getNumericValue('l00.0l'));
 	}
 	
 	function testThousandsValue(){
@@ -425,6 +426,13 @@
 		bInstance.run(null,document.getElementById('testTextarea'));
 		// Test
 		assertEquals('812.333.6505 phone', document.getElementById('totalG').value);
+
+	}
+
+	function testNumericCalculationsWithEmptyValues() {
+
+		assertEquals('20', document.getElementById('totalNANBNC').value);
+		
 
 	}
 	
@@ -697,6 +705,14 @@
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Color Selected:</label>
 				<input type="text" readonly="readonly" value="" id="totalColor" class="formula=COLOR" />
+			</div>
+
+			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
+				<label for="" class="preField">Numeric Calc.:</label>
+				<input id="testInputFieldNA" type="" value="10" class="calc-NA" /> +
+				<input id="testInputFieldNB" type="" value="" class="calc-NB" /> +
+				<input id="testInputFieldNC" type="" value="10" class="calc-NC" /> =
+				<input type="text" readonly="readonly" value="" id="totalNANBNC" class="formula=NA+NB+NC" />
 			</div>
 		</fieldset>
 	</form>

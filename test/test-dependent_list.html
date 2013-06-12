@@ -19,6 +19,12 @@
     wFORMS.behaviors['dependent_list'].instance.prototype.onApply = function() {    
         setUpPageStatus = 'complete';       
     } 
+    var checkTimer = setInterval(function(){
+        if(wFORMS.initialized === true){
+            clearInterval(checkTimer);
+            setUpPageStatus = 'complete';
+        }
+    }, 50);
     
     function setUpPage() {}
   

@@ -187,6 +187,7 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 	var f = this.target;
 	var formula = calculation.formula;
 	var _processedVariables = new Array();
+	var isNumericCalculation = true;  // behavior is different when computing a calculation, or merely concatenating strings. 
 
 	for(var i=0; i<calculation.variables.length;i++) {
 		var v = calculation.variables[i];
@@ -238,14 +239,24 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 				if(value.constructor==Array) { // array (multiple select)
 
 					for(var j=0;j<value.length;j++) { 
-						if(value[j] && wFORMS.helpers.isNumericValue(value[j])){
+
+						if(!wFORMS.helpers.isNumericValue(value[j]) && !wFORMS.helpers.isEmptyValue(value[j])) {
+							isNumericCalculation = false;	
+						}
+						
+						if(isNumericCalculation){
 							varval += wFORMS.helpers.getNumericValue(value[j]);
 						} else {
 							(!varval)?(varval=value[j]):(varval=String(varval).concat(value[j]));
 						}
 					}
 				} else {
-					if(wFORMS.helpers.isNumericValue(value)){
+
+					if(!wFORMS.helpers.isNumericValue(value) && !wFORMS.helpers.isEmptyValue(value)) {
+						isNumericCalculation = false;	
+					}
+
+					if(isNumericCalculation){
 						varval += wFORMS.helpers.getNumericValue(value);
 					} else {
 						(!varval)?(varval=value):(varval=String(varval).concat(value));
@@ -255,11 +266,12 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 		);
 
 		// prepend variable assignment to the formula
-		if(wFORMS.helpers.isNumericValue(varval)) {
+		if(isNumericCalculation) {
 			formula = 'var '+ v.name +' = '+ varval +'; '+ formula;
 		} else {
 			formula = 'var '+ v.name +' = "'+ varval.replace(/\"/g, '\\"') +'"; '+ formula;
 		}
+
 	} 
 
 	try {
