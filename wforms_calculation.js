@@ -259,7 +259,7 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 					if(isNumericCalculation){
 						varval += wFORMS.helpers.getNumericValue(value);
 					} else {
-						(!varval)?(varval=value):(varval=String(varval).concat(value));
+						(!varval)?(varval=String(value)):(varval=String(varval).concat(value));
 					}
 				}
 			}
