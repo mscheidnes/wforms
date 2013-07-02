@@ -371,23 +371,14 @@ _i.prototype.duplicateSection = function(elem){
 	newElem = elem.parentNode.insertBefore(newElem, this.getInsertNode(elem));
 	
 	wFORMS.applyBehaviors(newElem);
-		/*
-	// Associates repeated input sections with their calculations.
-	if(wFORMS.behaviors.calculation) {
-		_c = wFORMS.behaviors.calculation;
-		inputItem = newElem.querySelector('input');
-		if(inputItem) {
-			if(inputItem.className.search(_c.VARIABLE_SELECTOR_PREFIX) != -1) {
-//				var b1 = wFORMS.getBehaviorInstance(inputItem.form,'calculation');
-				console.log('repeat applyto');
-				var b2 =_c.applyTo(inputItem.form);
-//				console.log(b2);
-			}
-		}
-	}
-	*/
+
 	// Calls custom function
 	this.behavior.onRepeat(newElem);
+
+	// file upload handling
+	newElem.querySelectorAll(".deleteUploadedFileCb").forEach(function(e){
+        e.parentNode.parentNode.removeChild(e.parentNode);
+    });
 	
 	wFORMS.helpers.spotlight(newElem);
 }
@@ -402,8 +393,16 @@ _i.prototype.removeSection = function(elem){
 		var elem = elem.parentNode.removeChild(elem);
 		// Calls custom function
 		this.behavior.onRemove(elem);
+
+        wFORMS.helpers.deleteResumedFilesFinder(elem).forEach(function(checkbox){
+            elem.style.display="none";
+            checkbox.style.display = "none";
+            checkbox.checked = true;
+            checkbox.form.appendChild(elem);
+        });
 	}
 }
+
 /**
  * Looking for the place where to insert the cloned element
  * @param 	{DOMElement} 	source element
