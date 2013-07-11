@@ -167,7 +167,7 @@ wFORMS.behaviors.prefill.instance.prototype.getParameters = function(/* querystr
 	}
     
     for(var i=0;i<v.length;i++) {
-    	param[v[i].split('=')[0]] = decodeURIComponent(v[i].split('=')[1]);
+    	param[v[i].split('=')[0]] = decodeURIComponent(v[i].split('=')[1].replace(/\+/g,' '));
     }
     return param;
 } 
