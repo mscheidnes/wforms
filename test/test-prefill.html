@@ -25,7 +25,7 @@
 
 	wFORMS.behaviors.prefill.instance.prototype.onApply = function() {  } 
 	// override the getParameters method to feed our own test query string.
-	var qs = "tfa_a=1&tfa_Checkboxes=blue; tfa_c&tfa_Name=test&tfa_Radio=tfa_testc&tfa_multipleselect=wine; root beer&tfa_Comment=test 2&tfa_DropDown=2";
+	var qs = "tfa_a=1&tfa_Checkboxes=blue; tfa_c&tfa_Name=test&tfa_Radio=tfa_testc&tfa_multipleselect=wine; root beer&tfa_Comment=test 1+2%203+!@$^*();'\"<>%2B&tfa_DropDown=2";
 			
 	var params = wFORMS.behaviors.prefill.instance.prototype.getParameters(qs);
 	wFORMS.behaviors.prefill.instance.prototype.getParameters = function() { return params; }
@@ -103,7 +103,7 @@
 		var bInstance =  wFORMS.behaviors.prefill.applyTo(f);
 		
 		var fld = document.getElementById('tfa_Comment');
-		assertEquals('test 2', fld.value);
+		assertEquals('test 1 2 3 !@$^*();\'"<>+', fld.value);
 	}
 
 	function test_select() {
