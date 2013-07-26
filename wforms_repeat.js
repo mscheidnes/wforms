@@ -376,7 +376,10 @@ _i.prototype.duplicateSection = function(elem){
 	this.behavior.onRepeat(newElem);
 
 	// file upload handling
-	newElem.querySelectorAll(".deleteUploadedFileCb").forEach(function(e){
+	newElem.querySelectorAll(".inputWrapper input[type='file']").forEach(function(e){
+		e.style.display=""; // back to 'inline'.
+	});
+	newElem.querySelectorAll(".deleteUploadedFileCb").forEach(function(e){		
         e.parentNode.parentNode.removeChild(e.parentNode);
     });
 	
@@ -389,17 +392,18 @@ _i.prototype.duplicateSection = function(elem){
  */
 _i.prototype.removeSection = function(elem){
 	if(elem){
+        wFORMS.helpers.deleteResumedFilesFinder(elem).forEach(function(checkbox){
+        	// set and preserve the 'delete uploaded file' checkbox from deletion by moving it out of the way. 
+        	// Ensures that file is removed server-side.
+        	checkbox.style.display = "none";
+            checkbox.checked = true;
+            checkbox.form.appendChild(elem);
+        });
+
 		// Removes section
 		var elem = elem.parentNode.removeChild(elem);
 		// Calls custom function
 		this.behavior.onRemove(elem);
-
-        wFORMS.helpers.deleteResumedFilesFinder(elem).forEach(function(checkbox){
-            elem.style.display="none";
-            checkbox.style.display = "none";
-            checkbox.checked = true;
-            checkbox.form.appendChild(elem);
-        });
 	}
 }
 
