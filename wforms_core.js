@@ -536,7 +536,28 @@ wFORMS.getBehaviorInstance = function(f, behaviorName) {
 	return null;
 };
 
-base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.onLoadHandler,false);
+/* Custom handling of wFORMS initialization for IE<9 because
+of edge case behaviour when loading wFORMS in an iframe.  See:
+http://www.zachleat.com/web/domcontentloaded-inconsistencies/
+http://dean.edwards.name/weblog/2006/06/again/
+*/
+var loadIE = false;
+/*@cc_on
+	@if(@_jscript_version < 9)
+		loadIE = true;
+		document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>");
+		var script = document.getElementById("__ie_onload");
+		script.onreadystatechange = function() {
+		  if (this.readyState == "complete") {
+			wFORMS.onLoadHandler(); // call the onload handler
+		  }
+		};
+	@end 
+@*/
+
+if(!loadIE){
+	base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.onLoadHandler,false);
+}
 // document.addEventListener('DOMContentLoaded',wFORMS.onLoadHandler,false);
 
 // Enable JS only stylesheet.
