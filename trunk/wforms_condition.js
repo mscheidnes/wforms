@@ -11,8 +11,7 @@ wFORMS.behaviors['condition'] = (function(){
     var TRIGGER_CONDITIONALS = 'data-conditionals';
     var TRIGGER_DEFAULT_ENABLED = true;
     var DEFAULT_NON_EXIST_TRIGGER_VALUE = false;
-    var DEFAULT_CONDITIONAL_DISPLAY_VALUE = 'block';
-
+    
     //Private members
     var initialized = false;
 
@@ -523,21 +522,27 @@ wFORMS.behaviors['condition'] = (function(){
             },
 
             show: function(){
-                var conditionalElement = this.getConditionalElement();
-                conditionalElement.style.display
-                    = conditionalElement.originalDisplaySettings || DEFAULT_CONDITIONAL_DISPLAY_VALUE;
+                var n = this.getConditionalElement();
+
+                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA')) {
+                  var wrapperId = n.getAttribute('id')+'-D';
+                  n = document.getElementById(wrapperId);                     
+                }
+
+                base2.DOM.HTMLElement.removeClass(n,'offstate');
             },
 
             hide: function(){
-                var conditionalElement = this.getConditionalElement();
-                var displayValue
-                    = base2.DOM.AbstractView.getComputedStyle(window, conditionalElement, '').getPropertyValue('display');
-                if(displayValue !== 'none'){
-                    conditionalElement.originalDisplaySettings  = conditionalElement.style.display;
-                }
-                conditionalElement.style.display = 'none';
-            },
+                var n = this.getConditionalElement();
 
+                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA')) {
+                  var wrapperId = n.getAttribute('id')+'-D';
+                  n = document.getElementById(wrapperId);                     
+                }
+                
+                base2.DOM.HTMLElement.addClass(n,'offstate');
+            },
+            
             isValid : function(){
                 return this.getConditionalElement() && this.getConditionRuleString();
             },

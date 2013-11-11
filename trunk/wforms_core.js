@@ -41,7 +41,7 @@ if (typeof(wFORMS) == "undefined") {
 	wFORMS = {};
 }
 wFORMS.NAME 	= "wFORMS";
-wFORMS.VERSION 	= "3.6.10";
+wFORMS.VERSION 	= "3.7.0";
 wFORMS.__repr__ = function () {
 	return "[" + this.NAME + " " + this.VERSION + "]";
 };
@@ -285,6 +285,13 @@ wFORMS.helpers.contains = function(array, needle) {
 	}
 	return false;
 }
+
+wFORMS.helpers.isHTMLElement = function(o) {
+    return (
+    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
+        o && typeof o === "object" && o.nodeType === 1 && typeof o.nodeName==="string"
+    );
+};
 
 wFORMS.helpers.deleteResumedFiles = function(element){
 	var cb=document.getElementById('tfa_uploadDelete_'+element);
