@@ -11,7 +11,7 @@ wFORMS.behaviors['condition'] = (function(){
     var TRIGGER_CONDITIONALS = 'data-conditionals';
     var TRIGGER_DEFAULT_ENABLED = true;
     var DEFAULT_NON_EXIST_TRIGGER_VALUE = false;
-    
+
     //Private members
     var initialized = false;
 
@@ -523,10 +523,39 @@ wFORMS.behaviors['condition'] = (function(){
 
             show: function(){
                 var n = this.getConditionalElement();
+                var id = n.id;
 
                 if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA')) {
                   var wrapperId = n.getAttribute('id')+'-D';
-                  n = document.getElementById(wrapperId);                     
+                  n = document.getElementById(wrapperId);
+                }
+                var flds = n.getElementsByTagName('INPUT');
+                for(var i=0;i<flds.length;i++) {
+                  if(flds[i]._wforms_disabled) flds[i].disabled = false;
+                }
+                var flds = n.getElementsByTagName('TEXTEAREA');
+                for(var i=0;i<flds.length;i++) {
+                  if(flds[i]._wforms_disabled) flds[i].disabled = false;
+                }
+                var flds = n.getElementsByTagName('SELECT');
+                for(var i=0;i<flds.length;i++) {
+                  if(flds[i]._wforms_disabled) flds[i].disabled = false;
+                }
+
+                var s = document.getElementById('tfa_switchedoff');
+                if(s) {
+                  if(s.value) {
+                    var v = s.value.split(',');
+                  } else {
+                    var v = [];
+                  }
+                  for(var i in v){
+                    if(v[i]==id){
+                      v.splice(i,1);
+                      s.value = v.join(',');
+                      break;
+                    }
+                  }
                 }
 
                 base2.DOM.HTMLElement.removeClass(n,'offstate');
@@ -534,15 +563,49 @@ wFORMS.behaviors['condition'] = (function(){
 
             hide: function(){
                 var n = this.getConditionalElement();
+                var id = n.id;
 
                 if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA')) {
                   var wrapperId = n.getAttribute('id')+'-D';
-                  n = document.getElementById(wrapperId);                     
+                  n = document.getElementById(wrapperId);
                 }
-                
+                var flds = n.getElementsByTagName('INPUT');
+                for(var i=0;i<flds.length;i++) {
+                  flds[i].disabled = true;
+                  flds[i]._wforms_disabled = true;
+                }
+                var flds = n.getElementsByTagName('TEXTEAREA');
+                for(var i=0;i<flds.length;i++) {
+                  flds[i].disabled = true;
+                  flds[i]._wforms_disabled = true;
+                }
+                var flds = n.getElementsByTagName('SELECT');
+                for(var i=0;i<flds.length;i++) {
+                  flds[i].disabled = true;
+                  flds[i]._wforms_disabled = true;
+                }
+
+                var s = document.getElementById('tfa_switchedoff');
+                if(s) {
+                  if(s.value) {
+                    var v = s.value.split(',');
+                  } else {
+                    var v = [];
+                  }
+
+                  for(var i in v){
+                    if(v[i]==id){
+                      v.splice(i,1);
+                      break;
+                    }
+                  }
+                  v.push(id);
+                  s.value = v.join(',');
+                }
+
                 base2.DOM.HTMLElement.addClass(n,'offstate');
             },
-            
+
             isValid : function(){
                 return this.getConditionalElement() && this.getConditionRuleString();
             },
