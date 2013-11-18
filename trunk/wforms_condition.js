@@ -868,6 +868,8 @@ wFORMS.behaviors['condition'] = (function(){
                     }
                 }else if(triggerElement.tagName === 'TEXTAREA'){
                     return trim(triggerElement.value).length !== 0;
+                }else if(triggerElement.tagName === 'OPTION'){
+                    return triggerElement.selected;
                 }else if(triggerElement.tagName === 'SELECT'){
                     if(triggerElement.selectedIndex > 0) {
                         return true;
