@@ -412,11 +412,11 @@
             });
 
             it("should get a on/off value from SELECT element", function(){
-                var trigger = new wFORMS.behaviors['condition'].Trigger('#trigger-select2');
+                var trigger = new wFORMS.behaviors['condition'].Trigger('#trigger-select');
 
                 expect(trigger.getValue()).toBeFalsy();
 
-                $('#trigger-select').val('a');
+                $('#trigger-select').val('1');
                 expect(trigger.getValue()).toBeTruthy();
             });
 
