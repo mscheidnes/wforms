@@ -12,25 +12,6 @@ wFORMS.behaviors['condition'] = (function(){
     var TRIGGER_DEFAULT_ENABLED = true;
     var DEFAULT_NON_EXIST_TRIGGER_VALUE = false;
 
-    //Private members
-    var initialized = false;
-
-    function initialization(){
-        if( initialized ){
-            return;
-        }
-        //bind events
-        //false means handle the event in bubbling phase
-        base2.DOM.Element.addEventListener(document, 'click', EventHandlers.document, false);
-        base2.DOM.Element.addEventListener(document, 'keydown', EventHandlers.document, false);
-        //attach event handler for repeatables
-        if(wFORMS.behaviors.repeat){
-            wFORMS.behaviors.repeat.observeRepeatComplete(EventHandlers.onRepeatableDuplicated);
-            wFORMS.behaviors.repeat.observeRemoveComplete(EventHandlers.onRepeatableRemoved);
-        }
-
-        initialized = true;
-    }
 
 
     /**
@@ -532,6 +513,9 @@ wFORMS.behaviors['condition'] = (function(){
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
                   if(flds[i]._wforms_disabled) flds[i].disabled = false;
+                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
+                    (new Trigger(flds[i])).trigger();
+                  }
                 }
                 var flds = n.getElementsByTagName('TEXTEAREA');
                 for(var i=0;i<flds.length;i++) {
@@ -540,6 +524,9 @@ wFORMS.behaviors['condition'] = (function(){
                 var flds = n.getElementsByTagName('SELECT');
                 for(var i=0;i<flds.length;i++) {
                   if(flds[i]._wforms_disabled) flds[i].disabled = false;
+                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
+                    (new Trigger(flds[i])).trigger();
+                  }
                 }
 
                 var s = document.getElementById('tfa_switchedoff');
@@ -573,6 +560,10 @@ wFORMS.behaviors['condition'] = (function(){
                 for(var i=0;i<flds.length;i++) {
                   flds[i].disabled = true;
                   flds[i]._wforms_disabled = true;
+
+                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
+                    (new Trigger(flds[i])).trigger();
+                  }
                 }
                 var flds = n.getElementsByTagName('TEXTEAREA');
                 for(var i=0;i<flds.length;i++) {
@@ -583,6 +574,9 @@ wFORMS.behaviors['condition'] = (function(){
                 for(var i=0;i<flds.length;i++) {
                   flds[i].disabled = true;
                   flds[i]._wforms_disabled = true;
+                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
+                    (new Trigger(flds[i])).trigger();
+                  }
                 }
 
                 var s = document.getElementById('tfa_switchedoff');
@@ -784,6 +778,7 @@ wFORMS.behaviors['condition'] = (function(){
             this.referenceDOMTree = referenceDOMTree || document;
         }
 
+
         //private functions
         function _retrieveConditionals(instance){
             var triggerDOMElement = instance.getTriggerElement();
@@ -842,9 +837,31 @@ wFORMS.behaviors['condition'] = (function(){
                 return _conditionalToPattern(this.getConditionals());
             },
 
+            setEventListener: function() {
+                var n = this.getTriggerElement();
+
+                if(n && n.tagName=='OPTION') {
+                    while(n && n.tagName!='SELECT') { n = n.parentNode; }
+                }
+
+                if(!n || n.__wforms_event_handled) return;
+
+                if(n.tagName == 'INPUT' && n.getAttribute('type') == 'radio' ){
+                    var radioButtons = n.form[ n.getAttribute('name') ];
+                    radioButtons.forEach(function(radioButton){
+                        base2.DOM.Element.addEventListener(radioButton, 'change', EventHandlers.document, false);
+                        radioButton.__wforms_event_handled = true;
+                    });
+                } else {
+                    base2.DOM.Element.addEventListener(n, 'change', EventHandlers.document, false);
+                    n.__wforms_event_handled = true;
+                }
+            },
+
             getIdentifier: function(){
                 return this._triggerElementIdentifier;
             },
+
             getTriggerElement: function(){
                 try{
                     return base2.DOM.Element.querySelector(this.referenceDOMTree, this._triggerElementIdentifier);
@@ -858,6 +875,8 @@ wFORMS.behaviors['condition'] = (function(){
                 if(!triggerElement){
                     return DEFAULT_NON_EXIST_TRIGGER_VALUE;
                 }
+
+                if(triggerElement.disabled) return false;
 
                 if( triggerElement.tagName === 'INPUT') {
                     var type = base2.DOM.Element.getAttribute(triggerElement, 'type');
@@ -914,29 +933,7 @@ wFORMS.behaviors['condition'] = (function(){
                 return _storeConditionalsToPatternAttribute(this, unduplicatedEntries);
             },
 
-            activate: function(){
-                var triggerElement = this.getTriggerElement();
-                triggerElement && (triggerElement.condition_trigger_enabled = true);
-            },
-
-            deactivate: function(){
-                var triggerElement = this.getTriggerElement();
-                triggerElement && (triggerElement.condition_trigger_enabled = false);
-            },
-
             trigger: function(){
-                var triggerElement = this.getTriggerElement();
-                if(!triggerElement ){
-                    return;
-                }
-
-                if( typeof triggerElement.condition_trigger_enabled === 'undefined'){
-                    triggerElement.condition_trigger_enabled = TRIGGER_DEFAULT_ENABLED;
-                }
-
-                if(!triggerElement.condition_trigger_enabled ){
-                    return;
-                }
 
                 var activeConditionals = filter(this.getConditionals(), function(conditional){
                     return conditional && conditional.getConditionalElement();
@@ -964,21 +961,30 @@ wFORMS.behaviors['condition'] = (function(){
                 return;
             }
 
-            var conditionalsPattern = target.getAttribute(TRIGGER_CONDITIONALS);
-            if(conditionalsPattern ){ // if the element has a TRIGGER_CONDITIONALS attribute,
-                // respond to this event
-                (new Trigger(target)).trigger();
-            }
+            if(target.tagName === 'SELECT'){
+                for(var i=0;i<target.options.length;i++) {
+                    var o = target.options[i];
+                    if(o.getAttribute(TRIGGER_CONDITIONALS)) {
+                        (new Trigger(o)).trigger();
+                    }
+                }
+            } else {
 
-            //then check if target is a radio button
-            if(target.tagName === 'INPUT' && base2.DOM.Element.getAttribute(target, 'type') === 'radio' ){
-                var name = base2.DOM.Element.getAttribute(target, 'name');
-                //then we have to trigger the radio button in the same group
-                var radioButtons = base2.DOM.Element.querySelectorAll(document,
-                    'input[type="radio"][name="' + name +'"]');
-                radioButtons.forEach(function(radioButton){
-                    return (new Trigger(radioButton)).trigger();
-                })
+                //then check if target is a radio button
+                if(target.tagName === 'INPUT' && target.getAttribute('type') === 'radio' ){
+                    var name = target.getAttribute('name');
+                    //then we have to trigger the radio button in the same group
+                    var radioButtons = target.form[name];// base2.DOM.Element.querySelectorAll(document,'input[type="radio"][name="' + name +'"]');
+
+                    radioButtons.forEach(function(radioButton){
+                        return (new Trigger(radioButton)).trigger();
+                    })
+                } else {
+                    if(target.getAttribute(TRIGGER_CONDITIONALS) ){ // if the element has a TRIGGER_CONDITIONALS attribute,
+                        // respond to this event
+                        (new Trigger(target)).trigger();
+                    }
+                }
             }
         },
 
@@ -1021,26 +1027,28 @@ wFORMS.behaviors['condition'] = (function(){
         }
     };
 
-    var _timestamp = (new Date()).getTime();
-    var _intervalHandler = window.setInterval(function(){
-        if(wFORMS.initialized){
-            window.clearInterval(_intervalHandler);
-            initialization();
-        }
-        if((new Date()).getTime() - _timestamp > 5000){
-            window.clearInterval(_intervalHandler);
-            throw new Error('[Condition] behaviour cannot initialized due to time out');
-        }
-    }, 50);
+
 
     return { // the ultimate object that will become wFORMS.behaviors['condition']
+
         applyTo: function(domElement){
+
             var triggersElements = base2.DOM.Element.querySelectorAll(domElement, "[" + TRIGGER_CONDITIONALS + "]");
 
             triggersElements.forEach(function(triggerElement){
                 var trigger = new Trigger(triggerElement);
                 trigger.trigger();
+                trigger.setEventListener();
             });
+
+            if(triggersElements.length > 0){
+
+                //attach event handler for repeatables
+                if(wFORMS.behaviors.repeat){
+                    wFORMS.behaviors.repeat.observeRepeatComplete(EventHandlers.onRepeatableDuplicated);
+                    wFORMS.behaviors.repeat.observeRemoveComplete(EventHandlers.onRepeatableRemoved);
+                }
+            }
         },
 
         getConditional: function(domElement){
