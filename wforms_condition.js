@@ -506,7 +506,7 @@ wFORMS.behaviors['condition'] = (function(){
                 var n = this.getConditionalElement();
                 var id = n.id;
 
-                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA')) {
+                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices') )) {
                   var wrapperId = n.getAttribute('id')+'-D';
                   n = document.getElementById(wrapperId);
                 }
@@ -552,7 +552,7 @@ wFORMS.behaviors['condition'] = (function(){
                 var n = this.getConditionalElement();
                 var id = n.id;
 
-                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA')) {
+                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices') )) {
                   var wrapperId = n.getAttribute('id')+'-D';
                   n = document.getElementById(wrapperId);
                 }
