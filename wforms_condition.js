@@ -848,10 +848,16 @@ wFORMS.behaviors['condition'] = (function(){
 
                 if(n.tagName == 'INPUT' && n.getAttribute('type') == 'radio' ){
                     var radioButtons = n.form[ n.getAttribute('name') ];
-                    radioButtons.forEach(function(radioButton){
+                    if(!radioButtons.length) {
+                        // not a nodelist. Found just one match.
+                        radioButtons = [radioButtons];
+                    }
+                    for(var i=0; i<radioButtons.length;i++) {
+                        var radioButton = radioButtons[i];
                         base2.DOM.Element.addEventListener(radioButton, 'change', EventHandlers.document, false);
                         radioButton.__wforms_event_handled = true;
-                    });
+                    }
+
                 } else {
                     base2.DOM.Element.addEventListener(n, 'change', EventHandlers.document, false);
                     n.__wforms_event_handled = true;
@@ -976,9 +982,14 @@ wFORMS.behaviors['condition'] = (function(){
                     //then we have to trigger the radio button in the same group
                     var radioButtons = target.form[name];// base2.DOM.Element.querySelectorAll(document,'input[type="radio"][name="' + name +'"]');
 
-                    radioButtons.forEach(function(radioButton){
-                        return (new Trigger(radioButton)).trigger();
-                    })
+                    if(!radioButtons.length) {
+                        // not a nodelist. Found just one match.
+                        radioButtons = [radioButtons];
+                    }
+                    for(var i=0; i<radioButtons.length;i++) {
+                        var radioButton = radioButtons[i];
+                        (new Trigger(radioButton)).trigger();
+                    }
                 } else {
                     if(target.getAttribute(TRIGGER_CONDITIONALS) ){ // if the element has a TRIGGER_CONDITIONALS attribute,
                         // respond to this event

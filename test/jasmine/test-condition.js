@@ -431,10 +431,6 @@
                 return wFORMS.initialized === true;
             }, 'wait for wForms initializing', 100);
 
-            waitsFor(function(){
-                return wFORMS.behaviors.condition.isInitialized() === true;
-            }, 'wait for Condition behavior initialization', 100);
-
             runs(function(){
             });
         });
@@ -567,10 +563,6 @@
             waitsFor(function(){
                 return wFORMS.initialized === true;
             }, 'wait for wForms initializing', 100);
-
-            waitsFor(function(){
-                return wFORMS.behaviors.condition.isInitialized() === true;
-            }, 'wait for Condition behavior initialization', 100);
 
             runs(function(){
             });
