@@ -61,7 +61,7 @@ wFORMS.behaviors.validation = {
             max: 'The date must be before %1',
             min: 'The date must be after %1'
         },
-        wait: 			 "Please wait...",
+        wait: 			 "Please wait..."
     },
 
 
