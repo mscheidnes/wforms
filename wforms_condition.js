@@ -565,7 +565,7 @@ wFORMS.behaviors['condition'] = (function(){
                     (new Trigger(flds[i])).trigger();
                   }
                 }
-                var flds = n.getElementsByTagName('TEXTEAREA');
+                var flds = n.getElementsByTagName('TEXTAREA');
                 for(var i=0;i<flds.length;i++) {
                   flds[i].disabled = true;
                   flds[i]._wforms_disabled = true;
