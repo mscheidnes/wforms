@@ -1,0 +1,147 @@
+<html>
+<head>	
+	<title>wForms 3.0 - Condition behavior demonstration</title>
+	
+	<meta name="Description" content="wForms is an open-source, unobtrusive javascript library that adds commonly needed behaviors to traditional web forms without the need for any programming skills." />
+	<meta http-equiv="Keywords" content="form, web form, html form, online form, wForms, input validation, field validation, javascript library" />
+
+	<!-- Testing purposes -->
+	<link href="../../css/main.css" type="text/css" rel="stylesheet">
+	<link href="../../css/wforms-layout.css" type="text/css" rel="stylesheet">
+	<link href="../../css/wforms-jsonly.css" type="text/css" rel="stylesheet">
+	<script type="text/javascript" src="../../lib/base2/v1.0.1/src/base2.js"></script>
+	<script type="text/javascript" src="../../lib/base2/v1.0.1/src/base2-dom.js"></script>
+
+	<script type="text/javascript" src="../../wforms_core.js"></script>
+	<script type="text/javascript" src="../../wforms_repeat.js"></script>
+	<script type="text/javascript" src="../../wforms_condition.js"></script>
+
+    <script language="JavaScript" type="text/javascript"
+    src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //blue
+            var conditional = new wFORMS.behaviors.condition.Conditional('#blue');
+            conditional.linkTriggers();
+
+            //orange
+            var rule = wFORMS.behaviors.condition.Conditional.makeConditionRules({
+                OR : ['#option1', {
+                    'AND' : ['#option2', '#option3']
+                }, $('input:radio:nth(1)')[0],
+                document.getElementById('radio1')]
+            });
+
+            document.getElementById('orange').setAttribute('data-condition', rule);
+            conditional = wFORMS.behaviors.condition.getConditional('#orange');
+            conditional.linkTriggers();
+            conditional.refresh();
+        });
+    </script>
+    <style type="text/css" >
+        .conditionals div{
+            margin: 1em;
+            padding: 1em;
+        }
+    </style>
+</head>
+
+<body>
+	<form id="testForm">
+		
+        <fieldset id="fieldset">
+            <div>
+                <label>option1
+                    <input id="option1" type="checkbox" data-conditionals="#red, #yellow, #cyan, #crimson, #tan "></label>
+                <label>option2<input id="option2" type="checkbox" data-conditionals="#red, #yellow, #cyan"></label>
+                <label>option3<input id="option3" type="checkbox" data-conditionals="#red, #cyan"></label>
+            </div>
+
+            <div>
+                <label>radio1<input id="radio1" type="radio" name="radio-group1" data-conditionals="#cyan"></label>
+                <label>radio2<input id="radio2" type="radio" name="radio-group1" data-conditionals="#cyan"></label>
+                <label>radio3<input id="radio3" type="radio" name="radio-group1"></label>
+            </div>
+		</fieldset>
+
+        <fieldset class="conditionals">
+            <div id="red" style="background: red" data-condition=" `#option1` AND `#option2` AND `#option3` ">
+                conditional1 (`#option1` AND `#option2` AND `#option3`)
+            </div>
+
+            <div id="green" style="background: green" data-condition=" `#option1` AND `#option2` AND `#option3` ">
+                conditional2 (unattached) `#option1` AND `#option2` AND `#option3`
+            </div>
+
+            <div id="blue" style="color: white; background: blue"
+                 data-condition=" `#option1` OR `#option2` OR `#option3` ">
+                conditional3 (attached by script) `#option1` OR `#option2` OR `#option3`
+            </div>
+
+        </fieldset>
+
+        <fieldset class="conditionals">
+
+
+            <div id="orange" style="background: orange">
+                conditional4  ( `#option1` OR ( `#option2` AND `#option3` ) OR `#radio2` OR `#radio1` )
+            </div>
+
+        </fieldset>
+
+        <fieldset class="repeat conditionals">
+
+            <div>
+                <label>radio4
+                    <input id="radio4" type="radio" name="radio-group2" data-conditionals="#darkyellow, #crimson, #tan"></label>
+                <label>radio5<input id="radio5" type="radio" name="radio-group2" data-conditionals="#crimson"></label>
+                <label>radio6
+                    <input id="radio6" type="radio" name="radio-group2" data-conditionals="#darkyellow"></label>
+            </div>
+
+            <div id="black" style="background: black; color: white">
+                dummy
+            </div>
+
+            <div id="yellow" style="background: yellow; color: black"
+                 data-condition="`#option1` AND `#option2`">
+                All triggers outside `#option1` AND `#option2`
+            </div>
+
+            <div id="darkyellow" style="background: #FF6633; color: black"
+                 data-condition=" ( `#radio4` OR `#radio6` )">
+                All triggers inside  ( `#radio4` OR `#radio6` )
+            </div>
+
+            <div class="repeat">
+                <label>option4<input id="option4" type="checkbox" data-conditionals="#red, #cyan, #tan"></label>
+
+                <div id="cyan" style="background: cyan"
+                     data-condition="( `#option1` OR ( `#option2` AND `#option3` ) OR `#radio2` OR `#radio1` )" >
+
+                    nested complex conditional within repeatable  ( `#option1` OR ( `#option2` AND `#option3` ) OR
+                    `#radio2`
+                    OR`#radio1
+                    ` )
+                </div>
+
+                <div id="tan" style="background: tan; color: white"
+                     data-condition="( `#option1` AND `#radio4` AND `#option4` )">
+                    nested conditional references triggers in many different layers ( `#option1` AND `#radio4` AND `#option4` )
+                </div>
+            </div>
+
+        </fieldset>
+
+        <fieldset class="conditionals">
+            <div id="crimson" style="background: crimson"
+                 data-condition="( `#option1` AND ( `#radio4` OR `#radio5` ) )">
+                conditional (outside of repeatable but reference the triggers in the repeatable)
+                ( `#option1` AND ( `#radio4` OR `#radio5` ) )
+            </div>
+        </fieldset>
+	</form>
+
+
+</body>
+</html>
