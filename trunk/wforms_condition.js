@@ -507,8 +507,14 @@ wFORMS.behaviors['condition'] = (function(){
                 var id = n.id;
 
                 if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices') )) {
-                  var wrapperId = n.getAttribute('id')+'-D';
-                  n = document.getElementById(wrapperId);
+                  // Get the DIV that wraps the input, its label and other related markup.
+                  while(n && !base2.DOM.HTMLElement.hasClass(n,'oneField')) {
+                    n = n.parentNode;
+                  }
+                  if(!n) {
+                    // invalid markup. Not expected.
+                    return;
+                  }
                 }
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
@@ -553,8 +559,14 @@ wFORMS.behaviors['condition'] = (function(){
                 var id = n.id;
 
                 if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices') )) {
-                  var wrapperId = n.getAttribute('id')+'-D';
-                  n = document.getElementById(wrapperId);
+                  // Get the DIV that wraps the input, its label and other related markup.
+                  while(n && !base2.DOM.HTMLElement.hasClass(n,'oneField')) {
+                    n = n.parentNode;
+                  }
+                  if(!n) {
+                    // invalid markup. Not expected.
+                    return;
+                  }
                 }
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
