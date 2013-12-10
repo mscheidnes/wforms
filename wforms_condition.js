@@ -481,6 +481,10 @@ wFORMS.behaviors['condition'] = (function(){
                 }else{
                     this.hide();
                 }
+                var b = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm( this.getConditionalElement() ), 'paging');
+                if(b){
+                    b.setupManagedControls();
+                }
             },
 
             isConditionMet: function(){
@@ -503,10 +507,10 @@ wFORMS.behaviors['condition'] = (function(){
             },
 
             show: function(){
-                var n = this.getConditionalElement();
+                var n  = this.getConditionalElement();
                 var id = n.id;
 
-                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices') )) {
+                if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
                   // Get the DIV that wraps the input, its label and other related markup.
                   while(n && !base2.DOM.HTMLElement.hasClass(n,'oneField')) {
                     n = n.parentNode;
@@ -515,7 +519,13 @@ wFORMS.behaviors['condition'] = (function(){
                     // invalid markup. Not expected.
                     return;
                   }
+                } else {
+                    if(base2.DOM.HTMLElement.hasClass(n,'pageSection')) {
+                        // Get the DIV that wraps the page section (with class wfPage or wfCurrentPage)
+                        n = n.parentNode;
+                    }
                 }
+
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
                   if(flds[i]._wforms_disabled) flds[i].disabled = false;
@@ -558,7 +568,7 @@ wFORMS.behaviors['condition'] = (function(){
                 var n = this.getConditionalElement();
                 var id = n.id;
 
-                if(n && (n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices') )) {
+                if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
                   // Get the DIV that wraps the input, its label and other related markup.
                   while(n && !base2.DOM.HTMLElement.hasClass(n,'oneField')) {
                     n = n.parentNode;
@@ -567,6 +577,11 @@ wFORMS.behaviors['condition'] = (function(){
                     // invalid markup. Not expected.
                     return;
                   }
+                } else {
+                    if(base2.DOM.HTMLElement.hasClass(n,'pageSection')) {
+                        // Get the DIV that wraps the page section (with class wfPage or wfCurrentPage)
+                        n = n.parentNode;
+                    }
                 }
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
@@ -1091,7 +1106,15 @@ wFORMS.behaviors['condition'] = (function(){
 
         isInitialized: function(){
             return initialized;
-        }
+        },
 
+        /**
+         * True if the element was the target of a conditional rule and was turned off by the rule.
+         * @param  {DomElement}  The node (expected to be a section, field wrapper or a page wrapper)
+         * @return {Boolean}
+         */
+        hasOffState: function(n) {
+            return base2.DOM.HTMLElement.hasClass(n,'offstate');
+        }
     }
 })();
