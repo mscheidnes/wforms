@@ -510,7 +510,47 @@ wFORMS.behaviors.validation.instance.prototype.removeErrorMessage = function(ele
  * @return	{boolean}	true if the element is not 'visible' (switched off), false otherwise.
  */
 wFORMS.behaviors.validation.instance.prototype.isSwitchedOff = function(element) {
-	return element.disabled?true:false;
+
+    switch(element.tagName) {
+
+        case 'INPUT':
+            return element.disabled?true:false;
+
+        case 'TEXTAREA':
+            return element.disabled?true:false;
+
+        case 'SELECT':
+            return element.disabled?true:false;
+
+        default:
+
+            if(element.disabled === true) {
+                // if the disabled attribute is set, use this.
+                return true;
+            }
+
+            // otherwise, go through all nested fields and check if they're all disabled.
+            // If one is not, then the element isn't switched off.
+            var flds = element.getElementsByTagName('INPUT');
+            for(var i=0;i<flds.length;i++) {
+              if(!flds[i].disabled) {
+                return false;
+              }
+            }
+            flds = element.getElementsByTagName('TEXTAREA');
+            for(var i=0;i<flds.length;i++) {
+              if(!flds[i].disabled) {
+                return false;
+              }
+            }
+            flds = element.getElementsByTagName('SELECT');
+            for(var i=0;i<flds.length;i++) {
+              if(!flds[i].disabled) {
+                return false;
+              }
+            }
+            return true;
+    }
 }
 
 /**
@@ -584,7 +624,7 @@ wFORMS.behaviors.validation.instance.prototype.validateOneRequired = function(el
 	if(element.nodeType != 1) return false;
 
 	if(this.isSwitchedOff(element))
-		return false;
+        return false;
 
 	switch(element.tagName) {
 		case "INPUT":
