@@ -540,9 +540,14 @@ wFORMS.behaviors['condition'] = (function(){
                 var flds = n.getElementsByTagName('SELECT');
                 for(var i=0;i<flds.length;i++) {
                   if(flds[i]._wforms_disabled) flds[i].disabled = false;
-                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
-                    (new Trigger(flds[i])).trigger();
+                  // For SELECT elements, the triggers are set on individual option tags.
+                  var opts = flds[i].getElementsByTagName('OPTION');
+                  for(var j=0;j<opts.length;j++) {
+                      if(opts[j].getAttribute(TRIGGER_CONDITIONALS)) {
+                        (new Trigger(opts[j])).trigger();
+                      }
                   }
+
                 }
 
                 var s = document.getElementById('tfa_switchedoff');
@@ -601,8 +606,12 @@ wFORMS.behaviors['condition'] = (function(){
                 for(var i=0;i<flds.length;i++) {
                   flds[i].disabled = true;
                   flds[i]._wforms_disabled = true;
-                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
-                    (new Trigger(flds[i])).trigger();
+                  // For SELECT elements, the triggers are set on individual option tags.
+                  var opts = flds[i].getElementsByTagName('OPTION');
+                  for(var j=0;j<opts.length;j++) {
+                      if(opts[j].getAttribute(TRIGGER_CONDITIONALS)) {
+                        (new Trigger(opts[j])).trigger();
+                      }
                   }
                 }
 
@@ -909,7 +918,18 @@ wFORMS.behaviors['condition'] = (function(){
                     return DEFAULT_NON_EXIST_TRIGGER_VALUE;
                 }
 
-                if(triggerElement.disabled) return false;
+                // disabled elements are always "false"
+                if(triggerElement.disabled) {
+                    return false;
+                }
+                // select fields hold their disabled state on the select element.
+                if(triggerElement.tagName === 'OPTION'){
+                    var p = triggerElement.parentNode;
+                    while(p && p.tagName != 'SELECT') { p = p.parentNode; }
+                    if(p && p.disabled) {
+                        return false;
+                    }
+                }
 
                 if( triggerElement.tagName === 'INPUT') {
                     var type = base2.DOM.Element.getAttribute(triggerElement, 'type');
