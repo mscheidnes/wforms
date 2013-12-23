@@ -48,49 +48,65 @@
 
         function testRecursiveConditional() {
 
-            assertTrue(!!document.getElementById('tfa_2').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_12').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_2 should be hidden ',!!document.getElementById('tfa_2').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_10 should be hidden ',!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_12 should be hidden ',!!document.getElementById('tfa_12').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_16 should be hidden ',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_17 should be hidden ',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
 
             // turn on parent (checkbox/radio)
             document.getElementById('tfa_4').checked = true;
             (new wFORMS.behaviors.condition.Trigger('#tfa_4')).trigger();
 
-            assertFalse(!!document.getElementById('tfa_2').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
+            assertFalse(' tfa_2 should now be visible ', !!document.getElementById('tfa_2').className.match(/\boffstate\b/));
+            assertTrue(' tfa_10 should still be hidden ', !!document.getElementById('tfa_10').className.match(/\boffstate\b/));
 
             // turn on nested (checkbox/radio)
             document.getElementById('tfa_7').checked = true;
             (new wFORMS.behaviors.condition.Trigger('#tfa_7')).trigger();
 
-            assertFalse(!!document.getElementById('tfa_2').className.match(/\boffstate\b/));
-            assertFalse(!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
+            assertFalse(' tfa_2 should still be visible ', !!document.getElementById('tfa_2').className.match(/\boffstate\b/));
+            assertFalse(' tfa_10 should now be visible ', !!document.getElementById('tfa_10').className.match(/\boffstate\b/));
 
             // turn off parent (checkbox/radio)
             document.getElementById('tfa_4').checked = false;
             (new wFORMS.behaviors.condition.Trigger('#tfa_4')).trigger();
-            assertTrue(!!document.getElementById('tfa_2').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
+            assertTrue(' tfa_2 should be hidden again ',!!document.getElementById('tfa_2').className.match(/\boffstate\b/));
+            assertTrue(' tfa_10 should be hidden again ',!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
 
             // turn on parent (select)
             document.getElementById('tfa_21').selected = true;
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
-            assertFalse(!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
+            assertFalse(' tfa_16 should be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
+            assertTrue(' tfa_17 should still be hidden',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
 
             // turn on nested (select)
             document.getElementById('tfa_19').selected = true;
             (new wFORMS.behaviors.condition.Trigger('#tfa_19')).trigger();
-            assertFalse(!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
-            assertFalse(!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
+            assertFalse(' tfa_16 should still be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
+            assertFalse('tfa_17 should now be visible',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
 
             // turn off parent
             document.getElementById('tfa_21').selected = false;
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
-            assertTrue(!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
-            assertTrue(!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
+            assertTrue('tfa_16 should be hidden again',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
+            assertTrue('tfa_17 should be hidden again',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
+
+        }
+
+        function testNestedConflict() {
+
+            assertTrue( ' tfa_400 should be hidden ',!!document.getElementById('tfa_400').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_800 should be hidden ',!!document.getElementById('tfa_800-D').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_800 should be disabled ',document.getElementById('tfa_800').disabled);
+
+            document.getElementById('tfa_200').checked = true;
+            (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
+
+            assertFalse(' tfa_400 should be visible ',!!document.getElementById('tfa_400').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_800 should be disabled ', document.getElementById('tfa_800').disabled);
+            assertTrue( ' tfa_800 should still be hidden ',!!document.getElementById('tfa_800-D').className.match(/\boffstate\b/));
+
 
         }
     </script>
@@ -105,7 +121,7 @@
                 <div class="wForm" id="tfa_1-WRPR" dir="ltr">
                     <div class="codesection" id="code-tfa_1"></div>
                     <h3 class="wFormTitle" id="tfa_1-T">Test Recursive Conditionals</h3>
-                    <form method="post" action="http://master.app/responses/processor" class="hintsBelow labelsAbove" id="tfa_1">
+                    <form method="post" action="" class="hintsBelow labelsAbove" id="tfa_1">
                         <div id="tfa_3-D" class="oneField    ">
                             <label id="tfa_3-L" for="tfa_3" class="label preField ">Trigger 1</label>
                             <br>
@@ -194,11 +210,57 @@
                         <fieldset id="tfa_17" class="section empty" data-condition="`#tfa_19`">
                             <legend id="tfa_17-L">Conditional 4</legend>
                         </fieldset>
-                        <div class="actions" id="tfa_1-A">
-                            <input type="submit" class="primaryAction" value="Submit">
+                       <hr/>
+
+                        <div id="tfa_100-D" class="oneField    ">
+                            <label id="tfa_100-L" for="tfa_100" class="label preField ">Switch</label>
+                            <br>
+                            <div class="inputWrapper">
+                                <span id="tfa_100" class="choices vertical ">
+                                    <span class="oneChoice">
+                                        <input type="radio" value="tfa_200" class="" id="tfa_200" name="tfa_100" data-conditionals="#tfa_400">
+                                        <label class="label postField" id="tfa_200-L" for="tfa_200">Show A</label>
+                                    </span>
+                                    <span class="oneChoice">
+                                        <input type="radio" value="tfa_300" class="" id="tfa_300" name="tfa_100">
+                                        <label class="label postField" id="tfa_300-L" for="tfa_300">Hide A</label>
+                                    </span>
+                                </span>
+                            </div>
                         </div>
-                        <input type="hidden" value="" name="tfa_switchedoff" id="tfa_switchedoff">
-                    </form>
+                        <fieldset id="tfa_400" class="section" data-condition="`#tfa_200`">
+                            <legend id="tfa_400-L">Section A</legend>
+                            <div id="tfa_500-D" class="oneField    ">
+                                <label id="tfa_500-L" for="tfa_500" class="label preField ">Switch 2</label>
+                                <br>
+                                <div class="inputWrapper">
+                                    <span id="tfa_500" class="choices vertical ">
+                                        <span class="oneChoice">
+                                            <input type="radio" value="tfa_600" class="" id="tfa_600" name="tfa_500" data-conditionals="#tfa_800">
+                                            <label class="label postField" id="tfa_600-L" for="tfa_600">Show B</label>
+                                        </span>
+                                        <span class="oneChoice">
+                                            <input type="radio" value="tfa_700" class="" id="tfa_700" name="tfa_500">
+                                            <label class="label postField" id="tfa_700-L" for="tfa_700">Hide B</label>
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div id="tfa_800-D" class="oneField    ">
+                                <label id="tfa_800-L" for="tfa_800" class="label preField reqMark">Required B</label>
+                                <br>
+                                <div class="inputWrapper">
+                                    <input type="text" id="tfa_800" name="tfa_800" value="" placeholder="" data-condition="`#tfa_600`" class="required"></div>
+                            </div>
+                        </fieldset>
+
+
+
+                        <div class="actions" id="tfa_0-A">
+                            <input type="submit" class="primaryAction" value="Submit"></div>
+                        <div style="clear:both"></div>
+
+                        <input type="hidden" value="" name="tfa_switchedoff" id="tfa_switchedoff"></form>
                 </div>
             </div>
 

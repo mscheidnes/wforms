@@ -526,29 +526,39 @@ wFORMS.behaviors['condition'] = (function(){
                     }
                 }
 
-                var flds = n.getElementsByTagName('INPUT');
-                for(var i=0;i<flds.length;i++) {
-                  if(flds[i]._wforms_disabled) flds[i].disabled = false;
-                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
-                    (new Trigger(flds[i])).trigger();
-                  }
-                }
-                var flds = n.getElementsByTagName('TEXTAREA');
-                for(var i=0;i<flds.length;i++) {
-                  if(flds[i]._wforms_disabled) flds[i].disabled = false;
-                }
-                var flds = n.getElementsByTagName('SELECT');
-                for(var i=0;i<flds.length;i++) {
-                  if(flds[i]._wforms_disabled) flds[i].disabled = false;
-                  // For SELECT elements, the triggers are set on individual option tags.
-                  var opts = flds[i].getElementsByTagName('OPTION');
-                  for(var j=0;j<opts.length;j++) {
-                      if(opts[j].getAttribute(TRIGGER_CONDITIONALS)) {
-                        (new Trigger(opts[j])).trigger();
-                      }
-                  }
+                var _traverse = function(element) {
+                    switch(element.tagName) {
+                        case 'INPUT':
+                            if(element._wforms_disabled) element.disabled = false;
+                            if(element.getAttribute(TRIGGER_CONDITIONALS)) {
+                                (new Trigger( element )).trigger();
+                            }
+                            break;
+                        case 'TEXTAREA':
+                            if(element._wforms_disabled) element.disabled = false;
+                            break;
+                        case 'SELECT':
+                            if(element._wforms_disabled) element.disabled = false;
+                            // For SELECT elements, the triggers are set on individual option tags.
+                            var opts = element.getElementsByTagName('OPTION');
+                            for(var j=0;j<opts.length;j++) {
+                                if(opts[j].getAttribute(TRIGGER_CONDITIONALS)) {
+                                    (new Trigger( opts[j] )).trigger();
+                                }
+                            }
+                            break;
+                        default:
+                            for(var i=0;i<element.childNodes.length;i++) {
+                                if( element.childNodes[i].nodeType==1 &&
+                                   !wFORMS.behaviors.condition.hasOffState( element.childNodes[i] ) ) {
 
+                                    _traverse(element.childNodes[i]);
+                                }
+                            }
+                            break;
+                    }
                 }
+                _traverse(n);
 
                 var s = document.getElementById('tfa_switchedoff');
                 if(s) {
