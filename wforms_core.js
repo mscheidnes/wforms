@@ -1,9 +1,9 @@
-//Crossbrowser hacks. 
+//Crossbrowser hacks.
 try{
 	if( NodeList && !(NodeList.prototype.forEach))
 	{
 		NodeList.prototype.forEach = function (a, b) { for (var i = 0; i < this.length; i++) { a.call(b, this.item(i), i, this); } };
-	} 
+	}
 }catch(e){};
 
 try{
@@ -17,25 +17,25 @@ if (typeof(base2) == "undefined") {
 	throw new Error("Base2 not found. wForms 3 depends on the base2 library.");
 }
 
-/* Base2 beta2 backward compatibility. 
+/* Base2 beta2 backward compatibility.
  */
 base2.DOM.HTMLElement.implement({
   hasClass : function($node, $class) {
 	if($node.classList && $node.classList.contains) return $node.classList.contains($class);
 	else return $node.className.match(new RegExp('(\\s|^)'+$class+'(\\s|$)'));
   },
-  removeClass : function($node, $class) {  
+  removeClass : function($node, $class) {
 	if (base2.DOM.HTMLElement.hasClass($node,$class)) {
 		var reg = new RegExp('(\\s|^)'+$class+'(\\s|$)');
 		$node.className=$node.className.replace(reg,' ').replace(/^\s+|\s+$/g,"");
-	} 
+	}
   },
   addClass : function($node, $class) {
 	if (!base2.DOM.HTMLElement.hasClass($node,$class)) {
 		$node.className = ($node.className+" "+$class).replace(/^\s+|\s+$/g,"");
 	}
   }
-}); 
+});
 
 if (typeof(wFORMS) == "undefined") {
 	wFORMS = {};
@@ -56,8 +56,8 @@ wFORMS.initialized = false;
 
 /**
  * Helper method.
- * @return {string} A randomly generated id (with very high probability of uniqueness). 
- */	
+ * @return {string} A randomly generated id (with very high probability of uniqueness).
+ */
 wFORMS.helpers.randomId = function () {
 	var seed = (new Date()).getTime();
 	seed = seed.toString().substr(6);
@@ -67,9 +67,9 @@ wFORMS.helpers.randomId = function () {
 }
 
 /**
- * getFieldValue 
- * @param {domElement} element 
- * @returns {string} the value of the field. 
+ * getFieldValue
+ * @param {domElement} element
+ * @returns {string} the value of the field.
  */
 wFORMS.helpers.getFieldValue = function(element) {
 	switch(element.tagName) {
@@ -80,10 +80,10 @@ wFORMS.helpers.getFieldValue = function(element) {
 				return element.checked?element.value:null;
 			return element.value;
 			break;
-		case "SELECT":		
-			if(element.selectedIndex==-1) {					
-				return null; 
-			} 
+		case "SELECT":
+			if(element.selectedIndex==-1) {
+				return null;
+			}
 			if(element.getAttribute('multiple')) {
 				var v=[];
 				for(var i=0;i<element.options.length;i++) {
@@ -92,7 +92,7 @@ wFORMS.helpers.getFieldValue = function(element) {
 					}
 				}
 				return v;
-			}											
+			}
 			return element.options[element.selectedIndex].value;
 			break;
 		case "TEXTAREA":
@@ -100,9 +100,9 @@ wFORMS.helpers.getFieldValue = function(element) {
 			return element.value;
 			break;
 		default:
-			return null; 
+			return null;
 			break;
-	} 	 
+	}
 }
 
 wFORMS.helpers.detectLocaleDecimalSeparator = function() {
@@ -140,14 +140,14 @@ wFORMS.helpers.isEmptyValue = function (value){
 
 wFORMS.helpers.getNumericValue = function (value){
 	var h = wFORMS.helpers;
-	
+
 	if(h.isNumericValue(value)){
 		value = h.normalizeNumberToUSLocale(value);
 	}
 	var n = parseFloat(value);
 	if(isNaN(n)) {
 		n = 0;
-	} 
+	}
 	return n;
 }
 
@@ -184,7 +184,7 @@ wFORMS.helpers.getForm = function (e) {
 
 /**
  * Returns left position of the element
- * @params	{HTMLElement}	elem	Source element 
+ * @params	{HTMLElement}	elem	Source element
  */
 wFORMS.helpers.getLeft = function(elem){
 	var pos = 0;
@@ -198,19 +198,19 @@ wFORMS.helpers.getLeft = function(elem){
 			}
 		} catch(x) {}
 		pos += elem.offsetLeft;
-		
+
 		elem = elem.offsetParent;
-		
+
 	}
  	if(!window.opera && document.all && document.compatMode && document.compatMode != "BackCompat") {
-		pos += parseInt(document.body.currentStyle.marginTop); 	   		
+		pos += parseInt(document.body.currentStyle.marginTop);
  	}
 	return pos;
 }
 
 /**
  * Returns top position of the element
- * @params	{HTMLElement}	elem	Source element 
+ * @params	{HTMLElement}	elem	Source element
  */
 wFORMS.helpers.getTop = function(elem){
 	var pos = 0;
@@ -224,11 +224,11 @@ wFORMS.helpers.getTop = function(elem){
 			}
 		} catch(x) {}
 		pos += elem.offsetTop;
-		
+
 		elem = elem.offsetParent;
 	}
 	if(!window.opera && document.all && document.compatMode && document.compatMode != "BackCompat") {
-		pos += parseInt(document.body.currentStyle.marginLeft) + 1; 	   		
+		pos += parseInt(document.body.currentStyle.marginLeft) + 1;
  	}
 	return pos;
 }
@@ -248,12 +248,12 @@ wFORMS.helpers.position = function (element) {
 };
 
 /**
- * highlight change 
- */ 
+ * highlight change
+ */
 wFORMS.helpers.useSpotlight = false;
 
 wFORMS.helpers.spotlight = function(target) {
-	// not implemented	 	
+	// not implemented
 }
 
 /**
@@ -269,9 +269,11 @@ wFORMS.helpers.activateStylesheet = function(sheetref) {
 	}
 	for(var i=0;ss[i];i++ ) {
 		if(ss[i].href.indexOf(sheetref) != -1) {
+			ss[i].rel = "stylesheet";
+			ss[i].title = ""; // make sure this becomes a persistent stylesheet.
+			// force refresh
 			ss[i].disabled = true;
 			ss[i].disabled = false;
-			ss[i].rel = "stylesheet";
 		}
 	}
 }
@@ -304,7 +306,7 @@ wFORMS.helpers.deleteResumedFilesFinder = function(context){
 		context = document;
 	}
 	return base2.DOM.HTMLElement.querySelectorAll(context,".deleteUploadedFileCb");
-} 
+}
 
 // Loader config
 wFORMS.LOADER    	  = {};
@@ -315,51 +317,51 @@ wFORMS.LOADER.speed   = 2;
 
 wFORMS.LOADER.show = function(placeholder) {
 	if(wFORMS.LOADER.enabled) {
-	
+
 		// Create the loader div
 		var p = wFORMS.LOADER.create();
-		
+
 		// We'll adjust the size of the div to deduce the padding. Avoid flicker by hiding it.
-		p.style.visibility = "hidden"; 
+		p.style.visibility = "hidden";
 		p.style.overflow   = "hidden"; // triggers hasLayout in IE7
-		
+
 		/*@cc_on
 		@if(@_jscript_version <= 5.7)
-			p.style.width = "100%"; // triggers hasLayout in IE6			
+			p.style.width = "100%"; // triggers hasLayout in IE6
 		@end
 		@*/
-		
+
 		// Insert in DOM
 		var where = (arguments[1]=='above')?placeholder:placeholder.nextSibling;
 		p     	  = placeholder.parentNode.insertBefore(p,where);
 		p.id      = "wfLoader_"+placeholder.id;
 		wFORMS.LOADER._id = p.id;
-		
-		// Get div padding (set from CSS). We'll need it to collapse the div. 
+
+		// Get div padding (set from CSS). We'll need it to collapse the div.
 		var h = p.clientHeight;
 		p.style.height = h+'px';
 		wFORMS.LOADER._padding = p.clientHeight-h;
-		
-		// Reset height correctly 
+
+		// Reset height correctly
 		p.style.height = (h-wFORMS.LOADER._padding)+'px';
-		
+
 		// Show div
-		p.style.visibility = "visible";		
-	}	
+		p.style.visibility = "visible";
+	}
 }
 wFORMS.LOADER.hide = function(placeholder) {
-	if(wFORMS.LOADER.enabled && wFORMS.LOADER._id) {	
+	if(wFORMS.LOADER.enabled && wFORMS.LOADER._id) {
 		var p = document.getElementById(wFORMS.LOADER._id);
-		
-		if(p) {			
+
+		if(p) {
 			if(arguments[1]) {
-				// quick 
+				// quick
 				p.parentNode.removeChild(p);
 			} else {
 				// collapse div, then remove it.
 				wFORMS.LOADER._interval = setInterval(function() {
 					var h = p.clientHeight - wFORMS.LOADER.speed - wFORMS.LOADER._padding;
-					if(h<0) h=0;										
+					if(h<0) h=0;
 					p.style.height = h +'px';
 					if(p && !(p.clientHeight - wFORMS.LOADER._padding)) {
 						p.parentNode.removeChild(p);
@@ -374,25 +376,25 @@ wFORMS.LOADER.hide = function(placeholder) {
 wFORMS.LOADER.create = function() {
 	var d = document.createElement('DIV');
 	d.className = "wfLoader";
-	
+
 	var i = d.appendChild(document.createElement('DIV'));
 	i.className = 'inner';
-	
+
 	if(wFORMS.LOADER.spinner) {
 		var img = i.appendChild(document.createElement('IMG'));
 		img.src= wFORMS.LOADER.spinner;
 	}
 	if(wFORMS.LOADER.message) {
 		i.appendChild(document.createTextNode(wFORMS.LOADER.message));
-	}	
+	}
 	return d;
 }
 
 
 
 /**
- * Initialization routine. Automatically applies the behaviors to all web forms in the document.  
- */	
+ * Initialization routine. Automatically applies the behaviors to all web forms in the document.
+ */
 wFORMS.onLoadHandler = function() {
 	var forms=document.getElementsByTagName("FORM");
 	var queue = []; //serialize the functions calling
@@ -441,31 +443,31 @@ wFORMS.standardizeElement = function(elem) {
 		}
 	}
 	if(!elem.hasClass) {
-		elem.hasClass = function(className) { 
+		elem.hasClass = function(className) {
 			if((' ' + this.className + ' ').indexOf(' ' + className +' ') != -1) {
 				return true;
-			}			
-			return false;		
+			}
+			return false;
 		};
 	}
 	if(!elem.removeClass) {
 		elem.removeClass = function(className) { return base2.DOM.HTMLElement.removeClass(this,className) };
 	}
 	if(!elem.addClass) {
-		elem.addClass = function(className) { return base2.DOM.HTMLElement.addClass(this,className) };	
+		elem.addClass = function(className) { return base2.DOM.HTMLElement.addClass(this,className) };
 	}
 }
 /**
  * Initialization routine. Automatically applies all behaviors to the given element.
  * @param {domElement} A form element, or any of its children.
- * TODO: Kill existing instances before applying the behavior to the same element. 
- */	
+ * TODO: Kill existing instances before applying the behavior to the same element.
+ */
 wFORMS.applyBehaviors = function(f) {
-	
+
 	// Prevents Base2 DOM binding in IE8+ to prevent a stack overflow bug in base2 when dealing with cloned nodes (created by repeat behavior)
 	var doBind = /*@cc_on @if(@_jscript_version >= 5.8)!@end @*/true;
-	if(doBind) base2.DOM.bind(f); 
-	
+	if(doBind) base2.DOM.bind(f);
+
 	// switch must run before paging behavior
 	if(wFORMS.behaviors['switch']){
 		var b = wFORMS.behaviors['switch'].applyTo(f);
@@ -474,23 +476,23 @@ wFORMS.applyBehaviors = function(f) {
 		} else {
 			wFORMS.removeBehavior(f, 'switch');
 			wFORMS.instances['switch'].push(b);
-		}		
+		}
 	}
 	for(var behaviorName in wFORMS.behaviors) {
 		if(behaviorName == 'switch'){
 			continue;
-		}		
+		}
 		if(wFORMS.behaviors[behaviorName].applyTo) {
 			// It is a behavior.
-			
+
 			var b = wFORMS.behaviors[behaviorName].applyTo(f);
-			
+
 			// behaviors may create several instances
 			// if single instance returned, convert it to an array
 			if(b && b.constructor != Array) {
-				b=[b];			
-			} 
-			
+				b=[b];
+			}
+
 			for(var i=0;b && i<b.length;i++) {
 				if(!wFORMS.instances[behaviorName]) {
 					wFORMS.instances[behaviorName] = [b[i]];
@@ -507,18 +509,18 @@ wFORMS.applyBehaviors = function(f) {
 }
 
 wFORMS.removeBehavior = function(f, behaviorName) {
-	
+
 	return null;
-	
-	if(!wFORMS.instances[behaviorName]) 
+
+	if(!wFORMS.instances[behaviorName])
 		return null;
 
 	for(var i=0; i < wFORMS.instances[behaviorName].length; i++) {
 		if(wFORMS.instances[behaviorName][i].target==f) {
-			
+
 			// TODO: call a remove method for each behavior to cleanly remove any event handler
 			wFORMS.instances[behaviorName][i] = null;
-		}	
+		}
 	}
 	return null;
 }
@@ -526,19 +528,19 @@ wFORMS.removeBehavior = function(f, behaviorName) {
 /**
  * Returns the behavior instance associated to the given form/behavior pair.
  * @param	{domElement}	a HTML element (often the form element itself)
- * @param	{string}		the name of the behavior 
- * @return	{object}		the instance of the behavior 
+ * @param	{string}		the name of the behavior
+ * @return	{object}		the instance of the behavior
  * TODO: Returns an array if more than one instance for the given form
  */
 wFORMS.getBehaviorInstance = function(f, behaviorName) {
 
-	if(!f || !wFORMS.instances[behaviorName]) 
+	if(!f || !wFORMS.instances[behaviorName])
 		return null;
-	
+
 	for(var i=0; i < wFORMS.instances[behaviorName].length; i++) {
 		if(wFORMS.instances[behaviorName][i].target==f) {
 			return wFORMS.instances[behaviorName][i];
-		}	
+		}
 	}
 	return null;
 };
@@ -559,7 +561,7 @@ var loadIE = false;
 			wFORMS.onLoadHandler(); // call the onload handler
 		  }
 		};
-	@end 
+	@end
 @*/
 
 if(!loadIE){
