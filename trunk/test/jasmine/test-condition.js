@@ -6,9 +6,6 @@
         beforeEach(function(){
             loadFixtures( 'condition.html' );
 
-            waitsFor(function(){
-                return wFORMS.initialized === true;
-            }, 'wait for wForms initializing', 100);
 
             runs(function(){
             });
@@ -121,15 +118,11 @@
         });
     });
 
+
     describe('The Conditional class',
     function(){
         beforeEach(function(){
             loadFixtures( 'condition.html' );
-
-            waitsFor(function(){
-                return wFORMS.initialized === true;
-            }, 'wait for wForms initializing', 100);
-
             runs(function(){
             });
         });
@@ -279,13 +272,10 @@
             beforeEach(function(){
                 loadFixtures( 'condition.html' );
 
-                waitsFor(function(){
-                    return wFORMS.initialized === true;
-                }, 'wait for wForms initializing', 100);
-
                 runs(function(){
                 });
             });
+
 
             it("should be able to retrieve the trigger DOM object by its identifier", function(){
                 var trigger = new wFORMS.behaviors['condition'].Trigger('#option1');
@@ -455,9 +445,11 @@
 
         it("if linked to an outside trigger, when duplicated, "
             + "both duplications should be controlled by the same trigger", function(){
-            var $masterNode = $('#master-node');
-            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            var masterNode = document.getElementById('master-node');
+
+            var bInstance = wFORMS.getBehaviorInstance(masterNode, 'repeat');
             bInstance.run();
+
 
             var conditionalMaster = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[0\\]');
             var conditionalRepeat = new wFORMS.behaviors.condition.Conditional('#conditional-3\\[1\\]');
@@ -475,8 +467,10 @@
 
         it("if linked to an inside trigger, when duplicated, "
             + "each conditional should be controlled by the respective trigger", function(){
-            var $masterNode = $('#master-node');
-            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            var masterNode = document.getElementById('master-node');
+
+            var bInstance = wFORMS.getBehaviorInstance(masterNode, 'repeat');
+
             bInstance.run();
 
             var conditionalMaster = new wFORMS.behaviors.condition.Conditional('#conditional-1\\[0\\]');
@@ -518,8 +512,8 @@
             expect( conditional4.getConditionalElement().getAttribute('data-condition') )
                 .toBe("`#trigger-outside` OR NOT ( `#trigger-1` ) ");
 
-            var $masterNode = $('#master-node');
-            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            var masterNode = document.getElementById('master-node');
+            var bInstance = wFORMS.getBehaviorInstance(masterNode, 'repeat');
             bInstance.run();
 
             //after duplication conditional-2
@@ -578,8 +572,8 @@
             expect(conditionalIdentifiers.length).toBe(2);
 
             //make a duplication
-            var $masterNode = $('#master-node');
-            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            var masterNode = document.getElementById('master-node');
+            var bInstance = wFORMS.getBehaviorInstance(masterNode, 'repeat');
             bInstance.run();
 
             conditionalIdentifiers = $.map(trigger.getConditionals(), function(conditional){
@@ -606,8 +600,8 @@
             + 'if one of the component in the clause is removed', function(){
 
             //make a duplication
-            var $masterNode = $('#master-node');
-            var bInstance = wFORMS.getBehaviorInstance($masterNode[0], 'repeat');
+            var masterNode = document.getElementById('master-node');
+            var bInstance = wFORMS.getBehaviorInstance(masterNode, 'repeat');
             bInstance.run();
 
             var conditional = new wFORMS.behaviors.condition.Conditional('#conditional-2');

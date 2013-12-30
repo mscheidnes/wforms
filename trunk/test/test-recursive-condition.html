@@ -75,21 +75,22 @@
             assertTrue(' tfa_10 should be hidden again ',!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
 
             // turn on parent (select)
-            document.getElementById('tfa_21').selected = true;
+            document.getElementById('tfa_21').setAttribute('selected', 'selected');
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
             assertFalse(' tfa_16 should be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertTrue(' tfa_17 should still be hidden',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
 
             // turn on nested (select)
-            document.getElementById('tfa_19').selected = true;
+            document.getElementById('tfa_19').setAttribute('selected', 'selected');
             (new wFORMS.behaviors.condition.Trigger('#tfa_19')).trigger();
             assertFalse(' tfa_16 should still be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertFalse('tfa_17 should now be visible',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
 
             // turn off parent
-            document.getElementById('tfa_21').selected = false;
+            // document.getElementById('tfa_21').selected = false;
+            document.getElementById('tfa_15').selectedIndex = -1;
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
-            assertTrue('tfa_16 should be hidden again',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
+            assertTrue('tfa_16 should really be hidden again',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertTrue('tfa_17 should be hidden again',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
 
         }
@@ -107,7 +108,24 @@
             assertTrue( ' tfa_800 should be disabled ', document.getElementById('tfa_800').disabled);
             assertTrue( ' tfa_800 should still be hidden ',!!document.getElementById('tfa_800-D').className.match(/\boffstate\b/));
 
+        }
+        function testHiddenField() {
+            document.getElementById('tfa_300').checked = true;
+            (new wFORMS.behaviors.condition.Trigger('#tfa_300')).trigger();
+            assertTrue(' tfa_2279 should be disabled ', document.getElementById('tfa_2279').disabled);
 
+            document.getElementById('tfa_200').checked = true;
+            (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
+            assertTrue(' tfa_2279 should still be disabled ', document.getElementById('tfa_2279').disabled);
+
+            document.getElementById('tfa_600').checked = true;
+            (new wFORMS.behaviors.condition.Trigger('#tfa_600')).trigger();
+            assertTrue(' tfa_2279 should be enabled.',!document.getElementById('tfa_2279').disabled);
+
+            document.getElementById('tfa_300').checked = true;
+            document.getElementById('tfa_200').checked = false;
+            (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
+            assertTrue(' tfa_2279 should be disabled again ', document.getElementById('tfa_2279').disabled);
         }
     </script>
 
@@ -236,7 +254,7 @@
                                 <div class="inputWrapper">
                                     <span id="tfa_500" class="choices vertical ">
                                         <span class="oneChoice">
-                                            <input type="radio" value="tfa_600" class="" id="tfa_600" name="tfa_500" data-conditionals="#tfa_800">
+                                            <input type="radio" value="tfa_600" class="" id="tfa_600" name="tfa_500" data-conditionals="#tfa_800,#tfa_2279">
                                             <label class="label postField" id="tfa_600-L" for="tfa_600">Show B</label>
                                         </span>
                                         <span class="oneChoice">
@@ -252,6 +270,8 @@
                                 <div class="inputWrapper">
                                     <input type="text" id="tfa_800" name="tfa_800" value="" placeholder="" data-condition="`#tfa_600`" class="required"></div>
                             </div>
+
+                            <input type="hidden" id="tfa_2279" name="tfa_2279" value="" data-condition="`#tfa_600`">
                         </fieldset>
 
 
@@ -260,7 +280,8 @@
                             <input type="submit" class="primaryAction" value="Submit"></div>
                         <div style="clear:both"></div>
 
-                        <input type="hidden" value="" name="tfa_switchedoff" id="tfa_switchedoff"></form>
+                        <input type="hidden" value="" name="tfa_switchedoff" id="tfa_switchedoff"/>
+                    </form>
                 </div>
             </div>
 

@@ -78,6 +78,7 @@ wFORMS.behaviors.dependent_list.applyTo = function(f) {
         elem.addEventListener('change', function(event) { b.run(event, this)}, false);
         b.run(null, elem);
     });
+
     b.onApply();
     return b;
 }
@@ -96,7 +97,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.onApply = function() {}
 wFORMS.behaviors.dependent_list.instance.prototype.run = function(event, element) {
     var b = this;
     var selector = element.getAttribute('data-filter-dependent');
-    var dependents = document.querySelectorAll(selector);
+    var dependents = this.target.querySelectorAll(selector);
     dependents.forEach(function(dependent) {
         b.applyFiltersTo(dependent);
     });
@@ -110,11 +111,11 @@ wFORMS.behaviors.dependent_list.instance.prototype.applyFiltersTo = function(dep
     var b = this;
 
     var selector = dependent.getAttribute('data-filter-control');
-    var controls = document.querySelectorAll(selector);
+    var controls = this.target.querySelectorAll(selector);
 
-    for(var i=0;i<controls.length;i++) {
-        b.filter(controls[i], dependent);
-    }
+    controls.forEach(function(control) {
+        b.filter(control, dependent);
+    });
 }
 
 /**
@@ -230,7 +231,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.exclude = function(dependent,
 wFORMS.behaviors.dependent_list.instance.prototype.getChoiceLabel = function(choice) {
 
     if(choice.tagName != 'OPTION') {
-        choice = document.querySelector("label[for='"+choice.getAttribute('id')+"']");
+        choice = this.target.querySelector("label[for='"+choice.getAttribute('id')+"']");
     }
     var label = choice.textContent || choice.innerText;  // Note: doesn't support HTML markup.
     return label;
