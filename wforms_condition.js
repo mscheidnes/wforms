@@ -354,10 +354,11 @@ wFORMS.behaviors['condition'] = (function(){
             this.operands = operands;
         }
         extend(PolishExpression.prototype, {
-            toString: function(){
+            // see: http://stackoverflow.com/questions/9466156/tostring-does-not-work-in-ie
+            toStringy: function(){
                 var components = map(this.operands, function(operand){
                     if(operand instanceof PolishExpression){
-                        return operand.toString();
+                        return operand.toStringy();
                     }
                     return ' ' + operand + ' ';
                 });
@@ -512,12 +513,20 @@ wFORMS.behaviors['condition'] = (function(){
 
                 if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
                   // Get the DIV that wraps the input, its label and other related markup.
-                  while(n && !base2.DOM.HTMLElement.hasClass(n,'oneField')) {
-                    n = n.parentNode;
+                  var p = n.parentNode;
+                  while(p && p.nodeType==1 && !base2.DOM.HTMLElement.hasClass(p,'oneField')) {
+                    p = p.parentNode;
                   }
-                  if(!n) {
-                    // invalid markup. Not expected.
-                    return;
+                  if(p && p.nodeType==1 && base2.DOM.HTMLElement.hasClass(p,'oneField')) {
+                    n=p;
+                  } else {
+                    // not nested in a .oneField div. Happens for hidden fields.
+                    if(n.tagName=='INPUT') {
+                        if(n._wforms_disabled) n.disabled = false;
+                        if(n.getAttribute(TRIGGER_CONDITIONALS)) {
+                            (new Trigger( n )).trigger();
+                        }
+                    }
                   }
                 } else {
                     if(base2.DOM.HTMLElement.hasClass(n,'pageSection')) {
@@ -585,12 +594,21 @@ wFORMS.behaviors['condition'] = (function(){
 
                 if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
                   // Get the DIV that wraps the input, its label and other related markup.
-                  while(n && !base2.DOM.HTMLElement.hasClass(n,'oneField')) {
-                    n = n.parentNode;
+                  var p = n.parentNode;
+                  while(p && p.nodeType==1 && !base2.DOM.HTMLElement.hasClass(p,'oneField')) {
+                    p = p.parentNode;
                   }
-                  if(!n) {
-                    // invalid markup. Not expected.
-                    return;
+                  if(p && p.nodeType==1 && base2.DOM.HTMLElement.hasClass(p,'oneField')) {
+                    n=p;
+                  } else {
+                    // not nested in a .oneField div. Happens for hidden fields.
+                    if(n.tagName=='INPUT') {
+                        n.disabled = true;
+                        n._wforms_disabled = true;
+                        if(n.getAttribute(TRIGGER_CONDITIONALS)) {
+                            (new Trigger(n)).trigger();
+                        }
+                    }
                   }
                 } else {
                     if(base2.DOM.HTMLElement.hasClass(n,'pageSection')) {
@@ -800,7 +818,7 @@ wFORMS.behaviors['condition'] = (function(){
                     return new PolishExpression(nonTerminal.name, children);
                 }
                 var result = recursive(relationshipObject);
-                return (result && result.toString()) || null;
+                return (result && result.toStringy()) || null;
             }
         });
     })();
