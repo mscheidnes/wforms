@@ -79,12 +79,14 @@
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
             assertFalse(' tfa_16 should be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertTrue(' tfa_17 should still be hidden',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
+            assertTrue( 'tfa_802 should be enabled ',!document.getElementById('tfa_802').disabled);
 
             // turn on nested (select)
             document.getElementById('tfa_19').setAttribute('selected', 'selected');
             (new wFORMS.behaviors.condition.Trigger('#tfa_19')).trigger();
             assertFalse(' tfa_16 should still be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertFalse('tfa_17 should now be visible',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
+            assertTrue( 'tfa_802 should still be enabled ',!document.getElementById('tfa_802').disabled);
 
             // turn off parent
             // document.getElementById('tfa_21').selected = false;
@@ -92,7 +94,7 @@
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
             assertTrue('tfa_16 should really be hidden again',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertTrue('tfa_17 should be hidden again',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
-
+            assertTrue( 'tfa_802 should be disabled ',document.getElementById('tfa_802').disabled);
         }
 
         function testNestedConflict() {
@@ -100,6 +102,7 @@
             assertTrue( ' tfa_400 should be hidden ',!!document.getElementById('tfa_400').className.match(/\boffstate\b/));
             assertTrue( ' tfa_800 should be hidden ',!!document.getElementById('tfa_800-D').className.match(/\boffstate\b/));
             assertTrue( ' tfa_800 should be disabled ',document.getElementById('tfa_800').disabled);
+            assertTrue( ' tfa_801 should be disabled ',document.getElementById('tfa_801').disabled);
 
             document.getElementById('tfa_200').checked = true;
             (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
@@ -107,6 +110,7 @@
             assertFalse(' tfa_400 should be visible ',!!document.getElementById('tfa_400').className.match(/\boffstate\b/));
             assertTrue( ' tfa_800 should be disabled ', document.getElementById('tfa_800').disabled);
             assertTrue( ' tfa_800 should still be hidden ',!!document.getElementById('tfa_800-D').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_801 should be enabled ',!document.getElementById('tfa_801').disabled);
 
         }
         function testHiddenField() {
@@ -126,6 +130,10 @@
             document.getElementById('tfa_200').checked = false;
             (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
             assertTrue(' tfa_2279 should be disabled again ', document.getElementById('tfa_2279').disabled);
+        }
+
+        function testNestedNotCondition() {
+
         }
     </script>
 
@@ -214,16 +222,23 @@
                         <fieldset id="tfa_16" class="section" data-condition="`#tfa_21`">
                             <legend id="tfa_16-L">Conditional 3</legend>
                             <div id="tfa_18-D" class="oneField    ">
-                                <label id="tfa_18-L" for="tfa_18" class="label preField ">Conditional 4</label>
+                                <label id="tfa_18-L" for="tfa_18" class="label preField ">Conditional 4 and 5</label>
                                 <br>
                                 <div class="inputWrapper">
                                     <select id="tfa_18" name="tfa_18" class="">
                                         <option value="">Please select...</option>
                                         <option value="tfa_19" id="tfa_19" data-conditionals="#tfa_17" class="">show</option>
-                                        <option value="tfa_20" id="tfa_20" class="">hide</option>
+                                        <option value="tfa_20" id="tfa_20" data-conditionals="#tfa_802" class="">hide</option>
                                     </select>
                                 </div>
                             </div>
+                            <div id="tfa_802-D" class="oneField">
+                                <label id="tfa_802-L" for="tfa_6" class="label preField reqMark">Conditional 5</label><br>
+                                <div class="inputWrapper">
+                                    <input type="text" id="tfa_802" name="tfa_802" value="" placeholder="" data-condition="NOT (`#tfa_20`)" class="required">
+                                </div>
+                            </div>
+
                         </fieldset>
                         <fieldset id="tfa_17" class="section empty" data-condition="`#tfa_19`">
                             <legend id="tfa_17-L">Conditional 4</legend>
@@ -237,17 +252,17 @@
                                 <span id="tfa_100" class="choices vertical ">
                                     <span class="oneChoice">
                                         <input type="radio" value="tfa_200" class="" id="tfa_200" name="tfa_100" data-conditionals="#tfa_400">
-                                        <label class="label postField" id="tfa_200-L" for="tfa_200">Show A</label>
+                                        <label class="label postField" id="tfa_200-L" for="tfa_200">200 / Show A</label>
                                     </span>
                                     <span class="oneChoice">
                                         <input type="radio" value="tfa_300" class="" id="tfa_300" name="tfa_100">
-                                        <label class="label postField" id="tfa_300-L" for="tfa_300">Hide A</label>
+                                        <label class="label postField" id="tfa_300-L" for="tfa_300">300 / Hide A</label>
                                     </span>
                                 </span>
                             </div>
                         </div>
                         <fieldset id="tfa_400" class="section" data-condition="`#tfa_200`">
-                            <legend id="tfa_400-L">Section A</legend>
+                            <legend id="tfa_400-L">Section A / 400</legend>
                             <div id="tfa_500-D" class="oneField    ">
                                 <label id="tfa_500-L" for="tfa_500" class="label preField ">Switch 2</label>
                                 <br>
@@ -255,21 +270,30 @@
                                     <span id="tfa_500" class="choices vertical ">
                                         <span class="oneChoice">
                                             <input type="radio" value="tfa_600" class="" id="tfa_600" name="tfa_500" data-conditionals="#tfa_800,#tfa_2279">
-                                            <label class="label postField" id="tfa_600-L" for="tfa_600">Show B</label>
+                                            <label class="label postField" id="tfa_600-L" for="tfa_600">600 / Show B and C and Enable Hidden D</label>
                                         </span>
                                         <span class="oneChoice">
-                                            <input type="radio" value="tfa_700" class="" id="tfa_700" name="tfa_500">
-                                            <label class="label postField" id="tfa_700-L" for="tfa_700">Hide B</label>
+                                            <input type="radio" value="tfa_700" class="" id="tfa_700" name="tfa_500" data-conditionals="#tfa_801">
+                                            <label class="label postField" id="tfa_700-L" for="tfa_700">700 / Hide B</label>
                                         </span>
                                     </span>
                                 </div>
                             </div>
                             <div id="tfa_800-D" class="oneField    ">
-                                <label id="tfa_800-L" for="tfa_800" class="label preField reqMark">Required B</label>
+                                <label id="tfa_800-L" for="tfa_800" class="label preField reqMark">800 / Required B</label>
                                 <br>
                                 <div class="inputWrapper">
                                     <input type="text" id="tfa_800" name="tfa_800" value="" placeholder="" data-condition="`#tfa_600`" class="required"></div>
                             </div>
+
+                            <div id="tfa_801-D" class="oneField">
+                                <label id="tfa_801-L" for="tfa_801" class="label preField reqMark">801 / Required C</label><br>
+                                <div class="inputWrapper">
+                                    <input type="text" id="tfa_801" name="tfa_801" value="" placeholder="" data-condition="NOT (`#tfa_700`)" class="required">
+                                </div>
+                            </div>
+
+                            <label for="tfa_2279">2279 / Hidden D:</label>
 
                             <input type="hidden" id="tfa_2279" name="tfa_2279" value="" data-condition="`#tfa_600`">
                         </fieldset>

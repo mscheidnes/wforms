@@ -616,11 +616,13 @@ wFORMS.behaviors['condition'] = (function(){
                         n = n.parentNode;
                     }
                 }
+                var disabledList = [];
+
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
                   flds[i].disabled = true;
                   flds[i]._wforms_disabled = true;
-
+                  disabledList.push(flds[i]);
                   if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
                     (new Trigger(flds[i])).trigger();
                   }
@@ -629,11 +631,13 @@ wFORMS.behaviors['condition'] = (function(){
                 for(var i=0;i<flds.length;i++) {
                   flds[i].disabled = true;
                   flds[i]._wforms_disabled = true;
+                  disabledList.push(flds[i]);
                 }
                 var flds = n.getElementsByTagName('SELECT');
                 for(var i=0;i<flds.length;i++) {
                   flds[i].disabled = true;
                   flds[i]._wforms_disabled = true;
+                  disabledList.push(flds[i]);
                   // For SELECT elements, the triggers are set on individual option tags.
                   var opts = flds[i].getElementsByTagName('OPTION');
                   for(var j=0;j<opts.length;j++) {
@@ -641,6 +645,11 @@ wFORMS.behaviors['condition'] = (function(){
                         (new Trigger(opts[j])).trigger();
                       }
                   }
+                }
+                // a nested conditional rule may have re-enabled some fields, we do a second pass
+                // to make sure they're all disabled.
+                for(var i=0;i<disabledList.length;i++) {
+                    disabledList[i].disabled = true;
                 }
 
                 var s = document.getElementById('tfa_switchedoff');
@@ -1023,6 +1032,14 @@ wFORMS.behaviors['condition'] = (function(){
                 map(activeConditionals, function(conditional){
                     conditional.refresh();
                 });
+
+                var element = this.getTriggerElement();
+                element.setAttribute('data-condition-run', (parseInt(element.getAttribute('data-condition-run'))||0) + 1);
+            },
+
+            hasRun: function() {
+                var element = this.getTriggerElement();
+                return ((parseInt(element.getAttribute('data-condition-run'))||0)>0)?true:false;
             },
 
             isValid : function(){
@@ -1121,9 +1138,14 @@ wFORMS.behaviors['condition'] = (function(){
 
             var triggersElements = base2.DOM.Element.querySelectorAll(domElement, "[" + TRIGGER_CONDITIONALS + "]");
 
+            // Run every trigger once to set the initial state of all conditional rules.
             triggersElements.forEach(function(triggerElement){
                 var trigger = new Trigger(triggerElement);
-                trigger.trigger();
+                //  nested triggers are automatically triggered by their parent trigger,
+                //  so we don't need to run them again at this initialization stage.
+                if(!trigger.hasRun()) {
+                    trigger.trigger();
+                }
                 trigger.setEventListener();
             });
 
