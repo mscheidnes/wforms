@@ -56,6 +56,7 @@
 
             // turn on parent (checkbox/radio)
             document.getElementById('tfa_4').checked = true;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_4')).trigger();
 
             assertFalse(' tfa_2 should now be visible ', !!document.getElementById('tfa_2').className.match(/\boffstate\b/));
@@ -63,6 +64,7 @@
 
             // turn on nested (checkbox/radio)
             document.getElementById('tfa_7').checked = true;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_7')).trigger();
 
             assertFalse(' tfa_2 should still be visible ', !!document.getElementById('tfa_2').className.match(/\boffstate\b/));
@@ -70,12 +72,14 @@
 
             // turn off parent (checkbox/radio)
             document.getElementById('tfa_4').checked = false;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_4')).trigger();
             assertTrue(' tfa_2 should be hidden again ',!!document.getElementById('tfa_2').className.match(/\boffstate\b/));
             assertTrue(' tfa_10 should be hidden again ',!!document.getElementById('tfa_10').className.match(/\boffstate\b/));
 
             // turn on parent (select)
             document.getElementById('tfa_21').setAttribute('selected', 'selected');
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
             assertFalse(' tfa_16 should be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertTrue(' tfa_17 should still be hidden',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
@@ -83,6 +87,7 @@
 
             // turn on nested (select)
             document.getElementById('tfa_19').setAttribute('selected', 'selected');
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_19')).trigger();
             assertFalse(' tfa_16 should still be visible',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertFalse('tfa_17 should now be visible',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
@@ -91,6 +96,7 @@
             // turn off parent
             // document.getElementById('tfa_21').selected = false;
             document.getElementById('tfa_15').selectedIndex = -1;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_21')).trigger();
             assertTrue('tfa_16 should really be hidden again',!!document.getElementById('tfa_16').className.match(/\boffstate\b/));
             assertTrue('tfa_17 should be hidden again',!!document.getElementById('tfa_17').className.match(/\boffstate\b/));
@@ -101,40 +107,48 @@
 
             assertTrue( ' tfa_400 should be hidden ',!!document.getElementById('tfa_400').className.match(/\boffstate\b/));
             assertTrue( ' tfa_800 should be hidden ',!!document.getElementById('tfa_800-D').className.match(/\boffstate\b/));
+            assertTrue( ' tfa_600 should be disabled ',document.getElementById('tfa_600').disabled);
+            assertTrue( ' tfa_700 should be disabled ',document.getElementById('tfa_700').disabled);
             assertTrue( ' tfa_800 should be disabled ',document.getElementById('tfa_800').disabled);
             assertTrue( ' tfa_801 should be disabled ',document.getElementById('tfa_801').disabled);
 
             document.getElementById('tfa_200').checked = true;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
 
             assertFalse(' tfa_400 should be visible ',!!document.getElementById('tfa_400').className.match(/\boffstate\b/));
             assertTrue( ' tfa_800 should be disabled ', document.getElementById('tfa_800').disabled);
             assertTrue( ' tfa_800 should still be hidden ',!!document.getElementById('tfa_800-D').className.match(/\boffstate\b/));
             assertTrue( ' tfa_801 should be enabled ',!document.getElementById('tfa_801').disabled);
+            assertTrue( ' tfa_600 should be enabled ',!document.getElementById('tfa_600').disabled);
+            assertTrue( ' tfa_700 should be enabled ',!document.getElementById('tfa_700').disabled);
+
 
         }
         function testHiddenField() {
             document.getElementById('tfa_300').checked = true;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_300')).trigger();
             assertTrue(' tfa_2279 should be disabled ', document.getElementById('tfa_2279').disabled);
 
             document.getElementById('tfa_200').checked = true;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
             assertTrue(' tfa_2279 should still be disabled ', document.getElementById('tfa_2279').disabled);
 
             document.getElementById('tfa_600').checked = true;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_600')).trigger();
             assertTrue(' tfa_2279 should be enabled.',!document.getElementById('tfa_2279').disabled);
 
             document.getElementById('tfa_300').checked = true;
             document.getElementById('tfa_200').checked = false;
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_200')).trigger();
             assertTrue(' tfa_2279 should be disabled again ', document.getElementById('tfa_2279').disabled);
         }
 
-        function testNestedNotCondition() {
 
-        }
     </script>
 
 </head>
@@ -267,7 +281,7 @@
                                 <label id="tfa_500-L" for="tfa_500" class="label preField ">Switch 2</label>
                                 <br>
                                 <div class="inputWrapper">
-                                    <span id="tfa_500" class="choices vertical ">
+                                    <span id="tfa_500" class="choices vertical">
                                         <span class="oneChoice">
                                             <input type="radio" value="tfa_600" class="" id="tfa_600" name="tfa_500" data-conditionals="#tfa_800,#tfa_2279">
                                             <label class="label postField" id="tfa_600-L" for="tfa_600">600 / Show B and C and Enable Hidden D</label>
@@ -298,7 +312,27 @@
                             <input type="hidden" id="tfa_2279" name="tfa_2279" value="" data-condition="`#tfa_600`">
                         </fieldset>
 
+                      <!--  <fieldset id="tfa_999" data-condition="`#tfa_1001` OR NOT(`#tfa_1002`)"><legend>Loop</legend>
 
+                            <div id="tfa_1000-D" class="oneField">
+                                <label id="tfa_1000-L" for="tfa_500" class="label preField ">Loop Switch</label>
+                                <br>
+                                <div class="inputWrapper">
+                                    <span id="tfa_1000" class="choices vertical ">
+                                        <span class="oneChoice">
+                                            <input type="checkbox" value="tfa_1001" class="" id="tfa_1001" name="tfa_1001" data-conditionals="#tfa_999">
+                                            <label class="label postField" id="tfa_1001-L" for="tfa_1001">1001 / Show Loop</label>
+                                        </span>
+                                        <span class="oneChoice">
+                                            <input type="checkbox" value="tfa_1002" class="" id="tfa_1002" name="tfa_1002" data-conditionals="#tfa_999">
+                                            <label class="label postField" id="tfa_1002-L" for="tfa_1002">1002 / Hide Loop</label>
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+
+                        </fieldset>
+                    -->
 
                         <div class="actions" id="tfa_0-A">
                             <input type="submit" class="primaryAction" value="Submit"></div>
