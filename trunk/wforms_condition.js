@@ -1025,21 +1025,22 @@ wFORMS.behaviors['condition'] = (function(){
 
             trigger: function(){
 
-                var activeConditionals = filter(this.getConditionals(), function(conditional){
-                    return conditional && conditional.getConditionalElement();
-                });
-
-                map(activeConditionals, function(conditional){
-                    conditional.refresh();
-                });
-
                 var element = this.getTriggerElement();
-                element.setAttribute('data-condition-run', (parseInt(element.getAttribute('data-condition-run'))||0) + 1);
-            },
+                if(wFORMS.behaviors.condition._triggerChain && (element.id in wFORMS.behaviors.condition._triggerChain)) {
+                    // Infinite loop detected, or is an initialization run over a nested trigger that has already been executed.
+                    return;
+                } else {
 
-            hasRun: function() {
-                var element = this.getTriggerElement();
-                return ((parseInt(element.getAttribute('data-condition-run'))||0)>0)?true:false;
+                    wFORMS.behaviors.condition._triggerChain[element.id] = true;
+
+                    var activeConditionals = filter(this.getConditionals(), function(conditional){
+                        return conditional && conditional.getConditionalElement();
+                    });
+
+                    map(activeConditionals, function(conditional){
+                        conditional.refresh();
+                    });
+                }
             },
 
             isValid : function(){
@@ -1058,6 +1059,8 @@ wFORMS.behaviors['condition'] = (function(){
             if(!target){
                 return;
             }
+
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
 
             if(target.tagName === 'SELECT'){
                 for(var i=0;i<target.options.length;i++) {
@@ -1093,6 +1096,8 @@ wFORMS.behaviors['condition'] = (function(){
 
         onRepeatableDuplicated: function(masterNode, duplicateNode, idMappings){
             var involvedConditionals = [];
+
+            wFORMS.behaviors.condition.resetTriggerExecutionChain();
 
             //pre-process raw parameter
             idMappings = _preprocessParameter(idMappings);
@@ -1136,16 +1141,14 @@ wFORMS.behaviors['condition'] = (function(){
 
         applyTo: function(domElement){
 
+            this.resetTriggerExecutionChain();
+
             var triggersElements = base2.DOM.Element.querySelectorAll(domElement, "[" + TRIGGER_CONDITIONALS + "]");
 
             // Run every trigger once to set the initial state of all conditional rules.
             triggersElements.forEach(function(triggerElement){
                 var trigger = new Trigger(triggerElement);
-                //  nested triggers are automatically triggered by their parent trigger,
-                //  so we don't need to run them again at this initialization stage.
-                if(!trigger.hasRun()) {
-                    trigger.trigger();
-                }
+                trigger.trigger();
                 trigger.setEventListener();
             });
 
@@ -1185,6 +1188,10 @@ wFORMS.behaviors['condition'] = (function(){
          */
         hasOffState: function(n) {
             return base2.DOM.HTMLElement.hasClass(n,'offstate');
+        },
+
+        resetTriggerExecutionChain: function() {
+            wFORMS.behaviors.condition._triggerChain = {};
         }
     }
 })();
