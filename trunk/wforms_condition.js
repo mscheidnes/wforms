@@ -397,6 +397,40 @@ wFORMS.behaviors['condition'] = (function(){
             });
         }
 
+
+        /**
+         * A conditional rule is implicitely affected by any other conditional rule set on a parent element. If the parent is off/disabled,
+         * the rule cannot be activated. To handle this, we automatically rebuild the conditional rule during execution
+         * by adding the parent rule in a 'AND' condition.
+         *
+         * @param  {[type]} conditional [description]
+         * @return {[type]}             [description]
+         * @private
+         */
+        function _mergeImplicitRules() {
+
+            var rule          = this.getConditionRuleString();
+            var replaceRule   = false;
+            var domElement    = this.getConditionalElement();
+            var parentElement = domElement.parentNode;
+
+            while(parentElement && parentElement.nodeType==1) {
+                var parentRule = parentElement.getAttribute(CONDITIONAL_ATTRIBUTE_NAME);
+
+                if(parentRule && rule.indexOf(parentRule)===-1) {
+                    rule = "("+ rule +") AND (" + parentRule + ")";
+                    replaceRule = true;
+                }
+                parentElement = parentElement.parentNode;
+            }
+
+            if(replaceRule) {
+                this.unlinkTriggers();
+                domElement.setAttribute(CONDITIONAL_ATTRIBUTE_NAME, rule);
+                this.linkTriggers();
+            }
+        }
+
         //public functions
         extend(Conditional.prototype, {
             getConditionRuleString: function(){
@@ -489,6 +523,9 @@ wFORMS.behaviors['condition'] = (function(){
             },
 
             isConditionMet: function(){
+
+                _mergeImplicitRules.call(this);
+
                 var conditionRuleString = this.getConditionRuleString();
                 if(!conditionRuleString ){
                     //doesn't have a rule string, cannot judge
@@ -511,6 +548,10 @@ wFORMS.behaviors['condition'] = (function(){
                 var n  = this.getConditionalElement();
                 var id = n.id;
 
+                // get a handle on the calculation behavior instance so we can refresh calculations as we show/hide fields.
+                var calculations = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm(n),"calculation");
+
+
                 if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
                   // Get the DIV that wraps the input, its label and other related markup.
                   var p = n.parentNode;
@@ -525,6 +566,10 @@ wFORMS.behaviors['condition'] = (function(){
                         if(n._wforms_disabled) n.disabled = false;
                         if(n.getAttribute(TRIGGER_CONDITIONALS)) {
                             (new Trigger( n )).trigger();
+                        }
+                        // update calculations if any.
+                        if(calculations) {
+                            calculations.run(null, n);
                         }
                     }
                   }
@@ -542,9 +587,17 @@ wFORMS.behaviors['condition'] = (function(){
                             if(element.getAttribute(TRIGGER_CONDITIONALS)) {
                                 (new Trigger( element )).trigger();
                             }
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, element);
+                            }
                             break;
                         case 'TEXTAREA':
                             if(element._wforms_disabled) element.disabled = false;
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, element);
+                            }
                             break;
                         case 'SELECT':
                             if(element._wforms_disabled) element.disabled = false;
@@ -554,6 +607,10 @@ wFORMS.behaviors['condition'] = (function(){
                                 if(opts[j].getAttribute(TRIGGER_CONDITIONALS)) {
                                     (new Trigger( opts[j] )).trigger();
                                 }
+                            }
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, element);
                             }
                             break;
                         default:
@@ -592,25 +649,35 @@ wFORMS.behaviors['condition'] = (function(){
                 var n = this.getConditionalElement();
                 var id = n.id;
 
+                // get a handle on the calculation behavior instance so we can refresh calculations as we show/hide fields.
+                var calculations = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm(n),"calculation");
+
+
                 if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
-                  // Get the DIV that wraps the input, its label and other related markup.
-                  var p = n.parentNode;
-                  while(p && p.nodeType==1 && !base2.DOM.HTMLElement.hasClass(p,'oneField')) {
-                    p = p.parentNode;
-                  }
-                  if(p && p.nodeType==1 && base2.DOM.HTMLElement.hasClass(p,'oneField')) {
-                    n=p;
-                  } else {
-                    // not nested in a .oneField div. Happens for hidden fields.
-                    if(n.tagName=='INPUT') {
-                        n.disabled = true;
-                        n._wforms_disabled = true;
-                        if(n.getAttribute(TRIGGER_CONDITIONALS)) {
-                            (new Trigger(n)).trigger();
+
+                    // Get the DIV that wraps the input, its label and other related markup.
+                    var p = n.parentNode;
+                    while(p && p.nodeType==1 && !base2.DOM.HTMLElement.hasClass(p,'oneField')) {
+                        p = p.parentNode;
+                    }
+                    if(p && p.nodeType==1 && base2.DOM.HTMLElement.hasClass(p,'oneField')) {
+                        n=p;
+                    } else {
+                        // not nested in a .oneField div. Happens for hidden fields.
+                        if(n.tagName=='INPUT') {
+                            n.disabled = true;
+                            n._wforms_disabled = true;
+                            if(n.getAttribute(TRIGGER_CONDITIONALS)) {
+                                (new Trigger(n)).trigger();
+                            }
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, n);
+                            }
                         }
                     }
-                  }
                 } else {
+
                     if(base2.DOM.HTMLElement.hasClass(n,'pageSection')) {
                         // Get the DIV that wraps the page section (with class wfPage or wfCurrentPage)
                         n = n.parentNode;
@@ -620,36 +687,43 @@ wFORMS.behaviors['condition'] = (function(){
 
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
-                  flds[i].disabled = true;
-                  flds[i]._wforms_disabled = true;
-                  disabledList.push(flds[i]);
-                  if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
+
+                    flds[i].disabled = true;
+                    flds[i]._wforms_disabled = true;
+                    disabledList.push(flds[i]);
+                    if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
                     (new Trigger(flds[i])).trigger();
-                  }
+                    }
                 }
+
                 var flds = n.getElementsByTagName('TEXTAREA');
                 for(var i=0;i<flds.length;i++) {
-                  flds[i].disabled = true;
-                  flds[i]._wforms_disabled = true;
-                  disabledList.push(flds[i]);
+
+                    flds[i].disabled = true;
+                    flds[i]._wforms_disabled = true;
+                    disabledList.push(flds[i]);
                 }
+
                 var flds = n.getElementsByTagName('SELECT');
                 for(var i=0;i<flds.length;i++) {
-                  flds[i].disabled = true;
-                  flds[i]._wforms_disabled = true;
-                  disabledList.push(flds[i]);
-                  // For SELECT elements, the triggers are set on individual option tags.
-                  var opts = flds[i].getElementsByTagName('OPTION');
-                  for(var j=0;j<opts.length;j++) {
+
+                    flds[i].disabled = true;
+                    flds[i]._wforms_disabled = true;
+                    disabledList.push(flds[i]);
+                    // For SELECT elements, the triggers are set on individual option tags.
+                    var opts = flds[i].getElementsByTagName('OPTION');
+                    for(var j=0;j<opts.length;j++) {
                       if(opts[j].getAttribute(TRIGGER_CONDITIONALS)) {
                         (new Trigger(opts[j])).trigger();
                       }
-                  }
+                    }
                 }
-                // a nested conditional rule may have re-enabled some fields, we do a second pass
-                // to make sure they're all disabled.
+
+                // update calculations if any
                 for(var i=0;i<disabledList.length;i++) {
-                    disabledList[i].disabled = true;
+                    if(calculations) {
+                        calculations.run(null, disabledList[i]);
+                    }
                 }
 
                 var s = document.getElementById('tfa_switchedoff');
