@@ -1,9 +1,9 @@
-	
+
 if (typeof(wFORMS) == "undefined") {
 	throw new Error("wFORMS core not found. This behavior depends on the wFORMS core.");
 }
 /**
- * wForms repeat behavior. 
+ * wForms repeat behavior.
  * See: http://www.formassembly.com/wForms/v2.0/documentation/examples/repeat.html
  */
 wFORMS.behaviors.repeat = {
@@ -114,34 +114,34 @@ wFORMS.behaviors.repeat = {
 	 * Allows to leave names of the radio buttons the same (behavior-wide setting)
 	 */
 	preserveRadioName : false,
-	
+
 	/**
 	 * Allows to leave names of the radio buttons the same (field-level setting)
 	 * This class attribute can be set on a repeated element to override the
 	 * behavior's preserveRadioName setting.
 	 */
 	CSS_PRESERVE_RADIO_NAME: "preserveRadioName",
-	
+
 
 	/**
-	 * Custom function that could be overridden. 
+	 * Custom function that could be overridden.
 	 * Evaluates after section is duplicated
      * @param	{HTMLElement}	elem	Duplicated section
 	 */
 	onRepeat : function(elem){},
 
 	/**
-	 * Custom function that could be overridden. 
+	 * Custom function that could be overridden.
 	 * Evaluates after the section is removed
 	 * @param	{HTMLElement}	elem	a copy of the removed section - detached from the document
 	 */
 	onRemove : function(elem){},
 
 	/**
-	 * Custom function that could be overridden. 
+	 * Custom function that could be overridden.
 	 * Returns if section could be repeated
      * @param	{HTMLElement}	elem	Section to be duplicated
-     * @param	{wFORMS.behaviors.repeat}	b	Behavior mapped to repeatable section 
+     * @param	{wFORMS.behaviors.repeat}	b	Behavior mapped to repeatable section
      * @return	boolean
 	 */
 	allowRepeat : function(elem, b){
@@ -159,8 +159,8 @@ wFORMS.behaviors.repeat = {
      * @constructor
 	 */
 	instance : function(f) {
-		this.behavior = wFORMS.behaviors.repeat; 
-		this.target = f;		
+		this.behavior = wFORMS.behaviors.repeat;
+		this.target = f;
 		/*
  		 * Keeps track of all ids changed during one repeat run. Passed on to onRepeat observers and reset after each run.
 		 */
@@ -178,8 +178,8 @@ var _i = wFORMS.behaviors.repeat.instance;
  * Factory Method.
  * Applies the behavior to the given HTML element by setting the appropriate event handlers.
  * @param {domElement} f An HTML element, either nested inside a FORM element or (preferably) the FORM element itself.
- * @return {object} an instance of the behavior 
- */	
+ * @return {object} an instance of the behavior
+ */
 _b.applyTo = function(f) {
 	// look up for the all elements that could be repeated.
 	// Trying to add event listeners to elements for adding new container.
@@ -188,25 +188,25 @@ _b.applyTo = function(f) {
 	var b = new Array();
 
 	if(!f.querySelectorAll){base2.DOM.bind(f);}
-	
+
 	if(wFORMS.behaviors.repeat.getMasterSection(f)){
 		var masterArray = Array();
 		var masterSection = wFORMS.behaviors.repeat.getMasterSection(f);
 			if(!masterSection.querySelectorAll){base2.DOM.bind(masterSection);}
-			
+
 		var masterNodes = masterSection.querySelectorAll(this.SELECTOR_REPEAT);
 			masterNodes.forEach(function(elem){
 				masterArray.push(elem.querySelector(".duplicateLink").innerHTML);
 			});
-	}	
-	
+	}
+
 	f.querySelectorAll(this.SELECTOR_REPEAT).forEach(
-		function(elem,index){ 
+		function(elem,index){
 			if(_self.isHandled(elem)){
 				return ;
 			}
 			if(!elem.id) elem.id = wFORMS.helpers.randomId();
-			
+
 			var _b = new _self.instance(elem);
 			if(masterArray && masterArray[index]){
 				_b.behavior.MESSAGES.ADD_CAPTION = masterArray[index];
@@ -214,16 +214,16 @@ _b.applyTo = function(f) {
 			var e = _b.getOrCreateRepeatLink(elem);
 			e.addEventListener('click', function(event) { _b.run(event, e)}, false);
 			_b.setElementHandled(elem);
-			b.push(_b);							
+			b.push(_b);
 		}
 	);
-	
+
 	if(!f.hasClass) {
 		f.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 	}
-	
+
 	if(f.hasClass(this.CSS_REMOVEABLE)){
-		var m  = this.getMasterSection(f);		
+		var m  = this.getMasterSection(f);
 		var _i = wFORMS.getBehaviorInstance(m, 'repeat');
 		if(_i) {
 			_i.getOrCreateRemoveLink(f);
@@ -231,7 +231,7 @@ _b.applyTo = function(f) {
 			b[0].getOrCreateRemoveLink(f);
 		}
 	}
-	
+
 	f.querySelectorAll(this.SELECTOR_REMOVEABLE).forEach(function(e){
 		var m  = wFORMS.behaviors.repeat.getMasterSection(e);
 		var _i = wFORMS.getBehaviorInstance(m, 'repeat');
@@ -241,7 +241,7 @@ _b.applyTo = function(f) {
 			b[0].getOrCreateRemoveLink(e);
 		}
 	});
-	
+
 	for(var i=0;i<b.length;i++) {
 		b[i].onApply();
 	}
@@ -252,11 +252,11 @@ _b.applyTo = function(f) {
  * Executed once the behavior has been applied to the document.
  * Can be overwritten.
  */
-_i.prototype.onApply = function() {} 
+_i.prototype.onApply = function() {}
 
 
 /**
- * Returns repeat link for specified area if it exists, 
+ * Returns repeat link for specified area if it exists,
  * otherwise creates new one and returns it
  * @param	{HTMLElement}	elem	Element repeat link is related to
  * @return	{HTMLElement}
@@ -266,18 +266,18 @@ _i.prototype.getOrCreateRepeatLink = function(elem){
 	var e = document.getElementById(id);
 	if(!e || e == ''){
 		e = this.createRepeatLink(id);
-		
+
 		// Wraps in a span for better CSS positionning control.
 		var spanElem = document.createElement('span');
 		spanElem.className = this.behavior.CSS_DUPLICATE_SPAN;
 		e = spanElem.appendChild(e);
-		
+
 		if(elem.tagName.toUpperCase() == 'TR'){
 			var tdElem = elem.getElementsByTagName('TD');
 			if(!tdElem){
 				tdElem = elem.appendChild(document.createElement('TD'));
 			} else {
-				tdElem = tdElem[tdElem.length-1]; 
+				tdElem = tdElem[tdElem.length-1];
 			}
 			tdElem.appendChild(spanElem);
 		}else{
@@ -289,7 +289,7 @@ _i.prototype.getOrCreateRepeatLink = function(elem){
 }
 
 /**
- * Returns repeat link for specified area if it exists, 
+ * Returns repeat link for specified area if it exists,
  * otherwise creates new one and returns it
  * @param	{DOMString}	id	ID of the group
  * @return	{HTMLElement}
@@ -297,11 +297,11 @@ _i.prototype.getOrCreateRepeatLink = function(elem){
 _i.prototype.createRepeatLink = function(id){
 	// Creates repeat link element
 	var linkElem = document.createElement("A");
-				
+
 	linkElem.id = id;
-	linkElem.setAttribute('href', '#');	
+	linkElem.setAttribute('href', '#');
 	linkElem.className = this.behavior.CSS_DUPLICATE_LINK;
-	linkElem.setAttribute('title', this.behavior.MESSAGES.ADD_TITLE);	
+	linkElem.setAttribute('title', this.behavior.MESSAGES.ADD_TITLE);
 
 	// Appends text inside the <span element (for CSS replacement purposes) to <a element
 	linkElem.appendChild(document.createElement('span').appendChild(
@@ -313,7 +313,7 @@ _i.prototype.createRepeatLink = function(id){
 /*
  * Add remove link to duplicated section
  * @param 	{DOMElement}	duplicated section.
- */ 	
+ */
 _i.prototype.getOrCreateRemoveLink= function(elem){
 	var e  = this.createRemoveLink(elem.id);
 	// looking for the place where to paste link
@@ -327,18 +327,18 @@ _i.prototype.getOrCreateRemoveLink= function(elem){
 }
 
 /**
- * Returns remove link for specified area 
+ * Returns remove link for specified area
  * @param	{DOMString}	id	ID of the field group
  * @return	{HTMLElement}
  */
 _i.prototype.createRemoveLink = function(id){
 	// Creates repeat link element
 	var linkElem = document.createElement("a");
-	
+
 	linkElem.id = id + this.behavior.ID_SUFFIX_DUPLICATE_LINK;
-	linkElem.setAttribute('href', '#');	
+	linkElem.setAttribute('href', '#');
 	linkElem.className = this.behavior.CSS_DELETE_LINK;
-	linkElem.setAttribute('title', this.behavior.MESSAGES.REMOVE_TITLE);	
+	linkElem.setAttribute('title', this.behavior.MESSAGES.REMOVE_TITLE);
 	linkElem.setAttribute(this.behavior.ATTR_LINK_SECTION_ID, id);
 
 	// Appends text inside the <span element (for CSS image replacement) to <a element
@@ -347,13 +347,13 @@ _i.prototype.createRemoveLink = function(id){
 	linkElem.appendChild(spanElem);
 
 	var _self = this;
-	linkElem.onclick = function(event) { _self.onRemoveLinkClick(event, linkElem); return false; };	
+	linkElem.onclick = function(event) { _self.onRemoveLinkClick(event, linkElem); return false; };
 
 	// Wraps in a span for better CSS positionning control.
 	var spanElem = document.createElement('span');
 	spanElem.className = this.behavior.CSS_DELETE_SPAN;
 	spanElem.appendChild(linkElem);
-	
+
 	return spanElem;
 }
 
@@ -370,16 +370,16 @@ _i.prototype.duplicateSection = function(elem){
 	this.updateMasterSection(elem);
 	// Creates clone of the group
 	var newElem = elem.cloneNode(true);
-		
+
 	// Update the ids, names and other attributes that must be changed.
 	// (do it before inserting the element back in the DOM to prevent reseting radio buttons, see bug #152)
 	var index  = this.getNextDuplicateIndex(this.target);
 	var suffix = this.createSuffix(elem, index);
 
 	this.updateDuplicatedSection(newElem, index, suffix);
-	// Insert in DOM		
+	// Insert in DOM
 	newElem = elem.parentNode.insertBefore(newElem, this.getInsertNode(elem));
-	
+
 	// Call registered observers (better way to handle callbacks)
 	this.callRepeatCompleteObservers(elem, newElem);
 
@@ -389,7 +389,7 @@ _i.prototype.duplicateSection = function(elem){
 
 	// Calls custom function
 	this.behavior.onRepeat(newElem);
-	
+
 	wFORMS.helpers.spotlight(newElem);
 }
 
@@ -416,17 +416,17 @@ _i.prototype.removeSection = function(elem){
  */
 _i.prototype.getInsertNode = function(elem) {
  	var insertNode = elem.nextSibling;
- 	
+
  	if(insertNode && insertNode.nodeType==1 && !insertNode.hasClass) {
 		insertNode.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 	}
-  	
-	while(insertNode && 
-		 (insertNode.nodeType==3 ||       // skip text-node that can be generated server-side when populating a previously repeated group 
-		  insertNode.hasClass(this.behavior.CSS_REMOVEABLE))) {						
-		
+
+	while(insertNode &&
+		 (insertNode.nodeType==3 ||       // skip text-node that can be generated server-side when populating a previously repeated group
+		  insertNode.hasClass(this.behavior.CSS_REMOVEABLE))) {
+
 		insertNode = insertNode.nextSibling;
-		
+
 		if(insertNode && insertNode.nodeType==1 && !insertNode.hasClass) {
 			insertNode.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 		}
@@ -449,36 +449,36 @@ _i.prototype.onRemoveLinkClick = function(event, link){
   * @param	{HTMLElement}	elem
  */
 _i.prototype.updateMasterSection = function(elem){
-	// do it once 
-	if(elem.doItOnce==true) {		
+	// do it once
+	if(elem.doItOnce==true) {
 		return true;
 	} else {
 		elem.doItOnce=true;
 	}
 	var oldId = elem.id;
 
-	var suffix = this.createSuffix(elem); 
-	elem.id = this.clearSuffix(elem.id) + suffix; // ...[0] 
-	
-	if(elem.id!=oldId) { 
+	var suffix = this.createSuffix(elem);
+	elem.id = this.clearSuffix(elem.id) + suffix; // ...[0]
+
+	if(elem.id!=oldId) {
 		this.callMasterIdChangeObservers(oldId, elem.id);
 	}
 	this.updateMasterElements(elem, suffix);
 };
 _i.prototype.updateMasterElements  = function(elem, suffix){
-	
-	if(!elem || elem.nodeType!=1) 
+
+	if(!elem || elem.nodeType!=1)
 		return;
-	
+
 	var cn = elem.childNodes;
 	for(var i=0;i<cn.length;i++) {
 		var n = cn[i];
 		if(n.nodeType!=1) continue;
-		
-		if(!n.hasClass) { // no base2.DOM.bind to speed up function 
+
+		if(!n.hasClass) { // no base2.DOM.bind to speed up function
 			n.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 		}
-		
+
 		// suffix may change for this node and child nodes, but not sibling nodes, so keep a copy
 		var siblingSuffix = suffix;
 		if(n.hasClass(this.behavior.CSS_REPEATABLE)) {
@@ -493,25 +493,25 @@ _i.prototype.updateMasterElements  = function(elem, suffix){
 				var value = this.clearSuffix(n.getAttribute(attrName));
 				if(!value){
 					continue;
-				}				
+				}
 				if(attrName=='id' && wFORMS.behaviors.hint && wFORMS.behaviors.hint.isHintId(n.id)){
 					n.id = value.replace(new RegExp("(.*)(" + wFORMS.behaviors.hint.HINT_SUFFIX + ')$'),"$1" + suffix + "$2");
 				} else if(attrName=='id' && wFORMS.behaviors.validation && wFORMS.behaviors.validation.isErrorPlaceholderId(n.id)){
-					n.id = value.replace(new RegExp("(.*)(" + wFORMS.behaviors.validation.ERROR_PLACEHOLDER_SUFFIX + ')$'),"$1" + suffix + "$2"); 
+					n.id = value.replace(new RegExp("(.*)(" + wFORMS.behaviors.validation.ERROR_PLACEHOLDER_SUFFIX + ')$'),"$1" + suffix + "$2");
 				} else if(attrName=='id' && n.id.indexOf(this.behavior.ID_SUFFIX_DUPLICATE_LINK) != -1){
 					n.id = value.replace(new RegExp("(.*)(" + this.behavior.ID_SUFFIX_DUPLICATE_LINK + ')$'), "$1" + suffix + "$2");
-				} else if(attrName=='id'){ 
-					n.id = value + suffix;		// do not use setAttribute for the id property (doesn't work in IE6)	
-				} else if(attrName=='name'){ 
-					n.name = value + suffix;	// do not use setAttribute for the name property (doesn't work in IE6)	
+				} else if(attrName=='id'){
+					n.id = value + suffix;		// do not use setAttribute for the id property (doesn't work in IE6)
+				} else if(attrName=='name'){
+					n.name = value + suffix;	// do not use setAttribute for the name property (doesn't work in IE6)
 				} else {
-					n.setAttribute(attrName, value + suffix);	
+					n.setAttribute(attrName, value + suffix);
 				}
-			}			
+			}
 			this.updateMasterElements(n, suffix);
 		}
 
-		if(n.id!=oldId) { 
+		if(n.id!=oldId) {
 			this.callMasterIdChangeObservers(oldId, n.id);
 		}
 
@@ -528,27 +528,27 @@ _i.prototype.updateMasterElements  = function(elem, suffix){
  * @param	{string}		array-like notation, to be appended to attributes that must be unique.
  */
 _i.prototype.updateDuplicatedSection = function(elem, index, suffix){
-	
+
 	// Caches master section ID in the dublicate
 	elem[this.behavior.ATTR_MASTER_SECTION]=elem.id;
-	
+
 	var oldId = elem.id;
 
 	// Updates element ID (possible problems when repeat element is Hint or switch etc)
 	elem.id = this.clearSuffix(elem.id) + suffix;
-	// Updates classname	
+	// Updates classname
 	elem.className = elem.className.replace(this.behavior.CSS_REPEATABLE, this.behavior.CSS_REMOVEABLE);
 
-	if(!elem.hasClass) { // no base2.DOM.bind to speed up function 
+	if(!elem.hasClass) { // no base2.DOM.bind to speed up function
 		elem.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 	}
 	// Check for preserverRadioName override
-	if(elem.hasClass(this.behavior.CSS_PRESERVE_RADIO_NAME)) 
+	if(elem.hasClass(this.behavior.CSS_PRESERVE_RADIO_NAME))
 		var _preserveRadioName = true;
 	else
 		var _preserveRadioName = this.behavior.preserveRadioName;
-	
-	if(elem.id!=oldId) { 
+
+	if(elem.id!=oldId) {
 		this.callRepeatIdCreateObservers(oldId, elem.id);
 	}
 
@@ -566,25 +566,25 @@ _i.prototype.updateDuplicatedSection = function(elem, index, suffix){
  * id/ tfa_1[0] + suffix [1] =>  tfa_1[1]
  */
 _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName){
-	
+
 	/* Fix for Ticket #256 - id of nested repeated element not set properly */
-	if(elem.doItOnce) {		
-		elem.doItOnce = null;		
+	if(elem.doItOnce) {
+		elem.doItOnce = null;
 	}
-	
+
 	var removeStack = new Array();
 	var i = 0;
-	
+
 	while(elem && elem.childNodes && elem.childNodes[i]) {
-	
+
 		var e = elem.childNodes[i];
 		i++;
-		
+
 		if(e.nodeType!=1) {
-			// skip text nodes 
+			// skip text nodes
 			continue;
 		}
-		if(!e.hasClass) { // no base2.DOM.bind to speed up function 
+		if(!e.hasClass) { // no base2.DOM.bind to speed up function
 			e.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 		}
 		// Removes created descendant duplicated group if any
@@ -601,75 +601,79 @@ _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName)
 			removeStack.push(e);
 			continue;
 		}
-				
-		// Clears value	(TODO: select?)
+
+		// Clears value
 		if((e.tagName == 'INPUT' && e.type != 'button') || e.tagName == 'TEXTAREA'){
 			if(e.type != 'radio' && e.type != 'checkbox'){
 				e.value = '';
 			} else {
 				e.checked = false;
 			}
+		} else {
+			if(e.tagName == 'SELECT') {
+				e.selectedIndex = -1;
+			}
 		}
 
 		var oldId = e.id;
-		
+
 		// Fix #152 - Radio name with IE6, IE7?
 		if(e.tagName == 'INPUT' && e.type == 'radio' && !preserveRadioName && /*@cc_on @if(@_jscript_version < 5.8)! @end @*/false) {
-				 
+
 			// Create a radio input that works in IE and insert it before the input it needs to replace
 			var tagHtml = "<INPUT type=\"radio\" name=\""+e.name+suffix+"\"></INPUT>";
 			var fixedRadio = e.parentNode.insertBefore(document.createElement(tagHtml),e);
-		
+
 			// Clone other attributes
 			fixedRadio.id = e.id;
 			fixedRadio.className = e.className;
 			fixedRadio.value = e.value;
-			
+
 			// Remove original radio (keep element in memory)
-			e = e.parentNode.removeChild(e);			
-							
+			e = e.parentNode.removeChild(e);
+
 			var l = this.behavior.UPDATEABLE_ATTR_ARRAY.length;
-						
-			for (var j = 0; j < l; j++) {			
+
+			for (var j = 0; j < l; j++) {
 				var attrName = this.behavior.UPDATEABLE_ATTR_ARRAY[j];
 				var value = e.getAttribute(attrName);
-				fixedRadio.setAttribute(attrName, value);	
-			}			
-			// We can now continue with the fixed radio element				
-			e = fixedRadio;				
-			if(!e.hasClass) { // no base2.DOM.bind to speed up function 
+				fixedRadio.setAttribute(attrName, value);
+			}
+			// We can now continue with the fixed radio element
+			e = fixedRadio;
+			if(!e.hasClass) { // no base2.DOM.bind to speed up function
 				e.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
-			}								
-		} 
-		
+			}
+		}
+
 		this.updateAttributes(e, suffix, preserveRadioName);
-		
-		if(e.id!=oldId) { 
+
+		if(e.id!=oldId) {
 			this.callRepeatIdCreateObservers(oldId, e.id);
 		}
-		
+
 		if(e.hasClass(this.behavior.CSS_REPEATABLE)){
 			this.updateSectionChildNodes(e, this.createSuffix(e), preserveRadioName);
 		} else{
 			this.updateSectionChildNodes(e, suffix, preserveRadioName);
 		}
-   	}   
-	 
+   	}
+
    	for(var i=0;i<removeStack.length;i++){
    		var e = removeStack[i];
    		if(e.clearAttributes) {
-			// detach all event handler 
-			e.clearAttributes(false); 	
+			// detach all event handler
+			e.clearAttributes(false);
 		}
    		if(e.parentNode) e.parentNode.removeChild(e);
    	}
-   
+
 }
 
 /**
  * Creates suffix that should be used inside duplicated repeat section
  * @param	domelement	Repeat section element
- * @param	integer		row index	
+ * @param	integer		row index
  */
 _i.prototype.createSuffix = function(e, index){
 
@@ -678,7 +682,7 @@ _i.prototype.createSuffix = function(e, index){
     var reg = /\[(\d+)\]$/;
 	e = e.parentNode;
 	while(e && e.tagName){
-		if(!e.hasClass) { // no base2.DOM.bind to speed up function 
+		if(!e.hasClass) { // no base2.DOM.bind to speed up function
 			e.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 		}
 		if(e.hasClass(this.behavior.CSS_REPEATABLE) || e.hasClass(this.behavior.CSS_REMOVEABLE)){
@@ -696,7 +700,7 @@ _i.prototype.createSuffix = function(e, index){
  * Removes row counters from ID
  * @param	id	Current element id
  * @return	string
- * 
+ *
  * repeated field ID is: 			fieldid[n]...[n]
  * repeated hint ID is:				fieldid[n]...[n]-H
  * repeated error placeholder is : 	fieldid[n]...[n]-E
@@ -705,8 +709,8 @@ _i.prototype.createSuffix = function(e, index){
 _i.prototype.clearSuffix = function(value){
 	if(!value){
 		return;
-	}	
-    value = value.replace(/(\[\d+\])+(\-[HE])?$/,"$2");    
+	}
+    value = value.replace(/(\[\d+\])+(\-[HE])?$/,"$2");
 	return value;
 }
 
@@ -737,26 +741,26 @@ _i.prototype.updateAttributes = function(e, idSuffix, preserveRadioName){
 	var l = this.behavior.UPDATEABLE_ATTR_ARRAY.length;
 	for(var i = 0; i < l; i++){
 		var attrName = this.behavior.UPDATEABLE_ATTR_ARRAY[i];
-		
-		var value = this.clearSuffix(e.getAttribute(attrName));	
+
+		var value = this.clearSuffix(e.getAttribute(attrName));
 		if(!value){
 			continue;
 		}
 
 		if(attrName == 'name' && e.tagName == 'INPUT' && preserveRadioName){
 			continue;
-		} else if(isErrorPlaceholder && attrName=='id'){	
+		} else if(isErrorPlaceholder && attrName=='id'){
 			e.id = value.replace(new RegExp("(.*)(" + wFORMS.behaviors.validation.ERROR_PLACEHOLDER_SUFFIX + ')$'),"$1" + idSuffix + "$2");
-		} else if(isHint && attrName=='id'){			
+		} else if(isHint && attrName=='id'){
 			e.id = value.replace(new RegExp("(.*)(" + wFORMS.behaviors.hint.HINT_SUFFIX + ')$'),"$1" + idSuffix + "$2");
 		} else if(isDuplicateLink && attrName=='id'){
 			e.id = value.replace(new RegExp("(.*)(" + this.behavior.ID_SUFFIX_DUPLICATE_LINK + ')$'),"$1" + idSuffix + "$2");
-		} else if(attrName=='id'){ 
-			e.id = value + idSuffix;	// do not use setAttribute for the id property (doesn't work in IE6)	
-		} else if(attrName=='name'){ 
-			e.name = value + idSuffix;	// do not use setAttribute for the id property (doesn't work in IE6)	
+		} else if(attrName=='id'){
+			e.id = value + idSuffix;	// do not use setAttribute for the id property (doesn't work in IE6)
+		} else if(attrName=='name'){
+			e.name = value + idSuffix;	// do not use setAttribute for the id property (doesn't work in IE6)
 		} else {
-			e.setAttribute(attrName, value + idSuffix);	
+			e.setAttribute(attrName, value + idSuffix);
 		}
 	}
 }
@@ -780,9 +784,9 @@ _i.prototype.getNextDuplicateIndex = function(elem){
  * @return	{HTMLElement}
  */
 _i.prototype.getOrCreateCounterField = function(elem){
-		
+
 	var cId = elem.id + this.behavior.ID_SUFFIX_COUNTER;
-	
+
 	// Using getElementById except matchSingle because of lib bug
 	// when element is not exists exception is thrown
 	var cElem = document.getElementById(cId);
@@ -815,7 +819,7 @@ _i.prototype.createCounterField = function(id){
 }
 
 /**
- * Returns count of already duplicated sections. If was called from the behavior 
+ * Returns count of already duplicated sections. If was called from the behavior
  * belonged to duplicated section, returns false
  * @public
  * @return	{Integer} or {boolean}
@@ -861,7 +865,7 @@ _i.prototype.removeHandled = function(elem){
  * @return	boolean
  */
 _b.isDuplicate = function(elem){
-		if(!elem.hasClass) { // no base2.DOM.bind to speed up function 
+		if(!elem.hasClass) { // no base2.DOM.bind to speed up function
 			elem.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
 		}
 	return elem.hasClass(this.CSS_REMOVEABLE);
@@ -870,7 +874,7 @@ _b.isDuplicate = function(elem){
 
 /**
  * Returns true if element belongs to duplicate group
- * (to be used by other behaviors) 
+ * (to be used by other behaviors)
  * @param	{HTMLElement}	elem
  * @return	boolean
  */
@@ -895,7 +899,7 @@ _b.isHandled = function(elem){
  * @return	{HTMLElement} or false
  */
 _b.getMasterSection = function(elem){
-	if(!this.isDuplicate(elem)) return false;	
+	if(!this.isDuplicate(elem)) return false;
 	return document.getElementById(elem[this.ATTR_MASTER_SECTION]);
 }
 
@@ -904,14 +908,14 @@ _b.getMasterSection = function(elem){
  * @param   f  a function that takes 3 arguments: the element, the old id and the new id.
  */
  _b.observeMasterIdChange = function(f) {
- 	
+
  	// remove first if already present (ensures callback is added only once)
 	this.stopObservingMasterIdChange(f);
  	this._callbacks.onMasterIdChange.push(f);
 }
 
 _b.stopObservingMasterIdChange = function(f) {
-	
+
 	for(var i=0;i<this._callbacks.onMasterIdChange.length;i++) {
 		if(this._callbacks.onMasterIdChange[i].toString() == f.toString()) {
 			this._callbacks.onMasterIdChange.splice(i,1);
@@ -959,11 +963,11 @@ _i.prototype.callRepeatIdCreateObservers = function(original, copy) {
 }
 
 /**
- * Register a callback for when a new repeated element is created 
- * @param   f  a function that takes 3 arguments: the orginal element, its repeated copy, a json object listing how IDs have changed 
+ * Register a callback for when a new repeated element is created
+ * @param   f  a function that takes 3 arguments: the orginal element, its repeated copy, a json object listing how IDs have changed
  */
 _b.observeRepeatComplete = function(f) {
-	
+
 	this.stopObservingRepeatComplete(f);
 	this._callbacks.onRepeat.push(f);
 
@@ -988,11 +992,11 @@ _i.prototype.callRepeatCompleteObservers = function(original,copy) {
 }
 
 /**
- * Register a callback for when a repeated element is removed 
+ * Register a callback for when a repeated element is removed
  * @param   f  a function that takes 1 argument: the removed copy (already detached from the document)
  */
 _b.observeRemoveComplete = function(f) {
-	
+
 	this.stopObservingRemoveComplete(f);
 	this._callbacks.onRemove.push(f);
 
@@ -1016,19 +1020,19 @@ _i.prototype.callRemoveCompleteObservers = function(copy) {
 
 /**
  * Executes the behavior
- * @param {event} e 
+ * @param {event} e
  */
-_i.prototype.run = function(e){ 	
-	
+_i.prototype.run = function(e){
+
 	if(!wFORMS.LOADER.enabled) {
 		this.duplicateSection(this.target);
 	} else {
 		// run through timeout only if loader is enabled (breaks test suite otherwise)
 		var self = this;
 		wFORMS.LOADER.show(self.target);
-		setTimeout( function() { 
+		setTimeout( function() {
 			self.duplicateSection(self.target);
-			wFORMS.LOADER.hide(self.target, true); 
+			wFORMS.LOADER.hide(self.target, true);
 		}, 1);
 	}
 	if(e) e.preventDefault();
