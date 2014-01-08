@@ -207,8 +207,6 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 			_processedVariables.push(v.name);
 		}
 
-		// TODO: Exclude switched-off variables?
-
 		/*
 		Binding with forEach sometime fails when using this, resulting in undefined 'variable' parameter.
 			f.querySelectorAll("*[class*=\"...\"]");
