@@ -191,7 +191,7 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
 
 	for(var i=0; i<calculation.variables.length;i++) {
 		var v = calculation.variables[i];
-		var varval = 0;
+		var varval = isNumericCalculation?0:'';
 		var _self  = this;
 
 		// We don't rely on calculation.variables[i].field because
