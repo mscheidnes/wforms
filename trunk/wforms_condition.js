@@ -1001,13 +1001,19 @@ wFORMS.behaviors['condition'] = (function(){
                     }
                     for(var i=0; i<radioButtons.length;i++) {
                         var radioButton = radioButtons[i];
-                        base2.DOM.Element.addEventListener(radioButton, 'change', EventHandlers.document, false);
+                        base2.DOM.Element.addEventListener(radioButton, 'click', EventHandlers.onChange, false);
                         radioButton.__wforms_event_handled = true;
                     }
 
                 } else {
-                    base2.DOM.Element.addEventListener(n, 'change', EventHandlers.document, false);
-                    n.__wforms_event_handled = true;
+                    if(n.tagName == 'INPUT' && n.getAttribute('type') == 'checkbox' ){
+                        base2.DOM.Element.addEventListener(n, 'click', EventHandlers.onChange, false);
+                        n.__wforms_event_handled = true;
+                    } else {
+                        // SELECT
+                        base2.DOM.Element.addEventListener(n, 'change', EventHandlers.onChange, false);
+                        n.__wforms_event_handled = true;
+                    }
                 }
             },
 
@@ -1128,7 +1134,8 @@ wFORMS.behaviors['condition'] = (function(){
     })();
 
     var EventHandlers = {
-        document: function(event){
+        onChange: function(event){
+
             var target = event.target;
             if(!target){
                 return;
