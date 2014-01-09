@@ -411,43 +411,55 @@ wFORMS.behaviors['calculation'].removeHandledFlag = function(elem){
 	}
 }
 
+/**
+ * Limit scope of calculation variables when used inside repeated sections.
+ * @param  {DOMElement} calculatedElement The element whose value is being calcuted.
+ * @param  {DOMElement} variableElement   The element whose value is a variable in the calculation.
+ * @return {Boolean}    True if the variable should be used in the calculation. False otherwise (out of scope)
+ */
+ wFORMS.behaviors.calculation.instance.prototype.inScope = function(calculatedElement, variableElement) {
 
- wFORMS.behaviors.calculation.instance.prototype.inScope = function(formula, variable) {
+ 		// Check that repeat behavior is present.
+		if(wFORMS.behaviors.repeat) {
 
-		var br = wFORMS.behaviors.repeat;
-		if(br) {
-			var formulaRepeat = formula;
-			if(!formulaRepeat.hasClass) {
-				wFORMS.standardizeElement(formulaRepeat);
+			// Prepare 2 sets, one for the scope of the calculated field, and one for the scope of the variable field.
+			var calculatedRepeatSet = [];
+			var variableRepeatSet   = [];
+
+			// Populate the set for the calculated field. We add all repeatable elements that are parent in the DOM.
+			var repeatElement = wFORMS.behaviors.repeat.getRepeatedElement( calculatedElement );
+			while(repeatElement) {
+				calculatedRepeatSet.push( repeatElement );
+				repeatElement = wFORMS.behaviors.repeat.getRepeatedElement( repeatElement.parentNode );
 			}
-			while (formulaRepeat && !formulaRepeat.hasClass(br.CSS_REMOVEABLE) &&  !formulaRepeat.hasClass(br.CSS_REPEATABLE)) {
-				formulaRepeat = formulaRepeat.parentNode;
-				if(formulaRepeat && formulaRepeat.tagName!='HTML' ) {
-					wFORMS.standardizeElement(formulaRepeat);
-				} else {
-					formulaRepeat = null;
-					break;
+
+			// Populate the set for the variable field in a similar fashion.
+			repeatElement = wFORMS.behaviors.repeat.getRepeatedElement( variableElement );
+			while(repeatElement) {
+				variableRepeatSet.push( repeatElement );
+				repeatElement = wFORMS.behaviors.repeat.getRepeatedElement( repeatElement.parentNode );
+			}
+
+			// Helper function to check if one set is a subset of the other (i.e. all members are included in the superset)
+			var isSubset = function(subset, superset) {
+				for(var i=0;i<subset.length;i++) {
+					for(var j=0;j<superset.length;j++) {
+						if(subset[i] === superset[j]) {
+							break;
+						}
+					}
+					if(j==superset.length) {
+						return false;
+					}
 				}
-			}
+				return true;
+			};
 
-			if (formulaRepeat) {
-				// formula is in a repeated section. Check if variable belong to same.
-
-				var isInRepeat = false;
-				while(variable && variable.tagName !='HTML') {
-					if(!variable.hasClass) {
-						wFORMS.standardizeElement(variable);
-					}
-					if(variable.hasClass(br.CSS_REMOVEABLE) ||  variable.hasClass(br.CSS_REPEATABLE)) {
-						isInRepeat = true;
-					}
-					if(variable==formulaRepeat) {
-						return true;
-					}
-					variable = variable.parentNode;
-				}
-				return !isInRepeat;
-			}
+			// The variable is in scope as long as one of the two sets is a subset of the other.
+			// Works also if any of the set is empty (variable or calculated field not in a repeated section)
+			return isSubset(calculatedRepeatSet, variableRepeatSet) || isSubset(variableRepeatSet, calculatedRepeatSet);
 		}
+
+		// No repeated behavior, so variable is always in scope.
 		return true;
 	}

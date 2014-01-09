@@ -422,7 +422,7 @@ _i.prototype.getInsertNode = function(elem) {
 	}
 
 	while(insertNode &&
-		 (insertNode.nodeType==3 ||       // skip text-node that can be generated server-side when populating a previously repeated group
+		 (insertNode.nodeType!=1 ||       // skip text-node that can be generated server-side when populating a previously repeated group
 		  insertNode.hasClass(this.behavior.CSS_REMOVEABLE))) {
 
 		insertNode = insertNode.nextSibling;
@@ -882,6 +882,23 @@ _b.isInDuplicateGroup = function(elem){
 	return elem.getAttribute(this.ATTR_DUPLICATE_ELEM) ? true : false;
 };
 
+/**
+ * Returns the parent element with the repeat behavior for any given DOM Element.
+ * @param  {DOMElement} elem the element belonging to a repeatable section.
+ * @return {DOMElement} The repeatable section (or the element itself if it's repeatable). Null if none found.
+ */
+_b.getRepeatedElement = function(elem) {
+
+	while (elem && elem.nodeType==1 && elem.tagName != 'BODY') {
+
+		if( base2.DOM.HTMLElement.hasClass(elem,this.CSS_REMOVEABLE) ||
+			base2.DOM.HTMLElement.hasClass(elem,this.CSS_REPEATABLE)) {
+			return elem;
+		}
+		elem = elem.parentNode;
+	}
+	return null;
+};
 
 /**
  * Checks if element is already handled
