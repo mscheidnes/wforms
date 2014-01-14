@@ -554,7 +554,7 @@ var loadIE = false;
 /*@cc_on
 	@if(@_jscript_version < 9)
 		loadIE = true;
-		document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>");
+		document.write("<script id=__ie_onload defer src=//javascript:void(0)><\/script>");
 		var script = document.getElementById("__ie_onload");
 		script.onreadystatechange = function() {
 		  if (this.readyState == "complete") {
