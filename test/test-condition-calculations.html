@@ -56,7 +56,6 @@
             document.getElementById('tfa_20').setAttribute('selected', 'selected');
             wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_20')).trigger();
-            wFORMS.behaviors.condition.updateCalculations();
 
             assertTrue('tfa_1 should be visible',!document.getElementById('tfa_1-D').className.match(/\boffstate\b/));
 
@@ -64,7 +63,6 @@
             document.getElementById('tfa_2').checked = true;
             wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_2')).trigger();
-            wFORMS.behaviors.condition.updateCalculations();
 
             // Update calculations
             calcInstance.run(null,document.getElementById('tfa_2'));
@@ -86,12 +84,10 @@
             document.getElementById('tfa_16').selectedIndex = -1;
             wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_20')).trigger();
-            wFORMS.behaviors.condition.updateCalculations();
 
             assertTrue('tfa_1 should be hidden',!!document.getElementById('tfa_1-D').className.match(/\boffstate\b/));
 
             // Verify disabled status
-
             assertTrue('tfa_2 should be disabled',document.getElementById('tfa_2').disabled);
             // Verify total
             assertEquals('subtotal should be recomputed.','0',document.getElementById('tfa_6').value);
@@ -100,13 +96,11 @@
 
             // turn on conditional
             document.getElementById('tfa_20').setAttribute('selected', 'selected');
-            document.getElementById('tfa_20').selected = true; // Needed by FF.
             wFORMS.behaviors.condition.resetTriggerExecutionChain();
             (new wFORMS.behaviors.condition.Trigger('#tfa_20')).trigger();
-            wFORMS.behaviors.condition.updateCalculations();
 
             // Verify disabled status
-            assertTrue('tfa_2 should not be disabled this time',!document.getElementById('tfa_2').disabled);
+            assertTrue('tfa_2 should not be disabled',!document.getElementById('tfa_2').disabled);
             // Verify total
             assertEquals('100',document.getElementById('tfa_6').value);
             // Verify grand total

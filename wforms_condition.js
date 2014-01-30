@@ -548,6 +548,10 @@ wFORMS.behaviors['condition'] = (function(){
                 var n  = this.getConditionalElement();
                 var id = n.id;
 
+                // get a handle on the calculation behavior instance so we can refresh calculations as we show/hide fields.
+                var calculations = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm(n),"calculation");
+
+
                 if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
                   // Get the DIV that wraps the input, its label and other related markup.
                   var p = n.parentNode;
@@ -563,7 +567,10 @@ wFORMS.behaviors['condition'] = (function(){
                         if(n.getAttribute(TRIGGER_CONDITIONALS)) {
                             (new Trigger( n )).trigger();
                         }
-                        this.flagCalculationForUpdate(n);
+                        // update calculations if any.
+                        if(calculations) {
+                            calculations.run(null, n);
+                        }
                     }
                   }
                 } else {
@@ -572,7 +579,6 @@ wFORMS.behaviors['condition'] = (function(){
                         n = n.parentNode;
                     }
                 }
-                var self = this;
 
                 var _traverse = function(element) {
                     switch(element.tagName) {
@@ -581,11 +587,17 @@ wFORMS.behaviors['condition'] = (function(){
                             if(element.getAttribute(TRIGGER_CONDITIONALS)) {
                                 (new Trigger( element )).trigger();
                             }
-                            self.flagCalculationForUpdate( element );
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, element);
+                            }
                             break;
                         case 'TEXTAREA':
                             if(element._wforms_disabled) element.disabled = false;
-                            self.flagCalculationForUpdate( element );
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, element);
+                            }
                             break;
                         case 'SELECT':
                             if(element._wforms_disabled) element.disabled = false;
@@ -596,7 +608,10 @@ wFORMS.behaviors['condition'] = (function(){
                                     (new Trigger( opts[j] )).trigger();
                                 }
                             }
-                            self.flagCalculationForUpdate( element );
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, element);
+                            }
                             break;
                         default:
                             for(var i=0;i<element.childNodes.length;i++) {
@@ -634,6 +649,10 @@ wFORMS.behaviors['condition'] = (function(){
                 var n = this.getConditionalElement();
                 var id = n.id;
 
+                // get a handle on the calculation behavior instance so we can refresh calculations as we show/hide fields.
+                var calculations = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm(n),"calculation");
+
+
                 if(n.tagName=='INPUT' || n.tagName=='SELECT' || n.tagName=='TEXTAREA' || base2.DOM.HTMLElement.hasClass(n,'choices')) {
 
                     // Get the DIV that wraps the input, its label and other related markup.
@@ -651,7 +670,10 @@ wFORMS.behaviors['condition'] = (function(){
                             if(n.getAttribute(TRIGGER_CONDITIONALS)) {
                                 (new Trigger(n)).trigger();
                             }
-                            this.flagCalculationForUpdate( n );
+                            // update calculations if any.
+                            if(calculations) {
+                                calculations.run(null, n);
+                            }
                         }
                     }
                 } else {
@@ -661,17 +683,17 @@ wFORMS.behaviors['condition'] = (function(){
                         n = n.parentNode;
                     }
                 }
+                var disabledList = [];
 
                 var flds = n.getElementsByTagName('INPUT');
                 for(var i=0;i<flds.length;i++) {
 
                     flds[i].disabled = true;
                     flds[i]._wforms_disabled = true;
-
+                    disabledList.push(flds[i]);
                     if(flds[i].getAttribute(TRIGGER_CONDITIONALS)) {
-                        (new Trigger(flds[i])).trigger();
+                    (new Trigger(flds[i])).trigger();
                     }
-                    this.flagCalculationForUpdate( flds[i] );
                 }
 
                 var flds = n.getElementsByTagName('TEXTAREA');
@@ -679,8 +701,7 @@ wFORMS.behaviors['condition'] = (function(){
 
                     flds[i].disabled = true;
                     flds[i]._wforms_disabled = true;
-
-                    this.flagCalculationForUpdate( flds[i] );
+                    disabledList.push(flds[i]);
                 }
 
                 var flds = n.getElementsByTagName('SELECT');
@@ -688,7 +709,7 @@ wFORMS.behaviors['condition'] = (function(){
 
                     flds[i].disabled = true;
                     flds[i]._wforms_disabled = true;
-
+                    disabledList.push(flds[i]);
                     // For SELECT elements, the triggers are set on individual option tags.
                     var opts = flds[i].getElementsByTagName('OPTION');
                     for(var j=0;j<opts.length;j++) {
@@ -696,8 +717,13 @@ wFORMS.behaviors['condition'] = (function(){
                         (new Trigger(opts[j])).trigger();
                       }
                     }
+                }
 
-                    this.flagCalculationForUpdate( flds[i] );
+                // update calculations if any
+                for(var i=0;i<disabledList.length;i++) {
+                    if(calculations) {
+                        calculations.run(null, disabledList[i]);
+                    }
                 }
 
                 var s = document.getElementById('tfa_switchedoff');
@@ -779,22 +805,6 @@ wFORMS.behaviors['condition'] = (function(){
                     return DELIMITER + $1 + DELIMITER;
                 });
                 (this.getConditionalElement()).setAttribute(CONDITIONAL_ATTRIBUTE_NAME, conditionRuleString);
-            },
-
-            flagCalculationForUpdate: function( element ) {
-                // get a handle on the calculation behavior instance
-                if(!wFORMS.behaviors.condition.calculationInstance) {
-                    wFORMS.behaviors.condition.calculationInstance = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm( element ),"calculation");
-                }
-                var calc = wFORMS.behaviors.condition.calculationInstance;
-                if(calc) {
-                    if(calc.isVariable( element )) {
-                        var fields = calc.getCalculatedFields( element )
-                        for(var i=0;i<fields.length;i++) {
-                            wFORMS.behaviors.condition._dirtyCalculations[fields[i].id] = fields[i];
-                        }
-                    }
-                }
             }
         });
 
@@ -1085,7 +1095,6 @@ wFORMS.behaviors['condition'] = (function(){
                 existingConditionals.push(conditional);
                 return _storeConditionalsToPatternAttribute(this, existingConditionals);
             },
-
             removeConditional: function(conditional){
                 var existingConditionals = this.getConditionals();
                 var unduplicatedEntries = filter(existingConditionals, function(_conditional, index){
@@ -1164,9 +1173,6 @@ wFORMS.behaviors['condition'] = (function(){
                     }
                 }
             }
-
-            wFORMS.behaviors.condition.updateCalculations();
-
         },
 
         onRepeatableDuplicated: function(masterNode, duplicateNode, idMappings){
@@ -1199,8 +1205,6 @@ wFORMS.behaviors['condition'] = (function(){
                 var conditional = new Conditional(conditionalIdentifier);
                 conditional.refresh();
             })
-
-            wFORMS.behaviors.condition.updateCalculations();
         },
 
         onRepeatableRemoved: function(removedCopy){
@@ -1209,8 +1213,6 @@ wFORMS.behaviors['condition'] = (function(){
 
             //detach those removed triggers
             _detachTriggers(removedCopy);
-
-            wFORMS.behaviors.condition.updateCalculations();
         }
     };
 
@@ -1230,8 +1232,6 @@ wFORMS.behaviors['condition'] = (function(){
                 trigger.trigger();
                 trigger.setEventListener();
             });
-
-            wFORMS.behaviors.condition.updateCalculations();
 
             if(triggersElements.length > 0){
 
@@ -1273,19 +1273,6 @@ wFORMS.behaviors['condition'] = (function(){
 
         resetTriggerExecutionChain: function() {
             wFORMS.behaviors.condition._triggerChain = {};
-            wFORMS.behaviors.condition._dirtyCalculations = {};
-        },
-
-        updateCalculations: function() {
-
-            for(var id in wFORMS.behaviors.condition._dirtyCalculations){
-                var element = wFORMS.behaviors.condition._dirtyCalculations[id];
-                if(!wFORMS.behaviors.condition.calculationInstance) {
-                    wFORMS.behaviors.condition.calculationInstance = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm( element ),"calculation");
-                }
-                wFORMS.behaviors.condition.calculationInstance.refresh(null, element);
-            }
-            wFORMS.behaviors.condition._dirtyCalculations = {};
         }
     }
 })();

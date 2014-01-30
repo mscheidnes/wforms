@@ -1069,11 +1069,9 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 				}
 
 				elem = document.getElementById('tfa_saveForLater');
-                if(elem && !elem.checked) {
-                    elem.click();
-                }
+                                elem.click();
 
-				if(elem && elem.scrollIntoView) {
+				if(elem.scrollIntoView) {
 					elem.scrollIntoView();
 				} else {
 					location.hash="#tfa_saveForLater";

@@ -353,8 +353,7 @@
 
 		repeatedElement = document.getElementById('tfa_Month10[1]');
 		assertNotNull('id should be tfa_Month10[1]', repeatedElement);
-		assertTrue('value should not be set on cloned element', repeatedElement.selectedIndex <= 0); // value is 0 or -1 depending on browser.
-
+		assertEquals('value should not be set on cloned element',0,repeatedElement.selectedIndex);
 
 		var repeatedElement = document.getElementById('tfa_Day[0]');
 		assertNotNull('id should be tfa_Day[0]', repeatedElement);
