@@ -168,13 +168,17 @@ wFORMS.behaviors.validation = {
 
         var reg_date = '((' + year + spliter + reg_month_day +')|'
                 + '(' + reg_month_day + spliter + year +')|' + reg_month_day + ')';
-        var time = '(\\d{1,2}\\s*[:-]?\\s*\\d{1,2}(\\s*[:-]?\\s*\\d{1,2})?)';
+        var time12 = '((1[012]|[1-9])\\s*[:-]?\\s*[0-5][0-9](\\s*[:-]?\\s*[0-5][0-9])?\\s*(a|am|p|pm))';
+        var time24 = '(([0-1]?[0-9]|2[0-4])\\s*[:-]?\\s*[0-5][0-9](\\s*[:-]?\\s*[0-5][0-9])?)';
 
         return [
-            new RegExp('^' + reg_date + '\\s+' + time + '$', 'i'),
-            new RegExp('^' + time + '\\s+' + reg_date + '$', 'i'),
+            new RegExp('^' + reg_date + '\\s+' + time12 + '$', 'i'),
+            new RegExp('^' + reg_date + '\\s+' + time24 + '$', 'i'),
+            new RegExp('^' + time12 + '\\s+' + reg_date + '$', 'i'),
+            new RegExp('^' + time24 + '\\s+' + reg_date + '$', 'i'),
             new RegExp('^' + reg_date + '$', 'i'),
-            new RegExp('^' + time  + '$', 'i')
+            new RegExp('^' + time12  + '$', 'i'),
+            new RegExp('^' + time24  + '$', 'i')
         ];
     })()
 
