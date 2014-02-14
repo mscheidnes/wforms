@@ -1,6 +1,6 @@
 wFORMS.behaviors.word_counter = {
     CLASSNAME: 'count-words',
-    ATTRIBUTE: 'maxWords',
+    ATTRIBUTE: 'size',
     applyTo: function(f) {
         var instances = [];
         var inputs = f.querySelectorAll('.' + this.CLASSNAME);
@@ -67,6 +67,7 @@ wFORMS.behaviors.word_counter.instance.prototype = {
 wFORMS.behaviors.validation.rules.wordCount = {selector: '.' + wFORMS.behaviors.word_counter.CLASSNAME, check: 'validateWordCount'}
 wFORMS.behaviors.validation.messages.wordCount = "There are too many words in this field.";
 wFORMS.behaviors.validation.instance.prototype.validateWordCount = function(element, value) {
+    // need to check the type attribute... if that checks out then use the size to dertmin.
     if (element.count > element.getAttribute(wFORMS.behaviors.word_counter.ATTRIBUTE)) {
         return false;
     } else {
