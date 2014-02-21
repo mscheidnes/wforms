@@ -1,6 +1,6 @@
 wFORMS.behaviors.word_counter = {
     CLASSNAME: 'count-words',
-    ATTRIBUTE: 'size',
+    ATTRIBUTE: 'data-maxwords',
     applyTo: function(f) {
         var instances = [];
         var inputs = f.querySelectorAll('.' + this.CLASSNAME);
