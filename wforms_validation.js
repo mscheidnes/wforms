@@ -3,42 +3,42 @@ if (typeof(wFORMS) == "undefined") {
 }
 /**
  * wForms validation behavior
- * 
+ *
  */
 wFORMS.behaviors.validation = {
-	
+
 	/*
 	 * Suffix of the ID for the error message placeholder
  	 */
 	ERROR_PLACEHOLDER_SUFFIX : '-E',
     LOWER_BOUND_ATTRIBUTE: 'min',
     UPPER_BOUND_ATTRIBUTE: 'max',
-	
-	
-	rules: {	
+
+
+	rules: {
 		oneRequired	: { selector: ".required-one", 		  check: 'validateOneRequired'},
-	    isRequired	: { selector: ".required", 			  check: 'validateRequired'}, 
+	    isRequired	: { selector: ".required", 			  check: 'validateRequired'},
 		isAlpha		: { selector: ".validate-alpha", 	  check: 'validateAlpha'},
-		isAlphanum	: { selector: ".validate-alphanum",	  check: 'validateAlphanum'}, 
+		isAlphanum	: { selector: ".validate-alphanum",	  check: 'validateAlphanum'},
         isDateTime        : { selector: ".validate-datetime",       check: 'validateDateTime'},
         isDate        : { selector: ".validate-date",       check: 'validateDate',
             range_verifier: 'dateRangeTest', range_error_message: 'rangeDate'},
         isTime        : { selector: ".validate-time",       check: 'validateTime',
             range_verifier: 'timeRangeTest', range_error_message: 'rangeDate'},
-		isEmail		: { selector: ".validate-email", 	  check: 'validateEmail'}, 
+		isEmail		: { selector: ".validate-email", 	  check: 'validateEmail'},
         isInteger    : { selector: ".validate-integer",       check: 'validateInteger',
             range_verifier: 'numberRangeTest', range_error_message: 'rangeNumber'},
         isFloat        : { selector: ".validate-float",       check: 'validateFloat',
             range_verifier: 'numberRangeTest', range_error_message : 'rangeNumber'},
 		isPhone		: { selector: ".validate-phone",	  check: 'validatePhone'},
 		isCustom	: { selector: ".validate-custom",	  check: 'validateCustom'}
-	},	
-	
+	},
+
 	styling: {
 		fieldError	: "errFld",
 		errorMessage: "errMsg"
 	},
-	
+
 	messages: {
 		oneRequired 	: "This section is required.",
 		isRequired 		: "This field is required.",
@@ -62,13 +62,13 @@ wFORMS.behaviors.validation = {
             min: 'The date must be after %1'
         }
     },
-	
-	
+
+
 	instance: function(f) {
-		this.behavior = wFORMS.behaviors.validation; 
+		this.behavior = wFORMS.behaviors.validation;
 		this.target   = f;
 		var self 	  = this;
-		
+
 		if(!f.__wFormsValidationHandled) {
 			if(!f.addEventListener) {
 				wFORMS.standardizeElement(f);
@@ -76,12 +76,12 @@ wFORMS.behaviors.validation = {
             f.addEventListener('submit', function(e) {
                 return self.run(e, this)
             }, false);
-			f.__wFormsValidationHandled = true;			
+			f.__wFormsValidationHandled = true;
 		}
 
-        
+
 	},
-	
+
     onPass: function(bInstance, e) {
     },
     onFail: function(bInstance, e) {
@@ -91,11 +91,11 @@ wFORMS.behaviors.validation = {
 		var c = 0;
 		for (var id in bInstance.elementsInError) {
 			c++;
-			if(!firstErrorId) 
+			if(!firstErrorId)
 				firstErrorId = id;
 		}
 		m = m.replace('%%', c);
-		
+
 		/*
 		 * Let's break the individual error messages into their respective pages
 		 * and save it into bInstance.errorPages for later use.
@@ -132,7 +132,7 @@ wFORMS.behaviors.validation = {
 			a.forEach(function(i){
 				if(!i.removeClass || !i.hasClass || !i.addClass){wFORMS.standardizeElement(i);}
 				i.removeClass("errMsg");
-			});	
+			});
 			if(!bInstance.errorPages.forEach){bInstance.errorPages = base2.JavaScript.Array2(bInstance.errorPages);}
 			bInstance.errorPages.forEach(function(id,index){
 				var tab = base2.DOM.Element.querySelector(bInstance.target.parentNode,'#'+pInstance.behavior.CSS_PAGETAB+'_'+index);
@@ -142,8 +142,8 @@ wFORMS.behaviors.validation = {
 				}
 			});
 		}
-		
-		
+
+
 		var elem = document.getElementById(firstErrorId);
 
 		if(elem.scrollIntoView) {
@@ -151,7 +151,7 @@ wFORMS.behaviors.validation = {
 		} else {
 			location.hash="#"+firstErrorId;
 		}
-		
+
 		alert(m);
     },
 
@@ -183,22 +183,22 @@ wFORMS.behaviors.validation = {
  * Factory Method
  * Applies the behavior to the given HTML element by setting the appropriate event handlers.
  * @param {domElement} f An HTML element, either nested inside a FORM element or (preferably) the FORM element itself.
- * @return {object} an instance of the behavior 
- */	
+ * @return {object} an instance of the behavior
+ */
 wFORMS.behaviors.validation.applyTo = function(f) {
 	if(!f || !f.tagName) {
 		throw new Error("Can't apply behavior to " + f);
 	}
 	if(f.tagName!="FORM") {
 		// look for form tag in the ancestor nodes.
-		if(f.form) 
+		if(f.form)
 			f=f.form;
 		else {
 			var _f = f;
 			for(f = f.parentNode; f && f.tagName!="FORM" ;f = f.parentNode) continue;
 			if(!f || f.tagName!="FORM") {
 				// form tag not found, look for nested forms.
-				f = _f.getElementsByTagName('form');				
+				f = _f.getElementsByTagName('form');
 			}
 		}
 	}
@@ -206,17 +206,17 @@ wFORMS.behaviors.validation.applyTo = function(f) {
 		var v = new Array();
 		for(var i=0;i<f.length;i++) {
 			var _v = new wFORMS.behaviors.validation.instance(f[i]);
-			v.push(_v);	
+			v.push(_v);
 			_v.onApply();
 		}
 	} else {
 		var v = new wFORMS.behaviors.validation.instance(f);
 		v.onApply();
 	}
-	
-	return v;	   
+
+	return v;
 }
- 
+
 /**
  * Executed once the behavior has been applied to the document.
  * Can be overwritten.
@@ -238,12 +238,12 @@ wFORMS.behaviors.validation.instance.prototype.onApply = function() {
 			if(_onRepeatCallBack) _onRepeatCallBack.apply(this, arguments);
 		}
 	}
-} 
+}
 
- 
+
 /**
  * Executes the behavior
- * @param {event} 		e 	(optional) 
+ * @param {event} 		e 	(optional)
  * @param {domElement} element
  * @return	{boolean}	true if validation successful, false otherwise (and prevents event propagation)
  */
@@ -254,20 +254,20 @@ wFORMS.behaviors.validation.instance.prototype.run = function(e, element) {
 	if (e && e.pagingStopPropagation) {
 		return false;
 	}
-	
-	var _run = function(element) { 
-					
+
+	var _run = function(element) {
+
 		// Workaround for apparent bug in querySelectorAll not being limited to descendants of 'element':
-		// See bug #172 - Check if the element is not on the current page of a multi-page form			
+		// See bug #172 - Check if the element is not on the current page of a multi-page form
 		if(wFORMS.behaviors.paging && !wFORMS.behaviors.paging.showTabNavigation && !wFORMS.behaviors.paging.isElementVisible(element)) {
-			return;	
+			return;
 		}
-		
+
 		// Do not validate elements that are switched off by the switch behavior
 		if(_self.isSwitchedOff(element))
-			return;			
-		
-		var	value = wFORMS.helpers.getFieldValue(element);	
+			return;
+
+		var	value = wFORMS.helpers.getFieldValue(element);
 		if(rule.check.call) {
 			var passed = rule.check.call(_self, element, value);
 		} else {
@@ -287,34 +287,34 @@ wFORMS.behaviors.validation.instance.prototype.run = function(e, element) {
             }
         }
 
-			if(!passed) { 
+			if(!passed) {
 				if(!element.id) element.id = wFORMS.helpers.randomId();
 				_self.elementsInError[element.id] = { id:element.id, rule: ruleName };
-				_self.removeErrorMessage(element); 
+				_self.removeErrorMessage(element);
 				if(rule.fail) {
 					// custom fail method
                 rule.fail.call(_self, element, errorMessage);
 				} else {
 					// default fail method
                 _self.fail.call(_self, element, errorMessage);
-				} 					
+				}
 				errorCount ++;
 			} else {
 				// If no previous rule has found an error on that field,
 				// remove any error message from a previous validation run.
 				if(!_self.elementsInError[element.id])
 					_self.removeErrorMessage(element);
-				
+
 				if(rule.pass) {
- 				// runs custom pass method. 
+ 				// runs custom pass method.
  				rule.pass.call(_self, element);
  			} else {
  				// default pass method
  				_self.pass.call(_self, element);
- 			}	 			
+ 			}
 		}
     };
-	
+
 
  	var errorCount = 0;
  	this.elementsInError = {};
@@ -326,7 +326,7 @@ wFORMS.behaviors.validation.instance.prototype.run = function(e, element) {
 		if(!element.matchesSelector)
 			wFORMS.standardizeElement(element);
 		if(!element.matchesSelector)
-			element = base2.DOM.bind(element);	
+			element = base2.DOM.bind(element);
 
 		//Maybe move this to crossbrowser hacks?
 		//IE9 doesn't implement Element.matchesSelector ... oh wait
@@ -339,16 +339,16 @@ wFORMS.behaviors.validation.instance.prototype.run = function(e, element) {
 			element.matchesSelector = element.webkitMatchesSelector;
 		if(!element.matchesSelector)
 			element.matchesSelector = base2.DOM.Element.matchesSelector;
-			
+
 		/* run validation if rule matches current element */
-		if(element.matchesSelector(rule.selector)) { 
-			_run(element);			
+		if(element.matchesSelector(rule.selector)) {
+			_run(element);
 		}
-		
+
 		/* check descendant nodes and run validation on matching elements */
  		element.querySelectorAll(rule.selector).forEach(_run);
  	}
-	
+
  	if(errorCount > 0) {
  		if(e) {
  			e.preventDefault?e.preventDefault():e.returnValue = false;
@@ -357,24 +357,24 @@ wFORMS.behaviors.validation.instance.prototype.run = function(e, element) {
  		return false;
  	}
  	if(this.behavior.onPass) this.behavior.onPass(this, e);
- 	return true; 
+ 	return true;
 }
 
 
 /**
  * fail
- * @param {domElement} element 
+ * @param {domElement} element
  */
 /**
  * fail
- * @param {domElement} element 
+ * @param {domElement} element
  */
-wFORMS.behaviors.validation.instance.prototype.fail = function(element, ruleName) { 
+wFORMS.behaviors.validation.instance.prototype.fail = function(element, ruleName) {
 
-	
+
 	//  field wrapper DIV. (-D suffix)
 	var div = document.getElementById(element.id+'-D');
-	
+
 	if(!div && wFORMS.behaviors.repeat) {
 		if(element.id){
 			var name = element.id.replace(/(\[\d+\])+(\-[HED])?$/,"$2");
@@ -386,50 +386,50 @@ wFORMS.behaviors.validation.instance.prototype.fail = function(element, ruleName
 			div  = document.getElementById(name);
 		}
 	}
-	
+
 	// set class to show that the field has an error
-	if(div) {	
+	if(div) {
 		if(!div.hasClass || !div.addClass) wFORMS.standardizeElement(div);
 		div.addClass(this.behavior.styling.fieldError);
 	}else{
 		// set class to show that the field has an error
 		if(!element.hasClass || !element.addClass) wFORMS.standardizeElement(element);
-		element.addClass(this.behavior.styling.fieldError);	
+		element.addClass(this.behavior.styling.fieldError);
 	}
-	
+
     var message = (ruleName in this.behavior.messages) ? this.behavior.messages[ruleName] : ruleName;
 	// show error message.
     this.addErrorMessage(element, message);
 },
-	
+
 /**
  * pass
- * @param {domElement} element 
- */	
+ * @param {domElement} element
+ */
     wFORMS.behaviors.validation.instance.prototype.pass = function(element) { /* no implementation needed */
     }
 
 /**
  * addErrorMessage
- * @param {domElement} element 
- * @param {string} error message 
+ * @param {domElement} element
+ * @param {string} error message
  */
 wFORMS.behaviors.validation.instance.prototype.addErrorMessage = function(element, message) {
-	
+
 	// we'll need an id here.
-	if (!element.id) element.id = wFORMS.helpers.randomId(); 
-	
+	if (!element.id) element.id = wFORMS.helpers.randomId();
+
 	// Prepare error message
 	var txtNode = document.createElement('span');
 	txtNode.appendChild(document.createTextNode(message));
-	
+
 	// Find error message placeholder.
 	var p = document.getElementById(element.id + this.behavior.ERROR_PLACEHOLDER_SUFFIX);
 	if(!p) { // create placeholder.
-		p = document.createElement("div"); 
+		p = document.createElement("div");
 		p.setAttribute('id', element.id + this.behavior.ERROR_PLACEHOLDER_SUFFIX);
 		if(element.tagName=="TR") {
-			// If this is a table row, add error message to first cell.		
+			// If this is a table row, add error message to first cell.
 			if(element.getElementsByTagName('TH').length>0) {
 				p = (element.getElementsByTagName('TH')[0]).appendChild(p);
 			} else {
@@ -437,8 +437,8 @@ wFORMS.behaviors.validation.instance.prototype.addErrorMessage = function(elemen
 			}
 		} else {
 			if(element.hasClass("wfSection") || element.hasClass("inlineSection")) {
-				p = element.appendChild(p);				
-			} else {	
+				p = element.appendChild(p);
+			} else {
 				// If we find a field wrapper, append error message to it.
 				var div = document.getElementById(element.id+'-D');
 				if(div) {
@@ -452,61 +452,61 @@ wFORMS.behaviors.validation.instance.prototype.addErrorMessage = function(elemen
 	}
 	// Finish the error message.
 	p.appendChild(txtNode);
-	wFORMS.standardizeElement(p);  
-	p.addClass(this.behavior.styling.errorMessage);							
+	wFORMS.standardizeElement(p);
+	p.addClass(this.behavior.styling.errorMessage);
 }
 
 /**
  * removeErrorMessage
- * @param {domElement} element 
+ * @param {domElement} element
  */
-wFORMS.behaviors.validation.instance.prototype.removeErrorMessage = function(element) { 
-	
+wFORMS.behaviors.validation.instance.prototype.removeErrorMessage = function(element) {
+
 	//  field wrapper DIV. (-D suffix)
 	var div = document.getElementById(element.id+'-D');
-	
+
 	if(!element.hasClass) wFORMS.standardizeElement(element);
 	if(!element.addClass) wFORMS.standardizeElement(element);
 	if(!element.removeClass) wFORMS.standardizeElement(element);
 	if(div && !div.hasClass) wFORMS.standardizeElement(div);
 	if(div && !div.addClass) wFORMS.standardizeElement(div);
 	if(div && !div.removeClass) wFORMS.standardizeElement(div);
-	
+
 	if(element.hasClass(this.behavior.styling.fieldError)) {
 		element.removeClass(this.behavior.styling.fieldError);
 	}
 	if(div && div.hasClass(this.behavior.styling.fieldError)) {
 		div.removeClass(this.behavior.styling.fieldError);
 	}
-	
+
 	var errorMessage  = document.getElementById(element.id + this.behavior.ERROR_PLACEHOLDER_SUFFIX);
 	if(errorMessage)  {
-		errorMessage.parentNode.removeChild(errorMessage); 
+		errorMessage.parentNode.removeChild(errorMessage);
 	}else{
 		//Handle nested repeated sections
 		if(element.id){
 			var name = element.id.split('-D').join('');
 			var errorMessage  = document.getElementById(name + this.behavior.ERROR_PLACEHOLDER_SUFFIX);
 			if(errorMessage)  {
-				errorMessage.parentNode.removeChild(errorMessage); 
+				errorMessage.parentNode.removeChild(errorMessage);
 			}
 		}
 	}
-	
+
 }
 
 /**
  * Checks the element's 'visibility' (switch behavior)
- * @param {domElement} element 
+ * @param {domElement} element
  * @return	{boolean}	true if the element is not 'visible' (switched off), false otherwise.
  */
 wFORMS.behaviors.validation.instance.prototype.isSwitchedOff = function(element) {
 	var sb = wFORMS.getBehaviorInstance(this.target,'switch');
-	if(sb) { 
+	if(sb) {
 		var parentElement = element;
 		while(parentElement && parentElement.tagName!='BODY') {
-			// TODO: Check what happens with elements with multiple ON and OFF switches	
-			if(parentElement.className && 
+			// TODO: Check what happens with elements with multiple ON and OFF switches
+			if(parentElement.className &&
 			   parentElement.className.indexOf(sb.behavior.CSS_OFFSTATE_PREFIX)!=-1 &&
 			   parentElement.className.indexOf(sb.behavior.CSS_ONSTATE_PREFIX)==-1
 			   ) {
@@ -515,52 +515,52 @@ wFORMS.behaviors.validation.instance.prototype.isSwitchedOff = function(element)
 			}
 			parentElement = parentElement.parentNode;
 		}
-	}	
+	}
 	return false;
 }
- 
+
 /**
  * Checks if the element with the given id is a placeholder for the error message
- * @param {domElement} element 
+ * @param {domElement} element
  * @return	{boolean}	true if the element is a placeholder, false otherwise.
  */
 wFORMS.behaviors.validation.isErrorPlaceholderId = function(id) {
 	return id.match(new RegExp(wFORMS.behaviors.validation.ERROR_PLACEHOLDER_SUFFIX + '$')) != null;
-} 
-  
+}
+
 /**
  * Checks if the given string is empty (null or whitespace only)
- * @param {string} s 
- * @returns {boolean} 
+ * @param {string} s
+ * @returns {boolean}
  */
-wFORMS.behaviors.validation.instance.prototype.isEmpty = function(s) {				
+wFORMS.behaviors.validation.instance.prototype.isEmpty = function(s) {
 	var regexpWhitespace = /^\s+$/;
 	return  ((s == null) || (s.length == 0) || regexpWhitespace.test(s));
 }
 
 /**
  * validateRequired
- * @param {domElement} element 
- * @param {string} element's value (if available) 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @param {string} element's value (if available)
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateRequired = function(element, value) {
-		
+
 	switch(element.tagName) {
 		case "INPUT":
-			var inputType = element.getAttribute("type");					
-			if(!inputType) inputType = 'text'; 
+			var inputType = element.getAttribute("type");
+			if(!inputType) inputType = 'text';
 			switch(inputType.toLowerCase()) {
 				case "checkbox":
 				case "radio":
-					return element.checked; 
+					return element.checked;
 					break;
 				case "file":
-					// allows form to pass validation if a file has already been uploaded 
-					// (tfa_uploadDelete_xx checkbox exists and is not checked)					
+					// allows form to pass validation if a file has already been uploaded
+					// (tfa_uploadDelete_xx checkbox exists and is not checked)
 					var deleteCheckbox=document.getElementById('tfa_uploadDelete_'+element.id);
 					if(this.isEmpty(value)) {
-						return (deleteCheckbox && !deleteCheckbox.checked);						
+						return (deleteCheckbox && !deleteCheckbox.checked);
 					}
 					return true;
 					break;
@@ -568,7 +568,7 @@ wFORMS.behaviors.validation.instance.prototype.validateRequired = function(eleme
 					return !this.isEmpty(value);
 			}
 			break;
-		case "SELECT":							
+		case "SELECT":
 			return !this.isEmpty(value);
 			break;
 		case "TEXTAREA":
@@ -577,36 +577,36 @@ wFORMS.behaviors.validation.instance.prototype.validateRequired = function(eleme
 		default:
 			return this.validateOneRequired(element);
 			break;
-	} 	 
-	return false 
+	}
+	return false
 };
 
 /**
  * validateOneRequired
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateOneRequired = function(element) {
 	if(element.nodeType != 1) return false;
-	
+
 	if(this.isSwitchedOff(element))
-		return false;	
-	
+		return false;
+
 	switch(element.tagName) {
 		case "INPUT":
 			var inputType = element.getAttribute("type");
-			if(!inputType) inputType = 'text'; 
+			if(!inputType) inputType = 'text';
 			switch(inputType.toLowerCase()) {
 				case "checkbox":
 				case "radio":
-					return element.checked; 
+					return element.checked;
 					break;
 				case "file":
-					// allows form to pass validation if a file has already been uploaded 
+					// allows form to pass validation if a file has already been uploaded
 					// (tfa_uploadDelete_xx checkbox exists and is not checked)
 					var deleteCheckbox=document.getElementById('tfa_uploadDelete_'+element.id);
 					if(this.isEmpty(wFORMS.helpers.getFieldValue(element))) {
-						return (deleteCheckbox && !deleteCheckbox.checked);						
+						return (deleteCheckbox && !deleteCheckbox.checked);
 					}
 					return true;
 					break;
@@ -614,7 +614,7 @@ wFORMS.behaviors.validation.instance.prototype.validateOneRequired = function(el
 					return !this.isEmpty(wFORMS.helpers.getFieldValue(element));
 			}
 			break;
-		case "SELECT":							
+		case "SELECT":
 			return !this.isEmpty(wFORMS.helpers.getFieldValue(element));
 			break;
 		case "TEXTAREA":
@@ -625,14 +625,14 @@ wFORMS.behaviors.validation.instance.prototype.validateOneRequired = function(el
 				if(this.validateOneRequired(element.childNodes[i])) return true;
 			}
 			break;
-	} 	 
-	return false 
+	}
+	return false
 }
 
 /**
  * validateAlpha
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateAlpha = function(element, value) {
 	var regexp = /^[a-zA-Z\s]+$/; // Add ' and - ?
@@ -641,8 +641,8 @@ wFORMS.behaviors.validation.instance.prototype.validateAlpha = function(element,
 
 /**
  * validateAlphanum
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(element, value) {
 	var regexp = /^[\w\s]+$/;
@@ -651,8 +651,8 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 
 /**
  * validateDate
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateDateTime = function(element, value) {
     if(this.isEmpty(value)){
@@ -726,11 +726,11 @@ wFORMS.behaviors.validation.instance.prototype.analyzeDateComponents = function(
 
 /**
  * validateTime
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateTime = function(element, value) {
-	/* not yet implemented */	
+	/* not yet implemented */
     if (this.isEmpty(value)) {
 	return true;
 }
@@ -798,8 +798,8 @@ wFORMS.behaviors.validation.instance.prototype.analyzeTimeComponents = function(
 
 /**
  * validateEmail
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateEmail = function(element, value) {
 	var regexpEmail = /\w{1,}[@][\w\-]{1,}([.]([\w\-]{1,})){1,}$/;
@@ -808,8 +808,8 @@ wFORMS.behaviors.validation.instance.prototype.validateEmail = function(element,
 
 /**
  * validateInteger
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateInteger = function(element, value) {
 	var regexp = /^[\-+]?\d+$/;
@@ -818,11 +818,11 @@ wFORMS.behaviors.validation.instance.prototype.validateInteger = function(elemen
 
 /**
  * validateFloat
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateFloat = function(element, value) {
-	
+
 	return this.isEmpty(value) || wFORMS.helpers.isNumericValue(value);
 }
 
@@ -850,21 +850,21 @@ wFORMS.behaviors.validation.instance.prototype.validatePhone = function(element,
 
 /**
  * validateCustom
- * @param {domElement} element 
- * @returns {boolean} 
+ * @param {domElement} element
+ * @returns {boolean}
  */
-wFORMS.behaviors.validation.instance.prototype.validateCustom = function(element, value) {	
+wFORMS.behaviors.validation.instance.prototype.validateCustom = function(element, value) {
 	var pattern = new RegExp("\/(.*)\/([gi]*)");
 	var matches = element.className.match(pattern);
 	if (this.isEmpty(value)) {
 		return true;
-	}	
-	if(matches && matches[0]) {										
+	}
+	if(matches && matches[0]) {
 		var validationPattern = new RegExp(matches[1],matches[2]);
 		if(!value.match(validationPattern)) {
-			return false									
+			return false
 		}
-	}		
+	}
 	return true;
 }
 
@@ -874,7 +874,7 @@ wFORMS.behaviors.validation.instance.prototype.numberRangeTest = function(elemen
         return true;
     }
     lboundRaw = element.getAttribute(wFORMS.behaviors.validation.LOWER_BOUND_ATTRIBUTE);
-    
+
     if(lboundRaw && (this.validateFloat(lboundRaw) || this.validateInteger(lboundRaw))){
         lbound = parseFloat(lboundRaw);
     }
@@ -882,7 +882,7 @@ wFORMS.behaviors.validation.instance.prototype.numberRangeTest = function(elemen
         lbound = -Infinity;
     }
     uboundRaw = element.getAttribute(wFORMS.behaviors.validation.UPPER_BOUND_ATTRIBUTE);
-    
+
     if(uboundRaw  && (this.validateFloat(uboundRaw) || this.validateInteger(uboundRaw))){
         ubound = parseFloat(uboundRaw);
     }
@@ -966,7 +966,7 @@ wFORMS.behaviors.validation.instance.prototype.dateTimeRangeTestCommon = functio
 
 
 wFORMS.behaviors.validation.enableResumeLater = function() {
-	
+
 	var b = document.getElementById('tfa_resumeLater');
 	if(b) {
 		/**
@@ -979,7 +979,7 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 			if(document.getElementById('tfa_confirmPassword')) {
 				if(password != document.getElementById('tfa_confirmPassword').value){
 					return false;
-				}		
+				}
 			}
 			return true;
 		}
@@ -996,23 +996,23 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 					return false;
 				}
 			}
-			return true;			
+			return true;
 		}
 		if(!wFORMS.behaviors.validation.messages.isPasswordMedium) {
-			wFORMS.behaviors.validation.messages.isPasswordMedium = "Please choose a more secure password. Passwords must contain 4 or more characters, with at least 1 letter (a to z) and 1 number (0 to 9).";								
+			wFORMS.behaviors.validation.messages.isPasswordMedium = "Please choose a more secure password. Passwords must contain 4 or more characters, with at least 1 letter (a to z) and 1 number (0 to 9).";
 		}
 		wFORMS.behaviors.validation.instance.prototype.isPasswordMedium = function(element, password) {
-			var regexp_array = [/^([^\s]{4,})/, /[a-zA-Z]/i, /[0-9]/]; 
+			var regexp_array = [/^([^\s]{4,})/, /[a-zA-Z]/i, /[0-9]/];
 			for(var i =0; i<regexp_array.length; i++){
 				if(!password.match(regexp_array[i])){
 					return false;
 				}
 			}
-			return true;			
+			return true;
 		}
 		if(!wFORMS.behaviors.validation.messages.isPasswordWeak) {
 			wFORMS.behaviors.validation.messages.isPasswordWeak   = "Your password cannot be empty.";
-		}					
+		}
 		wFORMS.behaviors.validation.instance.prototype.isPasswordWeak   = function(element, password) {
 			var regexp_array = [/^([^\s]{1,})/];
 			for(var i =0; i<regexp_array.length; i++){
@@ -1025,50 +1025,50 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 
 		// Click handler for the link that opens the Save&Resume fieldset.
 		var l = document.getElementById('tfa_saveForLaterLink');
-		if(l) {	
+		if(l) {
 			l.onclick = function() {
-				
+
 				// Get form element, necessary to retrieve instance.
 				f = this;
 				while(f && f.tagName!='FORM') {
 					f = f.parentNode;
 				}
-				
+
 				elem = document.getElementById('tfa_saveForLater');
 				if(!elem.checked) {
 					elem.checked = true;
 				}
-				if(elem.scrollIntoView) {	
+				if(elem.scrollIntoView) {
 					elem.scrollIntoView();
 				} else {
 					location.hash="#tfa_saveForLater";
 				}
-				
+
 				var b = wFORMS.getBehaviorInstance(f,"switch");
 				b.run(null, elem);
 			}
 		}
-		
+
 		// Save button click handler.
-		b.onclick = function(e) { 
+		b.onclick = function(e) {
 			var f = this.form;
-			
+
 			// Save & Resume should not run the full validation. Only resume email and resume password check.
 			var bv = wFORMS.getBehaviorInstance(f,"validation");
-			if(bv) {				
-				// Overwrite the default validation rules, keep a backup. 
+			if(bv) {
+				// Overwrite the default validation rules, keep a backup.
 				var _savedRules = bv.behavior.rules;
 				bv.behavior.rules = [];
-				
+
 				// Add email validation on save email field.
 				bv.behavior.rules.isEmail 	 = { selector: "#tfa_resumeEmail", check: 'validateEmail' }
 				bv.behavior.rules.isRequired = { selector: "#tfa_resumeEmail", check: 'validateRequired' }
-				
+
 				// passwordStrength is a server-side configuration setting, set for javascript evaluation in final.xsl.
 				if(!wFORMS.behaviors.validation.passwordStrength) {
 					wFORMS.behaviors.validation.passwordStrength = 'low';
 				}
-				
+
 				// Set validation rules according to desired password strength.
 				switch(wFORMS.behaviors.validation.passwordStrength) {
 					case 'high':
@@ -1083,15 +1083,15 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 				}
 				// Add validation rule to check for password confirmation match
 				bv.behavior.rules.isPasswordConfirmed = { selector: "#tfa_resumePassword", check: 'isPasswordConfirmed' }
-				
-			} 
+
+			}
 			// Bypass multi-page unload warning
 			var b = wFORMS.getBehaviorInstance(f,"paging");
 			if(b) { b.behavior.warnOnUnload=false; }
-			
+
 			// Run validation
 			if(bv && bv.run(null,f)){
-				this.value=" ... "; 
+				this.value=" ... ";
 				f.submit();
 			} else {
 				// restore default validation rules.
@@ -1104,3 +1104,83 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 }
 // document.addEventListener('DOMContentLoaded',enableResumeLater,false);
 base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.behaviors.validation.enableResumeLater,false);
+
+
+
+
+wFORMS.behaviors.word_counter = {
+    CLASSNAME: 'count-words',
+    ATTRIBUTE: 'data-maxwords',
+    applyTo: function(f) {
+        var instances = [];
+        var inputs = f.querySelectorAll('.' + this.CLASSNAME);
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs.item(i);
+            var instance = new wFORMS.behaviors.word_counter.instance(input);
+            instances.push(instance);
+        }
+        return instances;
+    },
+    instance: function(input) {
+        this.target = input;
+        this.counter = null;
+        this.wordCount = 0;
+        this.maxWords = parseInt(input.getAttribute(wFORMS.behaviors.word_counter.ATTRIBUTE));
+        this.addHandlers(input);
+        this.addCounter(input);
+    }
+}
+
+wFORMS.behaviors.word_counter.instance.prototype = {
+    addHandlers: function(element) {
+        var self = this;
+        element.addEventListener('keyup', function() {
+            self.updateCounter(element);
+        }, false);
+        element.addEventListener('focus', function() {
+            self.counter.style.visibility = 'visible';
+        }, false);
+        element.addEventListener('blur', function() {
+            self.counter.style.visibility = 'hidden';
+        }, false);
+    },
+    addCounter: function(element) {
+        var p = element.parentNode;
+        this.counter = document.createElement('span');
+        this.counter.className = wFORMS.behaviors.word_counter.CLASSNAME;
+        this.counter.message = '  words remaining';
+        this.counter.style.marginLeft = '10px';
+        this.counter.style.visibility = 'hidden';
+        element.count = 0;
+        p.insertBefore(this.counter, element.nextSibling);
+        this.updateCounter(element);
+    },
+    getWordCount: function() {
+        return this.wordCount;
+    },
+    updateCounter: function(element) {
+        try {
+            this.wordCount = this.target.value.match(/\S+/g).length;
+        } catch (err) {
+            this.wordCount = 0;
+        }
+        if (this.maxWords - this.wordCount >= 0) {
+            this.counter.style.color = 'black';
+        } else {
+            this.counter.style.color = 'red';
+        }
+        this.counter.innerHTML = this.maxWords - this.wordCount + this.counter.message; // displays the number of words left (max-current)
+        element.count = this.wordCount;
+    }
+}
+
+wFORMS.behaviors.validation.rules.wordCount = {selector: '.' + wFORMS.behaviors.word_counter.CLASSNAME, check: 'validateWordCount'}
+wFORMS.behaviors.validation.messages.wordCount = "There are too many words in this field.";
+wFORMS.behaviors.validation.instance.prototype.validateWordCount = function(element, value) {
+    // need to check the type attribute... if that checks out then use the size to dertmin.
+    if (element.count > element.getAttribute(wFORMS.behaviors.word_counter.ATTRIBUTE)) {
+        return false;
+    } else {
+        return true;
+    }
+};
