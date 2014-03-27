@@ -31,7 +31,8 @@ wFORMS.behaviors.validation = {
         isFloat        : { selector: ".validate-float",       check: 'validateFloat',
             range_verifier: 'numberRangeTest', range_error_message : 'rangeNumber'},
 		isPhone		: { selector: ".validate-phone",	  check: 'validatePhone'},
-		isCustom	: { selector: ".validate-custom",	  check: 'validateCustom'}
+		isCustom	: { selector: ".validate-custom",	  check: 'validateCustom'},
+        wordCount : {selector: '.count-words', check: 'validateWordCount'}
 	},
 
 	styling: {
@@ -52,6 +53,7 @@ wFORMS.behaviors.validation = {
         isTime             : "This does not appear to be a valid time.",
 		isPhone			: "Please enter a valid phone number.",
 		isCustom		: "Please enter a valid value.",
+                wordCount : "There are too many words in this field.",
         notification    : "The form is not complete and has not been submitted yet. There was %% problem(s) with your submission.",  // %% will be replaced by the actual number of errors.
         rangeNumber    : {
             max: 'The value must be smaller than the upper bound %1',
@@ -206,7 +208,8 @@ wFORMS.behaviors.validation.applyTo = function(f) {
 	if(!f.tagName && f.length>0) {
 		var v = new Array();
 		for(var i=0;i<f.length;i++) {
-			var _v = new wFORMS.behaviors.validation.instance(f[i]);
+			var _v =
+                                new wFORMS.behaviors.validation.instance(f[i]);
 			v.push(_v);
 			_v.onApply();
 		}
@@ -510,47 +513,22 @@ wFORMS.behaviors.validation.instance.prototype.removeErrorMessage = function(ele
  * @return	{boolean}	true if the element is not 'visible' (switched off), false otherwise.
  */
 wFORMS.behaviors.validation.instance.prototype.isSwitchedOff = function(element) {
-
-    switch(element.tagName) {
-
-        case 'INPUT':
-            return element.disabled?true:false;
-
-        case 'TEXTAREA':
-            return element.disabled?true:false;
-
-        case 'SELECT':
-            return element.disabled?true:false;
-
-        default:
-
-            if(element.disabled === true) {
-                // if the disabled attribute is set, use this.
-                return true;
-            }
-
-            // otherwise, go through all nested fields and check if they're all disabled.
-            // If one is not, then the element isn't switched off.
-            var flds = element.getElementsByTagName('INPUT');
-            for(var i=0;i<flds.length;i++) {
-              if(!flds[i].disabled) {
-                return false;
-              }
-            }
-            flds = element.getElementsByTagName('TEXTAREA');
-            for(var i=0;i<flds.length;i++) {
-              if(!flds[i].disabled) {
-                return false;
-              }
-            }
-            flds = element.getElementsByTagName('SELECT');
-            for(var i=0;i<flds.length;i++) {
-              if(!flds[i].disabled) {
-                return false;
-              }
-            }
-            return true;
-    }
+	var sb = wFORMS.getBehaviorInstance(this.target,'switch');
+	if(sb) {
+		var parentElement = element;
+		while(parentElement && parentElement.tagName!='BODY') {
+			// TODO: Check what happens with elements with multiple ON and OFF switches
+			if(parentElement.className &&
+			   parentElement.className.indexOf(sb.behavior.CSS_OFFSTATE_PREFIX)!=-1 &&
+			   parentElement.className.indexOf(sb.behavior.CSS_ONSTATE_PREFIX)==-1
+			   ) {
+				// switched off. skip element.
+				return true;
+			}
+			parentElement = parentElement.parentNode;
+		}
+	}
+	return false;
 }
 
 /**
@@ -624,7 +602,7 @@ wFORMS.behaviors.validation.instance.prototype.validateOneRequired = function(el
 	if(element.nodeType != 1) return false;
 
 	if(this.isSwitchedOff(element))
-        return false;
+		return false;
 
 	switch(element.tagName) {
 		case "INPUT":
@@ -902,6 +880,20 @@ wFORMS.behaviors.validation.instance.prototype.validateCustom = function(element
 	return true;
 }
 
+/**
+ * validateWordCount
+ * @param {domElement} element
+ * @returns {boolean}
+ */
+wFORMS.behaviors.validation.instance.prototype.validateWordCount = function(element, value) {
+    // need to check the type attribute... if that checks out then use the size to dertmin.
+    if (element.count > element.getAttribute('data-maxwords')) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
 wFORMS.behaviors.validation.instance.prototype.numberRangeTest = function(element, value, errMessage){
     var lbound = null, ubound = null, lboundRaw, uboundRaw;
     if(this.isEmpty(value)){
@@ -1069,16 +1061,17 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 				}
 
 				elem = document.getElementById('tfa_saveForLater');
-                if(elem && !elem.checked) {
-                    elem.click();
-                }
-
-				if(elem && elem.scrollIntoView) {
+				if(!elem.checked) {
+					elem.checked = true;
+				}
+				if(elem.scrollIntoView) {
 					elem.scrollIntoView();
 				} else {
 					location.hash="#tfa_saveForLater";
 				}
-				(new wFORMS.behaviors['condition'].Trigger('#tfa_saveForLater')).trigger();
+
+				var b = wFORMS.getBehaviorInstance(f,"switch");
+				b.run(null, elem);
 			}
 		}
 
@@ -1137,3 +1130,76 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 }
 // document.addEventListener('DOMContentLoaded',enableResumeLater,false);
 base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.behaviors.validation.enableResumeLater,false);
+
+
+/*
+ * wForms WordCount
+ *
+ * This section is its own behavior.
+ */
+
+wFORMS.behaviors.word_counter = {
+    CLASSNAME: 'count-words',
+    ATTRIBUTE: 'data-maxwords',
+    applyTo: function(f) {
+        var instances = [];
+        var inputs = f.querySelectorAll('.' + this.CLASSNAME);
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs.item(i);
+            var instance = new wFORMS.behaviors.word_counter.instance(input);
+            instances.push(instance);
+        }
+        return instances;
+    },
+    instance: function(input) {
+        this.target = input;
+        this.counter = null;
+        this.wordCount = 0;
+        this.maxWords = parseInt(input.getAttribute(wFORMS.behaviors.word_counter.ATTRIBUTE));
+        this.addHandlers(input);
+        this.addCounter(input);
+    }
+}
+
+wFORMS.behaviors.word_counter.instance.prototype = {
+    addHandlers: function(element) {
+        var self = this;
+        element.addEventListener('keyup', function() {
+            self.updateCounter(element);
+        }, false);
+        element.addEventListener('focus', function() {
+            self.counter.style.visibility = 'visible';
+        }, false);
+        element.addEventListener('blur', function() {
+            self.counter.style.visibility = 'hidden';
+        }, false);
+    },
+    addCounter: function(element) {
+        var p = element.parentNode;
+        this.counter = document.createElement('span');
+        this.counter.className = wFORMS.behaviors.word_counter.CLASSNAME;
+        this.counter.message = '  words remaining';
+        this.counter.style.marginLeft = '10px';
+        this.counter.style.visibility = 'hidden';
+        element.count = 0;
+        p.insertBefore(this.counter, element.nextSibling);
+        this.updateCounter(element);
+    },
+    getWordCount: function() {
+        return this.wordCount;
+    },
+    updateCounter: function(element) {
+        try {
+            this.wordCount = this.target.value.match(/\S+/g).length;
+        } catch (err) {
+            this.wordCount = 0;
+        }
+        if (this.maxWords - this.wordCount >= 0) {
+            this.counter.style.color = 'black';
+        } else {
+            this.counter.style.color = 'red';
+        }
+        this.counter.innerHTML = this.maxWords - this.wordCount + this.counter.message; // displays the number of words left (max-current)
+        element.count = this.wordCount;
+    }
+}
