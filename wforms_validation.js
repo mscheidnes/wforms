@@ -31,7 +31,8 @@ wFORMS.behaviors.validation = {
         isFloat        : { selector: ".validate-float",       check: 'validateFloat',
             range_verifier: 'numberRangeTest', range_error_message : 'rangeNumber'},
 		isPhone		: { selector: ".validate-phone",	  check: 'validatePhone'},
-		isCustom	: { selector: ".validate-custom",	  check: 'validateCustom'}
+		isCustom	: { selector: ".validate-custom",	  check: 'validateCustom'},
+        wordCount : {selector: '.count-words', check: 'validateWordCount'}
 	},
 
 	styling: {
@@ -52,6 +53,7 @@ wFORMS.behaviors.validation = {
         isTime             : "This does not appear to be a valid time.",
 		isPhone			: "Please enter a valid phone number.",
 		isCustom		: "Please enter a valid value.",
+                wordCount : "There are too many words in this field.",
         notification    : "The form is not complete and has not been submitted yet. There was %% problem(s) with your submission.",  // %% will be replaced by the actual number of errors.
         rangeNumber    : {
             max: 'The value must be smaller than the upper bound %1',
@@ -205,7 +207,8 @@ wFORMS.behaviors.validation.applyTo = function(f) {
 	if(!f.tagName && f.length>0) {
 		var v = new Array();
 		for(var i=0;i<f.length;i++) {
-			var _v = new wFORMS.behaviors.validation.instance(f[i]);
+			var _v =
+                                new wFORMS.behaviors.validation.instance(f[i]);
 			v.push(_v);
 			_v.onApply();
 		}
@@ -868,6 +871,20 @@ wFORMS.behaviors.validation.instance.prototype.validateCustom = function(element
 	return true;
 }
 
+/**
+ * validateWordCount
+ * @param {domElement} element
+ * @returns {boolean}
+ */
+wFORMS.behaviors.validation.instance.prototype.validateWordCount = function(element, value) {
+    // need to check the type attribute... if that checks out then use the size to dertmin.
+    if (element.count > element.getAttribute('data-maxwords')) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
 wFORMS.behaviors.validation.instance.prototype.numberRangeTest = function(element, value, errMessage){
     var lbound = null, ubound = null, lboundRaw, uboundRaw;
     if(this.isEmpty(value)){
@@ -1106,7 +1123,11 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.behaviors.validation.enableResumeLater,false);
 
 
-
+/*
+ * wForms WordCount
+ *
+ * This section is its own behavior.
+ */
 
 wFORMS.behaviors.word_counter = {
     CLASSNAME: 'count-words',
@@ -1173,14 +1194,3 @@ wFORMS.behaviors.word_counter.instance.prototype = {
         element.count = this.wordCount;
     }
 }
-
-wFORMS.behaviors.validation.rules.wordCount = {selector: '.' + wFORMS.behaviors.word_counter.CLASSNAME, check: 'validateWordCount'}
-wFORMS.behaviors.validation.messages.wordCount = "There are too many words in this field.";
-wFORMS.behaviors.validation.instance.prototype.validateWordCount = function(element, value) {
-    // need to check the type attribute... if that checks out then use the size to dertmin.
-    if (element.count > element.getAttribute(wFORMS.behaviors.word_counter.ATTRIBUTE)) {
-        return false;
-    } else {
-        return true;
-    }
-};
