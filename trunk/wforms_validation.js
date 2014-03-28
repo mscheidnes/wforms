@@ -208,8 +208,7 @@ wFORMS.behaviors.validation.applyTo = function(f) {
 	if(!f.tagName && f.length>0) {
 		var v = new Array();
 		for(var i=0;i<f.length;i++) {
-			var _v =
-                                new wFORMS.behaviors.validation.instance(f[i]);
+			var _v = new wFORMS.behaviors.validation.instance(f[i]);
 			v.push(_v);
 			_v.onApply();
 		}
@@ -513,22 +512,50 @@ wFORMS.behaviors.validation.instance.prototype.removeErrorMessage = function(ele
  * @return	{boolean}	true if the element is not 'visible' (switched off), false otherwise.
  */
 wFORMS.behaviors.validation.instance.prototype.isSwitchedOff = function(element) {
-	var sb = wFORMS.getBehaviorInstance(this.target,'switch');
-	if(sb) {
-		var parentElement = element;
-		while(parentElement && parentElement.tagName!='BODY') {
-			// TODO: Check what happens with elements with multiple ON and OFF switches
-			if(parentElement.className &&
-			   parentElement.className.indexOf(sb.behavior.CSS_OFFSTATE_PREFIX)!=-1 &&
-			   parentElement.className.indexOf(sb.behavior.CSS_ONSTATE_PREFIX)==-1
-			   ) {
-				// switched off. skip element.
-				return true;
-			}
-			parentElement = parentElement.parentNode;
-		}
-	}
-	return false;
+    switch(element.tagName) {
+        case 'INPUT':
+            return element.disabled?true:false;
+
+        case 'TEXTAREA':
+            return element.disabled?true:false;
+
+        case 'SELECT':
+            return element.disabled?true:false;
+
+        default:
+            if(element.disabled === true) {
+                // if the disabled attribute is set, use this.
+                return true;
+            }
+
+            // otherwise, go through all nested fields and check if they're all disabled.
+            // If one is not, then the element isn't switched off.
+            var flds = element.getElementsByTagName('INPUT');
+
+            for(var i=0;i<flds.length;i++) {
+              if(!flds[i].disabled) {
+                return false;
+              }
+            }
+
+            flds = element.getElementsByTagName('TEXTAREA');
+
+            for(var i=0;i<flds.length;i++) {
+              if(!flds[i].disabled) {
+                return false;
+              }
+            }
+
+            flds = element.getElementsByTagName('SELECT');
+
+            for(var i=0;i<flds.length;i++) {
+              if(!flds[i].disabled) {
+                return false;
+              }
+            }
+
+            return true;
+    }
 }
 
 /**
@@ -599,10 +626,13 @@ wFORMS.behaviors.validation.instance.prototype.validateRequired = function(eleme
  * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateOneRequired = function(element) {
-	if(element.nodeType != 1) return false;
-
-	if(this.isSwitchedOff(element))
+	if(element.nodeType != 1) {
 		return false;
+	}
+
+	if(this.isSwitchedOff(element)) {
+		return false;
+	}
 
 	switch(element.tagName) {
 		case "INPUT":
@@ -984,13 +1014,6 @@ wFORMS.behaviors.validation.instance.prototype.dateTimeRangeTestCommon = functio
     return true;
 };
 
-
-
-
-
-
-
-
 wFORMS.behaviors.validation.enableResumeLater = function() {
 
 	var b = document.getElementById('tfa_resumeLater');
@@ -1061,17 +1084,18 @@ wFORMS.behaviors.validation.enableResumeLater = function() {
 				}
 
 				elem = document.getElementById('tfa_saveForLater');
-				if(!elem.checked) {
-					elem.checked = true;
+
+				if(elem && !elem.checked) {
+					elem.click();
 				}
-				if(elem.scrollIntoView) {
+
+				if(elem && elem.scrollIntoView) {
 					elem.scrollIntoView();
 				} else {
 					location.hash="#tfa_saveForLater";
 				}
 
-				var b = wFORMS.getBehaviorInstance(f,"switch");
-				b.run(null, elem);
+				(new wFORMS.behaviors['condition'].Trigger('#tfa_saveForLater')).trigger();
 			}
 		}
 
