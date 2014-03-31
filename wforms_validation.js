@@ -1191,6 +1191,15 @@ wFORMS.behaviors.word_counter.instance.prototype = {
         element.addEventListener('keyup', function() {
             self.updateCounter(element);
         }, false);
+        element.addEventListener('paste', function() {
+            setTimeout(function(){self.updateCounter(element);},0);
+        }, false);
+        element.addEventListener('cut', function() {
+            setTimeout(function(){self.updateCounter(element);},0);
+        }, false);
+        element.addEventListener('focus', function() {
+            self.updateCounter(element);
+        }, false);
         element.addEventListener('focus', function() {
             self.counter.style.visibility = 'visible';
         }, false);
