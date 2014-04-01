@@ -1238,7 +1238,7 @@ wFORMS.behaviors.word_counter.instance.prototype = {
             this.counter.style.color = 'red';
         }
 
-        this.counter.innerHTML = this.maxWords - this.wordCount + this.counter.message; // displays the number of words left (max-current)
+        this.counter.innerHTML = Math.abs(this.maxWords - this.wordCount) + this.counter.message; // displays the number of words left (max-current)
         element.count = this.wordCount;
     }
 }
