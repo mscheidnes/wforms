@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
+
+    <script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
+    <script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
+    <script type="text/javascript" src="../wforms_core.js"></script>
+    <script type="text/javascript" src="../wforms_validation.js"></script>
+
+    <script>
+        wFORMS.behaviors.repeat = {};
+    </script>
+
+    <script type="text/javascript" src="../localization/localization-en_US.js"></script>
+
+
+    <script>
+
+        // Wait until wForms is initalized.
+        var checkTimer = setInterval(function(){
+            if(wFORMS.initialized === true){
+                clearInterval(checkTimer);
+                setUpPageStatus = 'complete';
+            }
+        }, 50);
+
+        function setUpPage() { }
+
+        var bInstance = null;  // wForms validation behavior instance.
+
+        function setUp() {
+            var form = document.getElementById('tfa_0');
+            bInstance = wFORMS.getBehaviorInstance(form, 'validation');
+
+            // disable onFail event.
+            wFORMS.behaviors.validation.onFail = function(){};
+        }
+
+        function tearDown() {}
+
+
+        function testOk() {
+            assertTrue(!!bInstance);
+        }
+
+
+
+
+    </script>
+
+
+    </head>
+    <body>
+
+        <form method="post" action="" id="tfa_0">
+            <div id="tfa_1-D" class="oneField">
+                <label id="tfa_1-L" for="tfa_1" class="label preField">Word Count</label>
+                <div class="inputWrapper">
+                    <input type="text" id="tfa_1" name="tfa_1" value="" placeholder="" data-maxwords="5" class="count-words">
+                </div>
+            </div>
+
+            <div id="tfa_2-D" class="oneField">
+                <label id="tfa_2-L" for="tfa_2" class="label preField ">Word Count (textarea)</label>
+                <div class="inputWrapper">
+                    <textarea data-maxwords="5" id="tfa_2" name="tfa_2" class="count-words"></textarea>
+                </div>
+            </div>
+
+            <div class="actions" id="tfa_0-A"><input type="submit" class="primaryAction" value="Submit"></div>
+        </form>
+    </body>
+    </html>
