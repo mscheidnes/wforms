@@ -53,7 +53,9 @@ wFORMS.behaviors.validation = {
         isTime             : "This does not appear to be a valid time.",
 		isPhone			: "Please enter a valid phone number.",
 		isCustom		: "Please enter a valid value.",
-                wordCount : "There are too many words in this field.",
+                wordCount : "This field is over the word limit.",
+		wordsRemPos : " words remaining",
+		wordsRemNeg : " words over the limit",
         notification    : "The form is not complete and has not been submitted yet. There was %% problem(s) with your submission.",  // %% will be replaced by the actual number of errors.
         rangeNumber    : {
             max: 'The value must be smaller than the upper bound %1',
@@ -1211,7 +1213,7 @@ wFORMS.behaviors.word_counter.instance.prototype = {
         var p = element.parentNode;
         this.counter = document.createElement('span');
         this.counter.className = wFORMS.behaviors.word_counter.CLASSNAME;
-        this.counter.message = '  words remaining';
+        this.counter.message = wFORMS.behaviors.validation.messages.wordsRemPos;
         this.counter.style.marginLeft = '10px';
         this.counter.style.visibility = 'hidden';
         element.count = 0;
@@ -1227,11 +1229,15 @@ wFORMS.behaviors.word_counter.instance.prototype = {
         } catch (err) {
             this.wordCount = 0;
         }
+
         if (this.maxWords - this.wordCount >= 0) {
+	    this.counter.message = wFORMS.behaviors.validation.messages.wordsRemPos;
             this.counter.style.color = 'black';
         } else {
+	    this.counter.message = wFORMS.behaviors.validation.messages.wordsRemNeg;
             this.counter.style.color = 'red';
         }
+
         this.counter.innerHTML = this.maxWords - this.wordCount + this.counter.message; // displays the number of words left (max-current)
         element.count = this.wordCount;
     }
