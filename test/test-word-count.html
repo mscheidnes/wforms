@@ -33,7 +33,7 @@
         var bInstance = null;  // wForms validation behavior instance.
 
         function setUp() {
-            var form = document.getElementById('tfa_0');
+            form = document.getElementById('tfa_0');
             bInstance = wFORMS.getBehaviorInstance(form, 'validation');
 
             // disable onFail event.
@@ -47,8 +47,27 @@
             assertTrue(!!bInstance);
         }
 
+        function testError() {
+            var fieldA =  document.getElementById('tfa_1');
+            var fieldB =  document.getElementById('tfa_2')
+            var value = null; //simulated input form user
 
+            assertTrue('Validation should pass becuase there are no values set',bInstance.run(null,form));
 
+            value = 'This is 5 words long.'
+            fieldA.value = value;
+            fieldB.value = value;
+            // assert that test will pass when length is equal
+            assertTrue(bInstance.run(null,form));
+
+            value = "This phrase is 6 words long";
+            fieldA.value = value;
+            fieldA.focus();
+            fieldB.value = value;
+            fieldB.focus();
+            //assert that that validation on these will fail.
+            assertFalse(bInstance.run(null,form));
+        }
 
     </script>
 

@@ -1190,6 +1190,10 @@ wFORMS.behaviors.word_counter = {
 wFORMS.behaviors.word_counter.instance.prototype = {
     addHandlers: function(element) {
         var self = this;
+
+        if(!element.addEventListener){
+            wFORMS.standardizeElement(element);
+        }
         element.addEventListener('keyup', function() {
             self.updateCounter(element);
         }, false);
@@ -1232,10 +1236,10 @@ wFORMS.behaviors.word_counter.instance.prototype = {
 
         if (this.maxWords - this.wordCount >= 0) {
 	    this.counter.message = wFORMS.behaviors.validation.messages.wordsRemPos;
-            this.counter.style.color = 'black';
-        } else {
+            this.counter.className = this.counter.className.replace(/errMsg/,'');
+        } else if(!this.counter.className.match(/errMsg/)) {
 	    this.counter.message = wFORMS.behaviors.validation.messages.wordsRemNeg;
-            this.counter.style.color = 'red';
+            this.counter.className += ' errMsg';
         }
 
         this.counter.innerHTML = Math.abs(this.maxWords - this.wordCount) + this.counter.message; // displays the number of words left (max-current)
