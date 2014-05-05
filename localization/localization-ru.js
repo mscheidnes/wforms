@@ -4,7 +4,7 @@
 // This software is licensed under the CC-GNU LGPL <http://creativecommons.org/licenses/LGPL/2.1/>
 //
 // See http://formassembly.com/blog/how-to-localize-wforms/
-// Example: 
+// Example:
 // <head>...
 // <script type="text/javascript" src="wforms.js" ></script>
 // <script type="text/javascript" src="localization-XX.js" ></script>
@@ -25,7 +25,7 @@ wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "Добавить ряд",
 	ADD_TITLE 		: "Повторить предыдущее поле или группу полей.",
 	REMOVE_CAPTION 	: "Удалить",
-	REMOVE_TITLE 	: "Удалить предыдущее поле или группу полей."	
+	REMOVE_TITLE 	: "Удалить предыдущее поле или группу полей."
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -34,7 +34,7 @@ wFORMS.behaviors.paging.MESSAGES = {
 }
 
 
-// Alpha & Alphanumeric Input Validation: 
+// Alpha & Alphanumeric Input Validation:
 wFORMS.behaviors.validation.instance.prototype.validateAlpha = function(element, value) {
 	// Basic Latin
 	var reg =  /^[\u0400-\u04FF]+$/;
@@ -43,7 +43,7 @@ wFORMS.behaviors.validation.instance.prototype.validateAlpha = function(element,
 	// Latin Extended-A
 	// var reg =  /^[\u0041-\u007A\u00C0-\u00FF\u0100-\u017F]+$/;
 	// See unicode range below for other languages
-	
+
 	return this.isEmpty(value) || reg.test(value);
 }
 wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(element, value) {
@@ -54,9 +54,12 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	// Latin Extended-A
 	// var reg = /^[\u0030-\u0039\u0041-\u007A\u00C0-\u00FF\u0100-\u017F]+$/;
 	// See unicode range below for other languages
-	
+
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[\u0400-\u04FF]");
 
 // Unicode ranges (from http://www.unicode.org/) :
 // \u0030-\u0039 : Numbers 0-9

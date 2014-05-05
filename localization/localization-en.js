@@ -1,7 +1,7 @@
 // Localization for FormAssembly.com / wForms v3.0
 // English (US) - May 5, 2009, 10:33 am
 wFORMS.behaviors.validation.messages = {
-	oneRequired 	: "This section is required.",		
+	oneRequired 	: "This section is required.",
 	isRequired 		: "This field is required.",
 	isAlpha 		: "The text must use alphabetic characters only (a-z, A-Z). Numbers are not allowed.",
 	isEmail 		: "This does not appear to be a valid email address.",
@@ -39,6 +39,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg =  /^[\u0030-\u0039\u0041-\u007A]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[\u0041-\u007A]");
 
 // Calendar
 if(!wFORMS.helpers.calendar) {

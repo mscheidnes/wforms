@@ -4,7 +4,7 @@
 // This software is licensed under the CC-GNU LGPL <http://creativecommons.org/licenses/LGPL/2.1/>
 //
 // See http://formassembly.com/blog/how-to-localize-wforms/
-// Example: 
+// Example:
 // <head>...
 // <script type="text/javascript" src="wforms.js" ></script>
 // <script type="text/javascript" src="localization-fa.js" ></script>
@@ -19,14 +19,14 @@ wFORMS.behaviors.validation.messages = {
 	isAlphanum 		: "لطفا فقط از عدد و حروف استفاده کنید",
 	isDate 			: "به نظر یک تاریخ معتبر نمی آید",
 	isCustom		: "This value is invalid",
-	notification	: "%% خطا(ها) پیدا شد.فرم شما فرستاده نشد.لطفا اطلاعات وارد شده را چک کنی"	
+	notification	: "%% خطا(ها) پیدا شد.فرم شما فرستاده نشد.لطفا اطلاعات وارد شده را چک کنی"
 }
 
 wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "یک پاسخ دیگر",
 	ADD_TITLE 		: "",
 	REMOVE_CAPTION 	: "حذف",
-	REMOVE_TITLE 	: ""	
+	REMOVE_TITLE 	: ""
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -35,7 +35,7 @@ wFORMS.behaviors.paging.MESSAGES = {
 }
 
 
-// Alpha & Alphanumeric Input Validation: 
+// Alpha & Alphanumeric Input Validation:
 wFORMS.behaviors.validation.instance.prototype.validateAlpha = function(element, value) {
 	var reg =  /^[\u0600-\u06FF]+$/;
 	return this.isEmpty(value) || reg.test(value);
@@ -44,6 +44,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg =  /^[\u0030-\u0039\u0600-\u06FF]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[\u0600-\u06FF]");
 
 // Unicode ranges (from http://www.unicode.org/) :
 // \u0030-\u0039 : Numbers 0-9

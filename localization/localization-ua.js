@@ -4,8 +4,8 @@
 // This software is licensed under the CC-GNU LGPL <http://creativecommons.org/licenses/LGPL/2.1/>
 
 // Більше про локалізацю тут: http://formassembly.com/blog/how-to-localize-wforms/
-// Цей файл повинен бути підключений *ПІСЛЯ* wforms.js 
-// Приклад: 
+// Цей файл повинен бути підключений *ПІСЛЯ* wforms.js
+// Приклад:
 // <head>...
 // <script type="text/javascript" src="wforms.js" ></script>
 // <script type="text/javascript" src="localization-ua.js" ></script>
@@ -27,7 +27,7 @@ wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "Додати рядок",
 	ADD_TITLE 		: "Скопіює це поле або секцію.",
 	REMOVE_CAPTION 	: "Видалити",
-	REMOVE_TITLE 	: "Видалить це поле або секцію."	
+	REMOVE_TITLE 	: "Видалить це поле або секцію."
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -36,7 +36,7 @@ wFORMS.behaviors.paging.MESSAGES = {
 }
 
 
-// Alpha & Alphanumeric Input Validation: 
+// Alpha & Alphanumeric Input Validation:
 wFORMS.behaviors.validation.instance.prototype.validateAlpha = function(element, value) {
 	var reg = /^[\u0400-\u04FF]+$/;
 	return this.isEmpty(value) || reg.test(value);
@@ -45,6 +45,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg = /^[\u0030-\u0039\u0400-\u04FF]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[\u0400-\u04FF]");
 
 // Unicode ranges (from http://www.unicode.org/) :
 // \u0030-\u0039 : Numbers 0-9
