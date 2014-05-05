@@ -18,7 +18,7 @@ wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "Aggiungi una riga",
 	ADD_TITLE 		: "Ripete il campo o il gruppo di campi precedenti.",
 	REMOVE_CAPTION 	: "Rimuovi",
-	REMOVE_TITLE 	: "Rimuove il campo o il gruppo di campi precedenti."	
+	REMOVE_TITLE 	: "Rimuove il campo o il gruppo di campi precedenti."
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -38,6 +38,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg =  /^[\u0030-\u0039a-zA-Z\s\u00C0-\u00FF]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[a-zA-Z\u00C0-\u00FF]");
 
 // Calendar
 if(!wFORMS.helpers.calendar) {
