@@ -23,7 +23,7 @@ wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "Antwoord toevoegen",
 	ADD_TITLE 		: "Voeg een rij toe",
 	REMOVE_CAPTION 	: "Verwijderen",
-	REMOVE_TITLE 	: "Verwijdert het voorgaande veld of veld groep."	
+	REMOVE_TITLE 	: "Verwijdert het voorgaande veld of veld groep."
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -43,6 +43,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg =  /^[\u0030-\u0039a-zA-Z\s\u00C0-\u00FF]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[a-zA-Z\u00C0-\u00FF]");
 
 // Calendar
 if(!wFORMS.helpers.calendar) {
@@ -86,20 +89,20 @@ wFORMS.behaviors.validation.instance.prototype.validateDate = function(element, 
    if(this.isEmpty(value)){
        return true;
    }
- 
+
    var cfg = wFORMS.helpers.calendar.locale;
-   
+
    var re = /^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})$/
    if (re.test(value)) {
       var dArr = value.split(/[\/\.\-]/);
-      
-      var yr = dArr[cfg.MDY_YEAR_POSITION-1]; 
+
+      var yr = dArr[cfg.MDY_YEAR_POSITION-1];
       if(yr.length==2) yr = (yr>50) ? '19'+yr : '20'+yr;
-      var mo = parseInt(dArr[cfg.MDY_MONTH_POSITION-1],10); 
+      var mo = parseInt(dArr[cfg.MDY_MONTH_POSITION-1],10);
       var dy = parseInt(dArr[cfg.MDY_DAY_POSITION-1],10);
       var d = new Date(yr,mo-1,dy);
-      return (d.getMonth() + 1 == mo && 
-    		  d.getDate() == dy && 
+      return (d.getMonth() + 1 == mo &&
+    		  d.getDate() == dy &&
     		  d.getFullYear() == yr);
    }
    else {
