@@ -40,6 +40,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	return this.isEmpty(value) || reg.test(value);
 }
 
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[a-zA-Z\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]");
+
 // Calendar
 if(!wFORMS.helpers.calendar) {
 	wFORMS.helpers.calendar = {};
