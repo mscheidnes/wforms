@@ -134,6 +134,7 @@ wFORMS.behaviors.autoformat = {
             that.updateValue();
             that.caret.nudge(0);    // bump to first mask char
         });
+        this.element.addEventListener('blur', function() { that.blur(); });
         this.element.addEventListener('keydown', this.handlers.keyDown);
         this.element.addEventListener('keypress', this.handlers.keyPress);
         this.element.addEventListener('keyup', this.handlers.keyUp);
@@ -357,6 +358,13 @@ wFORMS.behaviors.autoformat.Mask.prototype.getEventHandlers = function() {
     };
 };
 
+/**
+ * Remove mask character on blur to prevent interference with validation
+ * plugin.
+ */
+wFORMS.behaviors.autoformat.Mask.prototype.blur = function() {
+  this.element.value = this.Vals.join('');
+};
 
 /**
  * Updates the value in the input box with contents of variable 'contents'.
