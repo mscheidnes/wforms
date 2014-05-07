@@ -363,7 +363,7 @@ wFORMS.behaviors.autoformat.Mask.prototype.getEventHandlers = function() {
  * plugin.
  */
 wFORMS.behaviors.autoformat.Mask.prototype.blur = function() {
-  this.element.value = this.Vals.join('');
+    this.element.value = this.contents.join('').replace(/[#$]/g, '');
 };
 
 /**
@@ -529,7 +529,7 @@ wFORMS.behaviors.autoformat.Mask.prototype.paste = function() {
  * mask characters.
  */
 wFORMS.behaviors.autoformat.Mask.prototype.submit = function () {
-    this.element.value = this.Vals.join('');
+    this.element.value = this.contents.join('').replace(/[#$]/g, '');
 };
 
 /**
