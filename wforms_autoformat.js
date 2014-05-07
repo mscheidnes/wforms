@@ -4,7 +4,19 @@ if (typeof(wFORMS) == "undefined") {
 
 wFORMS.behaviors.autoformat = {
 
-    ATTRIBUTE_SELECTOR: 'input[autoformat]',
+    /**
+     * Attribute name used to tag input elements (probably 'autoformat' or
+     * 'data-autoformat'). Note that if you change this here, you also need to
+     * change ATTRIBUTE_SELECTOR just below (since plain JS objects can't
+     * reference themselves).
+     */
+    AUTOFORMAT_ATTRIBUTE: 'data-autoformat',
+
+    /**
+     * CSS selector used to find all appropriate autoformat elements.
+     */
+    ATTRIBUTE_SELECTOR: 'input[data-autoformat]',
+
     ALLOWED_ELEMENT_TYPE: ['input[type="text"]'],
 
     /**
@@ -82,7 +94,7 @@ wFORMS.behaviors.autoformat = {
         wFORMS.standardizeElement(this.parentForm);
 
         // Autoformat string, from data-autoformat attribute on Elem.
-        this.formatString = this.element.getAttribute('autoformat');
+        this.formatString = this.element.getAttribute(wFORMS.behaviors.autoformat.AUTOFORMAT_ATTRIBUTE);
 
         // Array of characters holding the actual content of the element.
         this.contents = this.formatString.split('');
