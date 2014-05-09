@@ -554,28 +554,47 @@ wFORMS.behaviors.autoformat.Mask.prototype.isCharAllowed = function(c, maskChar)
 
 /**
  * Updates the 'contents' array with values from the Vals array, then
- * updates the Elem value itself.
+ * updates the element value itself.
  */
 wFORMS.behaviors.autoformat.Mask.prototype.reformat = function() {
-    var i,
-        tmp = this.Vals.slice();   // working copy of values
+    var i, v, newVals = [],
+        tmp = this.Vals.slice(),   // working copy of values
+
+        // Process a position in the format/contents array. Pass this an index
+        // into that array. This exists to avoid duplicating logic for both
+        // LTR and RTL inputs.
+        processChar = function (i) {
+            if (!tmp) {
+                // no more user-submitted values, use format character
+                this.contents[i] = this.format[i];
+            } else if (this.isMaskChar(this.format[i])) {
+                v = tmp.shift();
+                if (v && this.isCharAllowed(v, this.format[i])) {
+                    this.contents[i] = v;
+                    newVals.push(v);
+                } else {
+                    // If the character isn't allowed, we'll just discard the
+                    // rest of the input. This prevents having to deal with
+                    // edge cases with mixed numbers/letters where removing
+                    // some characters can invalidate the mask.
+                    tmp = null;
+                    this.contents[i] = this.format[i];
+                }
+            }
+        };
 
     if (this.isRtl) {
         for (i = this.format.length - 1; i >= 0; i--) {
-            if (this.isMaskChar(this.format[i])) {
-                this.contents[i] = tmp.shift() || this.format[i];
-            }
+            processChar.call(this, i);
         }
-
     } else {
         for (i = 0; i < this.format.length; i++) {
-            if (this.isMaskChar(this.format[i])) {
-                this.contents[i] = tmp.shift() || this.format[i];
-            }
+            processChar.call(this, i);
         }
     }
 
-    // console.log(contents);
+    this.Vals = newVals.slice();
+    this.caret.savePosition();      // to set this.valIndex properly
     this.updateValue();
 };
 
