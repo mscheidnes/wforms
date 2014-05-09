@@ -406,13 +406,11 @@ wFORMS.behaviors.autoformat.Mask.prototype.inputChar = function(newChar) {
         return;
     }
 
-    // console.log(Vals, valIndex);
-
     this.caret.savePosition();
 
     if (caretPos.isRange) {
         // splice out the selection and replace
-        this.Vals.splice(this.valIndex.start, this.valIndex.end - valIndex.start, newChar);
+        this.Vals.splice(this.valIndex.start, this.valIndex.end - this.valIndex.start, newChar);
     } else {
         // no selection, just insert the char at the caret position
         this.Vals.splice(this.valIndex.start, 0, newChar);
@@ -471,7 +469,6 @@ wFORMS.behaviors.autoformat.Mask.prototype.forwardDel = function() {
  */
 wFORMS.behaviors.autoformat.Mask.prototype.cut = function() {
     var fromEnd = 0,
-        pos = this.caret.previousPosition(),
         caretPos = this.caret.getPosition();
 
     this.Vals.splice(this.valIndex.start, this.valIndex.end - this.valIndex.start);
@@ -814,7 +811,7 @@ wFORMS.behaviors.autoformat.Caret.prototype.nudge = function(delta) {
                 !this.mask.isMaskChar(this.mask.format[this.caretPos.position - 1])) {
 
                     if (delta === 0) {
-                        this.caretPos.position -= 1
+                        this.caretPos.position -= 1;
                     } else {
                         this.caretPos.position += (delta > 0) ? 1 : -1;
                     }
@@ -942,4 +939,4 @@ wFORMS.behaviors.autoformat.Caret.prototype._setValIndex = function() {
 
     }
     this.mask.valIndex = {start: start, end: end};
-}
+};
