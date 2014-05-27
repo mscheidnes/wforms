@@ -3,7 +3,7 @@
 // This software is licensed under the CC-GNU LGPL <http://creativecommons.org/licenses/LGPL/2.1/>
 //
 // See http://formassembly.com/blog/how-to-localize-wforms/
-// Example: 
+// Example:
 // <head>...
 // <script type="text/javascript" src="wforms.js" ></script>
 // <script type="text/javascript" src="localization-af.js" ></script>
@@ -25,7 +25,7 @@ wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "Voeg nog 'n antwoord by",
 	ADD_TITLE 		: "Sal hierdie vraag of afdeling herhaal.",
 	REMOVE_CAPTION 	: "Verwyder",
-	REMOVE_TITLE 	: "Sal hierdie vraag of afdeling verwyder."	
+	REMOVE_TITLE 	: "Sal hierdie vraag of afdeling verwyder."
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -34,7 +34,7 @@ wFORMS.behaviors.paging.MESSAGES = {
 }
 
 
-// Alpha & Alphanumeric Input Validation: 
+// Alpha & Alphanumeric Input Validation:
 wFORMS.behaviors.validation.instance.prototype.validateAlpha = function(element, value) {
 	var reg =  /^[\u0041-\u007A\u00C0-\u00FF\u0100-\u017F]+$/;
 	return this.isEmpty(value) || reg.test(value);
@@ -43,6 +43,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg = /^[\u0030-\u0039\u0041-\u007A\u00C0-\u00FF\u0100-\u017F]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[\u0041-\u007A\u00C0-\u00FF\u0100-\u017F]");
 
 // Unused translations:
 // Weak Passord: Onveilige wagwoord. Jou wagwoord behoort tussen 4 en 12 karakters lank te wees en 'n kombinasie van hoofletters en kleinletters wees.

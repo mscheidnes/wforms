@@ -18,7 +18,7 @@ wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "اضف إجابة أخرى",
 	ADD_TITLE 		: "",
 	REMOVE_CAPTION 	: "حذف",
-	REMOVE_TITLE 	: ""	
+	REMOVE_TITLE 	: ""
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -38,3 +38,6 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg =  /^[\u0030-\u0039\u0600-\u06FF]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[\u0600-\u06FF]");

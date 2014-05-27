@@ -1,0 +1,30 @@
+	<script> 
+		// first reset and remove default wForms
+		wFORMS = undefined;
+		var oldScript = document.querySelector('script[src*="wforms.js"]');
+		oldScript.parentNode.removeChild(oldScript);
+	</script>
+	
+	<!-- Now to load the fragmented version of wForms -->
+	<!-- Base 2 Scripts -->
+	<script src="wForms/dev/lib/base2/v1.0.1/src/base2.js"></script>
+	<script src="wForms/dev/lib/base2/v1.0.1/src/base2-dom.js"></script>
+	
+	<!-- wForms Core Scripts -->
+	<script src="wForms/dev/wforms_core.js"></script>
+	<script src="wForms/dev/wforms_hint.js"></script>
+	<script src="wForms/dev/wforms_paging.js"></script>
+	<script src="wForms/dev/wforms_repeat.js"></script>
+	<script src="wForms/dev/wforms_switch.js"></script>
+	<script src="wForms/dev/wforms_condition.js"></script>
+	<script src="wForms/dev/wforms_validation.js"></script>
+	<script src="wForms/dev/wforms_calculation.js"></script>
+	<script src="wForms/dev/wforms_autoformat.js"></script>
+	<script src="wForms/dev/wforms_length_prompt.js"></script>
+	<script src="wForms/dev/wforms_dependent_list.js"></script>
+	<script src="wForms/dev/wforms_prefill.js"></script>
+	
+	<!-- added scripts for custom build -->
+	
+	<!-- Warn in Console that this is dev version -->
+	<script> console.warn('wForms loaded in developer mode'); </script>
