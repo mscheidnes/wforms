@@ -330,7 +330,30 @@
 			testField.value='test@abc.e.mail.co.jp';
 			// Test validation rule
 			assertTrue('test@abc.e.mail.co.jp should pass email validation', bInstance.run(null, testForm));
+			
+			testField.value = 'test   test@test.com';
+			// Test validation rule
+			assertFalse('test   test@test.com should fail email validation', bInstance.run(null, testForm))
 
+			testField.value = 'test @test.com';
+			// Test validation rule
+			assertFalse('test @test.com should fail email validation', bInstance.run(null, testForm))
+				
+			testField.value = 'test@te st.com';
+			// Test validation rule
+			assertFalse('test@te st.com should fail email validation', bInstance.run(null, testForm))
+			
+			testField.value = 'test@test .com';
+			// Test validation rule
+			assertFalse('test@test .com should fail email validation', bInstance.run(null, testForm))
+			
+			testField.value = 'test.@test.com';
+			// Test validation rule
+			assertFalse('test.@test.com should fail email validation', bInstance.run(null, testForm))
+			
+						testField.value = '.test@test.com';
+			// Test validation rule
+			assertFalse('.test@test.com should fail email validation', bInstance.run(null, testForm))
 		}
 
 		function testValidatePhone() {
