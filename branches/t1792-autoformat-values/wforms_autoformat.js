@@ -129,6 +129,14 @@ wFORMS.behaviors.autoformat = {
         // Caret instance for this mask
         this.caret = new wFORMS.behaviors.autoformat.Caret(this);
 
+        // Initialize Vals, for cases where element already has value
+        if (this.element.value !== '') {
+          var chars = this.element.value.split('');
+          for (var i = 0; i < chars.length; i++) {
+            this.inputChar(chars[i]);
+          }
+        }
+
         // User interaction listeners
         this.element.addEventListener('focus', function() {
             that.updateValue();
