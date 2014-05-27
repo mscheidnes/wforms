@@ -18,7 +18,7 @@ wFORMS.behaviors.repeat.MESSAGES = {
 	ADD_CAPTION 	: "Afegeix una altra fila. ",
 	ADD_TITLE 		: "Repiteix el camp o el grup anterior. ",
 	REMOVE_CAPTION 	: "Suprimeix",
-	REMOVE_TITLE 	: "Suprimeix el camp o el grup anterior."	
+	REMOVE_TITLE 	: "Suprimeix el camp o el grup anterior."
 }
 
 wFORMS.behaviors.paging.MESSAGES = {
@@ -38,6 +38,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	var reg =  /^[\u0030-\u0039\u0041-\u007A\u00C0-\u00FF\u0100-\u017F]+$/;
 	return this.isEmpty(value) || reg.test(value);
 }
+
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[\u0041-\u007A\u00C0-\u00FF\u0100-\u017F]");
 
 // Calendar
 if(!wFORMS.helpers.calendar) {

@@ -49,6 +49,9 @@ wFORMS.behaviors.validation.instance.prototype.validateAlphanum = function(eleme
 	return this.isEmpty(value) || reg.test(value);
 }
 
+wFORMS.behaviors.autoformat.NUMERIC_REGEX = new RegExp("[0-9]");
+wFORMS.behaviors.autoformat.ALPHABETIC_REGEX = new RegExp("[a-zA-Z]");
+
 // Calendar
 if(!wFORMS.helpers.calendar) {
 	wFORMS.helpers.calendar = {};
@@ -85,3 +88,4 @@ cfg.MDY_DAY_POSITION 		= 2;
 cfg.MDY_MONTH_POSITION 		= 1;
 cfg.MDY_YEAR_POSITION		= 3;
 cfg.DATE_FIELD_DELIMITER	= '/';
+
