@@ -200,7 +200,7 @@ wFORMS.behaviors.autoformat = {
         }
 
         return element.id;
-    },
+    }
 };
 
 wFORMS.behaviors.autoformat.instance.prototype.onApply = function() { };
