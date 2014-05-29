@@ -1,0 +1,20 @@
+<html>
+<head>
+
+   <title>Test base2 removeClass</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>	
+	<script type="text/javascript" src="http://base2.googlecode.com/svn/trunk/lib/base2-dom-fp.js"></script>
+	<script type="text/javascript">
+		function test() {
+			elem = document.getElementById('testdiv');
+			base2.DOM.bind(elem);
+			elem.removeClass('removeme');
+			alert(elem.className.length);
+		}
+ 	</script>
+</head>
+
+<body onload='test()'>
+	<div class="removeme someclass" id="testdiv"></div>
+</body>
+</html>
