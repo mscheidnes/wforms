@@ -131,25 +131,17 @@ wFORMS.behaviors.autoformat = {
 
         // Initialize Vals, for cases where element already has value
         if (this.element.value !== '') {
-          var chars = this.element.value.split('');
-          for (var i = 0; i < chars.length; i++) {
-            this.inputChar(chars[i]);
-          }
+            var chars = this.element.value.split('');
+            for (var i = 0; i < chars.length; i++) {
+                this.inputChar(chars[i]);
+            }
         }
 
-        // User interaction listeners
-        this.element.addEventListener('focus', function() {
-            that.updateValue();
-            that.caret.nudge(0);    // bump to first mask char
-        });
-        this.element.addEventListener('blur', function() { that.blur(); });
-        this.element.addEventListener('keydown', this.handlers.keyDown);
-        this.element.addEventListener('keypress', this.handlers.keyPress);
-        this.element.addEventListener('keyup', this.handlers.keyUp);
-        this.element.addEventListener('click', this.handlers.click);
-        this.element.addEventListener('cut', this.handlers.cut);
-        this.element.addEventListener('paste', this.handlers.paste);
-        this.parentForm.addEventListener('submit', this.handlers.submit);
+        // Add user interaction listeners. This has to be done in a setTimeout
+        // so that the input value has a chance to update in the case of an
+        // element which already has a value (if there is a default value, for
+        // instance).
+        window.setTimeout(function() { that.addListeners(); }, 1);
 
         // Inputs set to RTL behave strangely, so we'll set it to act like an LTR
         // box here (characters always fill in from left to right), and fake the CSS
@@ -367,6 +359,27 @@ wFORMS.behaviors.autoformat.Mask.prototype.getEventHandlers = function() {
 };
 
 /**
+ * Add listeners for user interaction.
+ */
+wFORMS.behaviors.autoformat.Mask.prototype.addListeners = function() {
+    var that = this;
+
+    this.element.addEventListener('focus', function() {
+        that.updateValue();
+        that.caret.nudge(0);    // bump to first mask char
+    });
+    this.element.addEventListener('blur', function() { this.blur(); });
+    this.element.addEventListener('keydown', this.handlers.keyDown);
+    this.element.addEventListener('keypress', this.handlers.keyPress);
+    this.element.addEventListener('keyup', this.handlers.keyUp);
+    this.element.addEventListener('click', this.handlers.click);
+    this.element.addEventListener('cut', this.handlers.cut);
+    this.element.addEventListener('paste', this.handlers.paste);
+    this.parentForm.addEventListener('submit', this.handlers.submit);
+    this.element.blur();
+};
+
+/**
  * Remove extra characters on blur to prevent interference with validation
  * plugin.
  */
@@ -423,8 +436,6 @@ wFORMS.behaviors.autoformat.Mask.prototype.inputChar = function(newChar) {
         // no selection, just insert the char at the caret position
         this.Vals.splice(this.valIndex.start, 0, newChar);
     }
-
-    // console.log(Vals);
 
     this.Vals.length = this.VAL_LENGTH;    // throw away extra chars
     this.reformat();
@@ -816,7 +827,6 @@ wFORMS.behaviors.autoformat.Caret.prototype.cloneCaretPos = function() {
  */
 wFORMS.behaviors.autoformat.Caret.prototype.nudge = function(delta) {
     delta = (delta !== undefined) ? delta : 1;
-    //console.log(caretPos);
 
     if (this.isRtl) {
         delta = -delta;
@@ -858,7 +868,6 @@ wFORMS.behaviors.autoformat.Caret.prototype.nudge = function(delta) {
     }
 
     this.caretPos.start = this.caretPos.end = this.caretPos.position;
-    // console.log("done nudging", caretPos);
     return this.update();
 };
 
