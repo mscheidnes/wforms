@@ -21,8 +21,10 @@ if (typeof(base2) == "undefined") {
  */
 base2.DOM.HTMLElement.implement({
   hasClass : function($node, $class) {
-	if($node.classList && $node.classList.contains) return $node.classList.contains($class);
-	else return $node.className.match(new RegExp('(\\s|^)'+$class+'(\\s|$)'));
+    if((' ' + $node.className + ' ').indexOf(' ' + $class +' ') != -1) {
+        return true;
+    }
+    return false;
   },
   removeClass : function($node, $class) {
 	if (base2.DOM.HTMLElement.hasClass($node,$class)) {

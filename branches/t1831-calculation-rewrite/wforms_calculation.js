@@ -39,109 +39,231 @@ wFORMS.behaviors.calculation  = {
         this.behavior = wFORMS.behaviors.calculation;
         this.target = f;
         this.calculations = [];
-        //this.variables = [];
+        this.variables = {};
+
+        // handle case where repeated sections are removed.
+        if(wFORMS.behaviors.repeat) {
+            var self = this;
+            wFORMS.behaviors.repeat.observeRemoveComplete( function(elem){self.unApply(elem);} );
+        }
     }
 }
 
 /**
- * Factory Method.
- * Applies the behavior to the given HTML element by setting the appropriate event handlers.
- * @param {domElement} f An HTML element, either nested inside a FORM element or (preferably) the FORM element itself.
- * @return {object} an instance of the behavior
+ * Applies the behavior to the given HTML element by setting the appropriate event handlers and populating
+ * the internal data structures.
+ * @param {domElement}  f An HTML element, either nested inside a FORM element or the FORM element itself.
+ * @return {object}     an instance of the behavior
  */
-wFORMS.behaviors.calculation.applyTo = function(f) {
+wFORMS.behaviors.calculation.applyTo = function(element) {
 
-
+    // Get to the <form> element.
+    var f = element;
     while(f && f.tagName!='FORM') {
         f = f.parentNode;
     }
+    if(!f) {
+        return; // no form found, nothing to do.
+    }
 
+    // retrieve the existing instance for this form, if it already exists.
     var b = wFORMS.getBehaviorInstance(f,'calculation');
     if(!b) {
+        // otherwise, create it.
         b = new wFORMS.behaviors.calculation.instance(f);
+        var isNewInstance = true;
     } else {
-        b.calculations = [];
+        var isNewInstance = false;
     }
 
-    if(wFORMS.behaviors.repeat && !b._repeatRemoveHandler) {
-        var _callback = wFORMS.behaviors.repeat.onRemove;
-        b._repeatRemoveHandler = function() {
-            wFORMS.behaviors.calculation.applyTo(f);
-            if(_callback) _callback.apply(this, arguments);
-        }
-        wFORMS.behaviors.repeat.onRemove = b._repeatRemoveHandler;
-    }
+    var mustRecompute = [];
 
-    base2.DOM.Element.querySelectorAll(f,wFORMS.behaviors.calculation.CALCULATION_SELECTOR).forEach(
+    // look for elements with calculations
+    base2.DOM.Element.querySelectorAll(element,wFORMS.behaviors.calculation.CALCULATION_SELECTOR).forEach(
+
         function(elem){
-            // extract formula
+
+            // extract formula (TODO: Handle data- attribute.)
             var formula = elem.className.substr(elem.className.indexOf('formula=')+8).split(' ')[0];
 
+            // get the list of variables in this calculations.
             var variables = formula.split(/[^a-zA-Z]+/g);
-            b.varFields = [];
 
-            // process variables, add onchange/onblur event to update total.
-            for (var i = 0; i < variables.length; i++) {
-                if(variables[i]!='') {
+            var calc = { field: elem, formula: formula, variables: variables };
 
-                    /*
-                    Binding with forEach sometime fails when using this, resulting in undefined 'variable' parameter.
-                        f.querySelectorAll("*[class*=\"...\"]");
-                    Library call works fine: base2.DOM.Document.querySelectorAll(...)
-                    */
-                    base2.DOM.Document.querySelectorAll(f,"*[class*=\""+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+variables[i]+"\"]").forEach(
-                        function(variable){
-                            if(!variable.addEventListener) {
-                                base2.DOM.bind(variable);
-                            }
-                            // make sure the variable is an exact match.
-                            var exactMatch = ((' ' + variable.className + ' ').indexOf(' '+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+variables[i]+' ')!=-1);
-                            if(!exactMatch) return;
-
-                            // listen for value changes
-                            if(!wFORMS.behaviors.calculation.isHandled(variable)){
-                                var t = variable.tagName.toLowerCase();
-                                if (t == 'input' || t == 'textarea') {
-
-                                    // toggled fields
-                                    var y = variable.type.toLowerCase();
-                                    if (t == 'input' && (y == 'radio' || y == 'checkbox')) {
-                                        variable.addEventListener('click', function(e){ return b.run(e, this)}, false);
-                                        wFORMS.behaviors.calculation.setHandledFlag(variable);
-
-                                    // text entry fields
-                                    } else {
-                                        variable.addEventListener('blur', function(e){ return b.run(e, this)}, false);
-                                        wFORMS.behaviors.calculation.setHandledFlag(variable);
-                                    }
-
-                                // select boxes
-                                } else if (t == 'select') {
-                                    variable.addEventListener('change',  function(e){ return b.run(e, this)}, false);
-                                    wFORMS.behaviors.calculation.setHandledFlag(variable);
-
-                                // unsupported elements
-                                } else {
-                                    return;
-                                }
-                            }
-
-                            b.varFields.push({name: variables[i], field: variable});
-                        }
-                    );
-                }
+            if( !b.isInCalculationTable( calc ) ) {
+                b.calculations.push(calc);
             }
-            var calc = { field: elem, formula: formula, variables: b.varFields };
-            b.calculations.push(calc);
-            b.compute(calc);
+            if( !b.isInCalculationTable( calc, mustRecompute ) ) {
+                mustRecompute.push(calc);
+            }
         }
     );
 
+    // look for elements that are variable in calculations
+    base2.DOM.Document.querySelectorAll(element,"*[class*=\""+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+"\"]").forEach(
+        function(variableElement){
+
+            if(!wFORMS.behaviors.calculation.isValidVariableElement(variableElement)) {
+                return;
+            }
+
+            // get variable name
+            var variable = wFORMS.behaviors.calculation.getVariableName(variableElement);
+
+            if(!variable) {
+                return;
+            }
+
+            // populate hash table linking variable names to form fields (DOM elements)
+            // a variable may have more than one field associated to it.
+            if(!b.variables[variable]) {
+                b.variables[variable] = [ variableElement ];
+            } else {
+                if(b.variables[variable].indexOf(variableElement)==-1) {
+                    b.variables[variable].push( variableElement );
+                }
+            }
+
+            // Any calculation using this new found variable must be recomputed.
+            var calculations = b.findCalculationsByVariable(variable);
+
+            if( !b.isInCalculationTable( calculations, mustRecompute ) ) {
+                mustRecompute = mustRecompute.concat(calculations);
+            }
+
+            // listen for value changes
+            if(!variableElement.addEventListener) {
+                base2.DOM.bind(variableElement);
+            }
+            if(!wFORMS.behaviors.calculation.isHandled(variableElement)){
+                var t = variableElement.tagName.toLowerCase();
+                if (t == 'input' || t == 'textarea') {
+
+                    // toggled fields
+                    var y = variableElement.type.toLowerCase();
+                    if (t == 'input' && (y == 'radio' || y == 'checkbox')) {
+                        variableElement.addEventListener('click', function(e){ return b.run(e, this)}, false);
+                        wFORMS.behaviors.calculation.setHandledFlag(variableElement);
+
+                    // text entry fields
+                    } else {
+                        variableElement.addEventListener('blur', function(e){ return b.run(e, this)}, false);
+                        wFORMS.behaviors.calculation.setHandledFlag(variableElement);
+                    }
+
+                // select boxes
+                } else if (t == 'select') {
+                    variableElement.addEventListener('change',  function(e){ return b.run(e, this)}, false);
+                    wFORMS.behaviors.calculation.setHandledFlag(variableElement);
+                }
+            }
+        }
+    );
+
+    for(var i=0;i<mustRecompute.length;i++) {
+        b.compute(mustRecompute[i]);
+    }
     b.onApply();
 
-    return b;
+    if(isNewInstance) {
+        return b;
+    } else {
+        return [];
+    }
 }
 
+
+wFORMS.behaviors.calculation.instance.prototype.unApply = function(element) {
+
+    // Get to the <form> element.
+    var f = this.target;
+    var b = this;
+
+    var mustRecompute = [];
+
+     // look for elements with calculations
+    base2.DOM.Element.querySelectorAll(element,wFORMS.behaviors.calculation.CALCULATION_SELECTOR).forEach(
+
+        function(elem){
+
+            for(var i=0;i<b.calculations.length;i++) {
+                if(b.calculations[i].field == elem) {
+                    if( b.isVariable(elem) ) {
+                        // todo, ensure each element is only once in the array.
+                        mustRecompute = mustRecompute.concat(b.getCalculatedFields(elem));
+                    }
+                    b.calculations.splice(i,1);
+                    break;
+                }
+            }
+        }
+    );
+
+     // look for elements that are variable in calculations
+    base2.DOM.Document.querySelectorAll(element,"*[class*=\""+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+"\"]").forEach(
+        function(variableElement){
+
+            var variable = wFORMS.behaviors.calculation.getVariableName(variableElement);
+            for(var i=0;i<b.variables[variable].length;i++) {
+                if(b.variables[variable][i]==variableElement) {
+                    mustRecompute = mustRecompute.concat(b.getCalculatedFields(variableElement));
+                    b.variables[variable].splice(i,1);
+                    return;
+                }
+            }
+        }
+    );
+
+    for(var i=0;i<mustRecompute.length;i++) {
+        b.refresh(null,mustRecompute[i]);
+    }
+}
+
+wFORMS.behaviors.calculation.isValidVariableElement = function(element) {
+    return (element && (element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA'));
+}
+
+wFORMS.behaviors.calculation.getVariableName = function(element) {
+    var classes = element.className;
+    var variableClass = classes.substr(classes.indexOf(wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX)).split(' ')[0];
+    variableClass = variableClass.replace(wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX,'');
+    return variableClass;
+}
+
+wFORMS.behaviors.calculation.instance.prototype.isInCalculationTable = function( calculation, calculationTable) {
+
+    if(!calculationTable) {
+        calculationTable = this.calculations;
+    }
+
+    if(calculation.constructor==Array) {
+        for(var i=0;i<calculation.length;i++) {
+            if(this.isInCalculationTable(calculation[i], calculationTable)) {
+                return true;
+            }
+        }
+    } else {
+        for(var i=0;i<calculationTable.length; i++) {
+            if(calculationTable[i].field == calculation.field) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+wFORMS.behaviors.calculation.instance.prototype.findCalculationsByVariable = function (variable) {
+    var matchingCalculations = [];
+    for(var i=0;i<this.calculations.length; i++) {
+        for(var j=0;j<this.calculations[i].variables.length;j++) {
+            if(this.calculations[i].variables[j] == variable) {
+                matchingCalculations.push( this.calculations[i] );
+            }
+        }
+    }
+    return matchingCalculations;
+}
 /**
  * Executed once the behavior has been applied to the document.
  * Can be overwritten.
@@ -154,16 +276,10 @@ wFORMS.behaviors.calculation.instance.prototype.onApply = function() {}
  * @param {domElement} elem
  */
 wFORMS.behaviors.calculation.instance.prototype.run = function(event, element) {
-
-    for(var i=0; i<this.calculations.length;i++) {
-        var calc = this.calculations[i];
-        for(var j=0; j<calc.variables.length;j++) {
-
-            if(element==calc.variables[j].field) {
-                // this element is part of the calculation for calc.field
-                this.compute(calc);
-            }
-        }
+    var variable = wFORMS.behaviors.calculation.getVariableName(element);
+    var calculations = this.findCalculationsByVariable( variable );
+    for(var i=0; i<calculations.length;i++) {
+        this.compute(calculations[i]);
     }
 }
 
@@ -194,110 +310,86 @@ wFORMS.behaviors.calculation.instance.prototype.refreshAll = function() {
  * @param {DomElement or String} The variable field, or the variable name.
  * @return {Array DomElement} the matching calculated elements.
  */
-wFORMS.behaviors.calculation.instance.prototype.getCalculatedFields = function( variable ) {
+wFORMS.behaviors.calculation.instance.prototype.getCalculatedFields = function( element ) {
+    var variable = wFORMS.behaviors.calculation.getVariableName(element);
+    var calculations = this.findCalculationsByVariable( variable );
     var foundFields = [];
-    for(var i=0; i<this.calculations.length;i++) {
-        var calc = this.calculations[i];
-        for(var j=0; j<this.calculations[i].variables.length;j++) {
-            if( (variable.nodeName && this.calculations[i].variables[j].field == variable) ||
-                (typeof variable == 'string' && this.calculations[i].variables[j].name == variable) ) {
-                foundFields.push( this.calculations[i].field );
-            }
-        }
+    for(var i=0;i<calculations.length;i++) {
+        foundFields.push(calculations[i].field);
     }
     return foundFields;
 }
 
 
 wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) {
+
     var f = this.target;
     var formula = calculation.formula;
-    var _processedVariables = new Array();
     var isNumericCalculation = true;  // behavior is different when computing a calculation, or merely concatenating strings.
 
     for(var i=0; i<calculation.variables.length;i++) {
-        var v = calculation.variables[i];
-        var varval = isNumericCalculation?0:'';
-        var _self  = this;
+        var variable = calculation.variables[i];
+        var varval   = isNumericCalculation?0:'';
 
-        // We don't rely on calculation.variables[i].field because
-        // the form may have changed since we've applied the behavior
-        // (repeat behavior for instance).
-
-        // Since the calculations can have several variables with the same name
-        // querySelectorAll will catch them all, so we don't need to also loop
-        // through all of them.
-        if(wFORMS.helpers.contains(_processedVariables,v.name)) {
+        if(!variable || !this.variables[variable]) {
             continue;
-        } else {
-            _processedVariables.push(v.name);
         }
+        for(var j=0;j<this.variables[variable].length;j++) {
 
-        /*
-        Binding with forEach sometime fails when using this, resulting in undefined 'variable' parameter.
-            f.querySelectorAll("*[class*=\"...\"]");
-        Library call works fine: base2.DOM.Document.querySelectorAll(...)
-        */
-        base2.DOM.Document.querySelectorAll(f,"*[class*=\""+_self.behavior.VARIABLE_SELECTOR_PREFIX+v.name+"\"]").forEach(
-            function(variable){
+            var variableElement = this.variables[variable][j];
 
+            if(variableElement.disabled) {
+                continue;
+            }
 
-                // make sure the variable is an exact match.
-                var exactMatch = ((' ' + variable.className + ' ').indexOf(' '+wFORMS.behaviors.calculation.VARIABLE_SELECTOR_PREFIX+v.name+' ')!=-1);
-                if(!exactMatch) return;
+            if(!this.inScope(calculation.field, variableElement)){
+                continue;
+            }
 
-                if(!_self.inScope(calculation.field, variable)){
-                    return;
-                }
+            // If field value has a different purpose, the value for the calculation can be set in the
+            // class attribute, prefixed with CHOICE_VALUE_SELECTOR_PREFIX
+            if(this.hasValueInClassName(variableElement)) {
+                var value = this.getValueFromClassName(variableElement);
+            } else {
+                value = wFORMS.helpers.getFieldValue(variableElement);
+            }
 
-                if(variable.disabled) {
-                    return;
-                }
+            //need to test if value is string, because an empty string is regarded as false
+            if((typeof value !== 'string') && !value) value=0;
+            if(value.constructor==Array) { // array (multiple select)
 
-                // If field value has a different purpose, the value for the calculation can be set in the
-                // class attribute, prefixed with CHOICE_VALUE_SELECTOR_PREFIX
-                if(_self.hasValueInClassName(variable)) {
-                    var value = _self.getValueFromClassName(variable);
-                } else {
-                    value = wFORMS.helpers.getFieldValue(variable);
-                }
+                for(var k=0;k<value.length;k++) {
 
-                //need to test if value is string, because an empty string is regards as false
-                if((typeof value !== 'string') && !value) value=0;
-                if(value.constructor==Array) { // array (multiple select)
-
-                    for(var j=0;j<value.length;j++) {
-
-                        if(!wFORMS.helpers.isNumericValue(value[j]) && !wFORMS.helpers.isEmptyValue(value[j])) {
-                            isNumericCalculation = false;
-                        }
-
-                        if(isNumericCalculation){
-                            varval += wFORMS.helpers.getNumericValue(value[j]);
-                        } else {
-                            (!varval)?(varval=value[j]):(varval=String(varval).concat(value[j]));
-                        }
-                    }
-                } else {
-
-                    if(!wFORMS.helpers.isNumericValue(value) && !wFORMS.helpers.isEmptyValue(value)) {
+                    if(!wFORMS.helpers.isNumericValue(value[k]) && !wFORMS.helpers.isEmptyValue(value[k])) {
                         isNumericCalculation = false;
                     }
 
                     if(isNumericCalculation){
-                        varval += wFORMS.helpers.getNumericValue(value);
+                        varval += wFORMS.helpers.getNumericValue(value[k]);
                     } else {
-                        (!varval)?(varval=String(value)):(varval=String(varval).concat(value));
+                        (!varval)?(varval=value[k]):(varval=String(varval).concat(value[k]));
                     }
                 }
+            } else {
+
+                if(!wFORMS.helpers.isNumericValue(value) && !wFORMS.helpers.isEmptyValue(value)) {
+                    isNumericCalculation = false;
+                }
+
+                if(isNumericCalculation){
+                    varval += wFORMS.helpers.getNumericValue(value);
+                } else {
+                    (!varval)?(varval=String(value)):(varval=String(varval).concat(value));
+                }
             }
-        );
+        }
+
 
         // prepend variable assignment to the formula
         if(isNumericCalculation) {
-            formula = 'var '+ v.name +' = '+ varval +'; '+ formula;
+            formula = 'var '+ variable +' = '+ varval +'; '+ formula;
         } else {
-            formula = 'var '+ v.name +' = "'+ varval.replace(/\"/g, '\\"') +'"; '+ formula;
+            formula = 'var '+ variable +' = "'+ varval.replace(/\"/g, '\\"') +'"; '+ formula;
         }
 
     }
@@ -324,13 +416,15 @@ wFORMS.behaviors.calculation.instance.prototype.compute = function(calculation) 
         }
     }
 
-    calculation.field.value = result;
+    if(result!=calculation.field.value) {
 
+        calculation.field.value = result;
 
-    // If the calculated field is also a variable, recursively update dependant calculations
-    if( this.isVariable(calculation.field) ) {
-        // TODO: Check for infinite loops?
-        this.run(null,calculation.field);
+        // If the calculated field is also a variable, recursively update dependant calculations
+        if( this.isVariable(calculation.field) ) {
+            // TODO: Check for infinite loops?
+            this.run(null,calculation.field);
+        }
     }
 }
 
@@ -469,7 +563,6 @@ wFORMS.behaviors['calculation'].removeHandledFlag = function(elem){
                 variableRepeatSet.push( repeatElement );
                 repeatElement = wFORMS.behaviors.repeat.getRepeatedElement( repeatElement.parentNode );
             }
-
             // Helper function to check if one set is a subset of the other (i.e. all members are included in the superset)
             var isSubset = function(subset, superset) {
                 for(var i=0;i<subset.length;i++) {

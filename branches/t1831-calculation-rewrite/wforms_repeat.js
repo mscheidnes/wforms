@@ -219,7 +219,7 @@ _b.applyTo = function(f) {
     );
 
     if(!f.hasClass) {
-        f.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+        wFORMS.standardizeElement(f);
     }
 
     if(f.hasClass(this.CSS_REMOVEABLE)){
@@ -453,7 +453,7 @@ _i.prototype.getInsertNode = function(elem) {
     var insertNode = elem.nextSibling;
 
     if(insertNode && insertNode.nodeType==1 && !insertNode.hasClass) {
-        insertNode.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+        wFORMS.standardizeElement(insertNode);
     }
 
     while(insertNode &&
@@ -463,7 +463,7 @@ _i.prototype.getInsertNode = function(elem) {
         insertNode = insertNode.nextSibling;
 
         if(insertNode && insertNode.nodeType==1 && !insertNode.hasClass) {
-            insertNode.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+            wFORMS.standardizeElement(insertNode);
         }
     }
     return insertNode;
@@ -510,8 +510,8 @@ _i.prototype.updateMasterElements  = function(elem, suffix){
         var n = cn[i];
         if(n.nodeType!=1) continue;
 
-        if(!n.hasClass) { // no base2.DOM.bind to speed up function
-            n.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+        if(!n.hasClass) {
+            wFORMS.standardizeElement(n);
         }
 
         // suffix may change for this node and child nodes, but not sibling nodes, so keep a copy
@@ -574,8 +574,8 @@ _i.prototype.updateDuplicatedSection = function(elem, index, suffix){
     // Updates classname
     elem.className = elem.className.replace(this.behavior.CSS_REPEATABLE, this.behavior.CSS_REMOVEABLE);
 
-    if(!elem.hasClass) { // no base2.DOM.bind to speed up function
-        elem.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+    if(!elem.hasClass) {
+        wFORMS.standardizeElement(elem);
     }
     // Check for preserverRadioName override
     if(elem.hasClass(this.behavior.CSS_PRESERVE_RADIO_NAME))
@@ -619,8 +619,9 @@ _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName)
             // skip text nodes
             continue;
         }
-        if(!e.hasClass) { // no base2.DOM.bind to speed up function
-            e.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+
+        if(!e.hasClass) {
+            wFORMS.standardizeElement(e);
         }
         // Removes created descendant duplicated group if any
         if(this.behavior.isDuplicate(e)){
@@ -676,8 +677,8 @@ _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName)
             }
             // We can now continue with the fixed radio element
             e = fixedRadio;
-            if(!e.hasClass) { // no base2.DOM.bind to speed up function
-                e.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+            if(!e.hasClass) {
+                wFORMS.standardizeElement(e);
             }
         }
 
@@ -716,9 +717,9 @@ _i.prototype.createSuffix = function(e, index){
     var suffix = '[' + (index ? index : '0' ) + ']';
     var reg = /\[(\d+)\]$/;
     e = e.parentNode;
-    while(e && e.tagName){
-        if(!e.hasClass) { // no base2.DOM.bind to speed up function
-            e.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
+    while(e && e.tagName && e.tagName != 'BODY'){
+        if(!e.hasClass) {
+            wFORMS.standardizeElement(e);
         }
         if(e.hasClass(this.behavior.CSS_REPEATABLE) || e.hasClass(this.behavior.CSS_REMOVEABLE)){
             var idx = reg.exec(e.id);
@@ -908,16 +909,16 @@ _i.prototype.removeHandled = function(elem){
  * @return  boolean
  */
 _b.isDuplicate = function(elem){
-        if(!elem.hasClass) { // no base2.DOM.bind to speed up function
-            elem.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
-        }
+    if(!elem.hasClass) { // no base2.DOM.bind to speed up function
+        wFORMS.standardizeElement(elem);
+    }
     return elem.hasClass(this.CSS_REMOVEABLE);
 };
 
 _b.isMaster = function(elem){
-        if(!elem.hasClass) { // no base2.DOM.bind to speed up function
-            elem.hasClass = function(className) { return base2.DOM.HTMLElement.hasClass(this,className) };
-        }
+    if(!elem.hasClass) {
+        wFORMS.standardizeElement(elem);
+    }
     return elem.hasClass(this.CSS_REPEATABLE);
 };
 
@@ -942,9 +943,11 @@ _b.isInDuplicateGroup = function(elem){
 _b.getRepeatedElement = function(elem) {
 
 	while (elem && elem.nodeType==1 && elem.tagName != 'BODY') {
-
-		if( base2.DOM.HTMLElement.hasClass(elem,this.CSS_REMOVEABLE) ||
-			base2.DOM.HTMLElement.hasClass(elem,this.CSS_REPEATABLE)) {
+        if(!elem.hasClass) {
+            wFORMS.standardizeElement(elem);
+        }
+		if( elem.hasClass(this.CSS_REMOVEABLE) ||
+			elem.hasClass(this.CSS_REPEATABLE)) {
 			return elem;
 		}
 		elem = elem.parentNode;

@@ -17,7 +17,7 @@
 
 
 <script type="text/javascript" src="../wforms_core.js"></script>
-<script type="text/javascript" src="../wforms_calculation.js"></script> 
+<script type="text/javascript" src="../wforms_calculation.js"></script>
 
 
 <script type="text/javascript">
@@ -25,35 +25,35 @@
 	wFORMS.behaviors.calculation.instance.prototype.onApply = function() {
 		bInstance = this;
 		setUpPageStatus = 'complete';
-	} 
-  	
-	function setUpPage() {}
-  
-  	function setUp() {
-		document.getElementById('testInputField').value = '10';	
-		document.getElementById('testTextarea').value = '40';	
-		document.getElementById('totalAB').className = 'formula=A+B';
-		wFORMS.behaviors.calculation.applyTo(document.getElementById('testForm'));	
 	}
-	
+
+	function setUpPage() {}
+
+  	function setUp() {
+		document.getElementById('testInputField').value = '10';
+		document.getElementById('testTextarea').value = '40';
+		document.getElementById('totalAB').className = 'formula=A+B';
+		wFORMS.behaviors.calculation.applyTo(document.getElementById('testForm'));
+	}
+
 	function tearDown() {}
-	
+
 	function testApplyTo() {
-	
+
 		assertNotUndefined('Instance of behavior should be available.', bInstance);
 		assertNotUndefined('Instance target should be set',bInstance.target);
 		assertEquals('Instance target should be the form','testForm',bInstance.target.id);
 		assertEquals('Found calculations',16, bInstance.calculations.length);
-		
-		// Each calculation should have a field, formula and variables 
-		for(var i=0; i<bInstance.calculations.length;i++) {	
+
+		// Each calculation should have a field, formula and variables
+		for(var i=0; i<bInstance.calculations.length;i++) {
 			var c = bInstance.calculations[i];
 			assertNotUndefined(c.field);
 			assertEquals('string', typeof c.formula);
 			assertEquals('object', typeof c.variables);
 		}
 	}
-	
+
 	function testHelpers() {
 		var b = wFORMS.helpers.isNumericValue(0);
 		assertTrue(b);
@@ -63,7 +63,7 @@
 
 		b = wFORMS.helpers.isNumericValue("");
 		assertFalse('empty string is not numeric',b);
-		
+
 		b = wFORMS.helpers.isNumericValue(null);
 		assertFalse('null is not numeric',b);
 
@@ -84,165 +84,165 @@
 	function testTextInput() {
 		// Check calculations with field default values
 		assertEquals('10', document.getElementById('totalA').value);
-		
+
 		// Change text input value:
 		document.getElementById('testInputField').value = '100';
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testInputField'));
-		
+
 		// Test
 		assertEquals('100', document.getElementById('totalA').value);
 	}
-	
+
 	function testTextarea() {
 		// Check calculations with field default values
 		assertEquals('40', document.getElementById('totalB').value);
-		
+
 		// Change text input value:
 		document.getElementById('testTextarea').value = '400';
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testTextarea'));
-		
+
 		// Test
 		assertEquals('400', document.getElementById('totalB').value);
 	}
-	
+
 	function testSelect() {
 		// ---- Calculation value stored in option value attribute ----
-		
+
 		// Check calculations with field default values
 		assertEquals('16', document.getElementById('totalC').value);
-		
-		// Change select multiple value 
+
+		// Change select multiple value
 		document.getElementById('testSelectField1').options[2].selected = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testSelectField1'));
-		
+
 		// Check calculations with field default values
 		assertEquals('17', document.getElementById('totalC').value);
-		
-		// ---- Calculation value stored in option class attribute ---- 
-		// Change select multiple value 
+
+		// ---- Calculation value stored in option class attribute ----
+		// Change select multiple value
 		document.getElementById('testSelectField2').options[2].selected = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testSelectField1'));
-		
+
 		// Check calculations with field default values
 		assertEquals('27', document.getElementById('totalC').value);
-		
+
 	}
-	
+
 	function testSelectMultiple() {
 		// ---- Calculation value stored in option value attribute ----
-		
+
 		// Check calculations with field default values
 		assertEquals('0', document.getElementById('totalD').value);
-		
-		// Change select multiple value 
+
+		// Change select multiple value
 		document.getElementById('testSelectMultiple1').options[0].selected = true;
 		document.getElementById('testSelectMultiple1').options[1].selected = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testSelectMultiple1'));
-		
+
 		// Test
 		assertEquals('12', document.getElementById('totalD').value);
 
-		// ---- Calculation value stored in option class attribute ---- 
-		
-		// Change select multiple value 
+		// ---- Calculation value stored in option class attribute ----
+
+		// Change select multiple value
 		document.getElementById('testSelectMultiple2').options[0].selected = true;
 		document.getElementById('testSelectMultiple2').options[2].selected = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testSelectMultiple2'));
-		
+
 		// Test
 		assertEquals('29', document.getElementById('totalD').value);
 	}
-	
+
 	function testRadio() {
 		// ---- Calculation value stored in input value attribute ----
-		
+
 		// Check calculations with field default values
 		assertEquals('0', document.getElementById('totalE').value);
-		
-		// Change radio value 
+
+		// Change radio value
 		document.getElementById('radio11').checked = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('radio11'));
-		
+
 		// Test
 		assertEquals('14', document.getElementById('totalE').value);
-		
-		// ---- Calculation value stored in option class attribute ---- 
-		
-		// Change radio value 
+
+		// ---- Calculation value stored in option class attribute ----
+
+		// Change radio value
 		document.getElementById('radio21').checked = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('radio21'));
-		
+
 		// Test
 		assertEquals('118', document.getElementById('totalE').value);
-		
+
 	}
-	
+
 	function testCheckbox() {
 		// ---- Calculation value stored in input value attribute ----
-		
+
 		// Check calculations with field default values
 		assertEquals('0', document.getElementById('totalF').value);
-		
-		// Change radio value 
+
+		// Change radio value
 		document.getElementById('checkbox11').checked = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('checkbox11'));
-		
+
 		// Test
 		assertEquals('2', document.getElementById('totalF').value);
-		
-		// ---- Calculation value stored in option class attribute ---- 
-	
-		// Change radio value 
+
+		// ---- Calculation value stored in option class attribute ----
+
+		// Change radio value
 		document.getElementById('checkbox21').checked = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('checkbox21'));
-		
+
 		// Test
 		assertEquals('11.5', document.getElementById('totalF').value);
 	}
 
 	function testStringConcatenation() {
 
-		// not yet identified as string concatenation (has no value is provided yet)
-		assertEquals('0', document.getElementById('totalColor').value);
+		// not yet identified as string concatenation (as no value is provided yet)
+		assertEquals('', document.getElementById('totalColor').value);
 
-		// Change radio value 
+		// Change radio value
 		document.getElementById('checkbox21a').checked = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('checkbox21a'));
 
 		assertEquals('red', document.getElementById('totalColor').value);
 
-		// Change radio value 
+		// Change radio value
 		document.getElementById('checkbox22b').checked = true;
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('checkbox22b'));
 
 
 		assertEquals('redblue', document.getElementById('totalColor').value);
 	}
-	
+
 	function testSimpleFormulas() {
 		var f = document.getElementById('totalAB');
 		var form = document.getElementById('testForm');
@@ -251,32 +251,32 @@
 		// B  = 40
 		// AB = 99 (tests variable name collision)
 		assertEquals('50', f.value);
-		
-		// Change formulas		
-		f.className = 'formula=B*A'; 
+
+		// Change formulas
+		f.className = 'formula=B*A';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('400', f.value);
-		
-		f.className = 'formula=B-A'; 
+
+		f.className = 'formula=B-A';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('30', f.value);
-		
-		f.className = 'formula=B/A'; 
+
+		f.className = 'formula=B/A';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('4', f.value);
-		
-		f.className = 'formula=A%7'; 
+
+		f.className = 'formula=A%7';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('3', f.value);
-		
+
 		f.className = 'formula=B+2';
 		wFORMS.behaviors.calculation.applyTo(form);
-		assertEquals('42', f.value); 
+		assertEquals('42', f.value);
 
 		f.className = 'formula=(B+A+2)';
 		wFORMS.behaviors.calculation.applyTo(form);
-		assertEquals('52', f.value); 
-		
+		assertEquals('52', f.value);
+
 		f.className = 'formula=(B/A)/2';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('2', f.value);
@@ -284,20 +284,20 @@
 		f.className = 'formula=AB+A';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('109', f.value);
-		
+
 		f.className = 'formula=A+AB+A';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('119', f.value);
-		
+
 		f.className = 'formula=AB/AB';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('1', f.value);
-		
+
 		f.className = 'formula=A+A';
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('20', f.value);
 	}
-	
+
 	function testFloatingFormulas() {
 		var f = document.getElementById('totalAB');
 		var form = document.getElementById('testForm');
@@ -306,23 +306,25 @@
 		// B  = 40
 		// AB = 99 (tests variable name collision)
 		assertEquals('50', f.value);
-		
-		// Change formulas		
-		f.className = 'formula=B*2.5'; 
+
+		// Change formulas
+		f.className = 'formula=B*2.5';
+        bInstance.unApply(form);
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('100', f.value);
-		
-		// Change formulas		
-		f.className = 'formula=B*2.5'; 
+
+		// Change formulas
+		f.className = 'formula=B*2.5';
+        bInstance.unApply(form);
 		wFORMS.behaviors.calculation.applyTo(form);
 		assertEquals('100', f.value);
-		
+
 		// Change field value
 		document.getElementById('testTextarea').value = '4.5';
-		
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testTextarea'));
-		
+
 		// Test
 		assertEquals('11.25', document.getElementById('totalAB').value);
 	}
@@ -331,96 +333,96 @@
 		// Check calculations with field default values
 		assertEquals('address', document.getElementById('totalZ').value);
 		assertEquals('zipcode', document.getElementById('totalY').value);
-		
+
 		// Test
-		assertEquals("address-zipcode", document.getElementById('totalX').value);	
+		assertEquals("address-zipcode", document.getElementById('totalX').value);
 	}
-	
+
 	function testSubTotals() {
-		document.getElementById('testInputField').value = '100';	
-		document.getElementById('testTextarea').value = '50';		
-	
+		document.getElementById('testInputField').value = '100';
+		document.getElementById('testTextarea').value = '50';
+
 		// Update calculations
 		bInstance.run(null,document.getElementById('testInputField'));
 		bInstance.run(null,document.getElementById('testTextarea'));
-	
+
 		// Test
 		assertEquals('150', document.getElementById('totalG').value);
 		assertEquals('15', document.getElementById('totalH').value);
 	}
-	
+
 	function testVariableValueConflict() {
-		document.getElementById('a').value = 'a';	
+		document.getElementById('a').value = 'a';
 		document.getElementById('b').value = 'b';
 		bInstance.run(null, document.getElementById('a'));
 		bInstance.run(null, document.getElementById('b'));
 		assertEquals('ab', document.getElementById('c').value);
 	}
-	
+
 	function testQuoteValue() {
-		document.getElementById('a').value = "''";	
+		document.getElementById('a').value = "''";
 		document.getElementById('b').value = '""';
 		bInstance.run(null, document.getElementById('a'));
 		bInstance.run(null, document.getElementById('b'));
 		assertEquals('\'\'""', document.getElementById('c').value);
 	}
-	
+
 	function testLargeFormula() {
 		bInstance.run(null,document.getElementById('inputWithLongFormula'));
-		assertEquals('21', document.getElementById('inputWithLongFormula').value);		
+		assertEquals('21', document.getElementById('inputWithLongFormula').value);
 	}
 
 	function testIsNumericValue(){
 		var _bh = wFORMS.helpers;
-	
+
 		assertTrue(_bh.isNumericValue('1001'));
 		assertTrue(_bh.isNumericValue('1,001'));
 		assertFalse(_bh.isNumericValue('100l'));
 		assertFalse(_bh.isNumericValue('l00l'));
-		
+
 		assertTrue(_bh.isNumericValue('1000.01'));
 		assertTrue(_bh.isNumericValue('1,000.01'));
 		assertFalse(_bh.isNumericValue('100.0l'));
 		assertFalse(_bh.isNumericValue('l00l.0l'));
 		assertFalse(_bh.isNumericValue('l,000.0l'));
 	}
-	
+
 	function testGetNumericValue(){
 		var _bh = wFORMS.helpers;
-	
+
 		assertEquals(Number('100'),_bh.getNumericValue('100'));
 		assertEquals(Number('100'),_bh.getNumericValue('100l'));
 		assertEquals(0, _bh.getNumericValue('l00l'));
-		
+
 		assertEquals(Number('100.01'),_bh.getNumericValue('100.01'));
 		assertEquals(Number('100.0'),_bh.getNumericValue('100.0l'));
-		assertEquals(100,_bh.getNumericValue('100l.0l'));  
+		assertEquals(100,_bh.getNumericValue('100l.0l'));
 		assertEquals(0,_bh.getNumericValue('l00.0l'));
 	}
-	
+
 	function testThousandsValue(){
 		document.getElementById('testInputField').value = '1,050';
-		document.getElementById('testTextarea').value = '2001';		
+		document.getElementById('testTextarea').value = '2001';
 		// Update calculations
 		bInstance.run(null,document.getElementById('testInputField'));
 		bInstance.run(null,document.getElementById('testTextarea'));
 		// Test
 		assertEquals('3051', document.getElementById('totalG').value);
-		
-		
+
+
 		document.getElementById('testInputField').value = '1,234.56';
-		document.getElementById('testTextarea').value = '1,234.562';		
+		document.getElementById('testTextarea').value = '1,234.562';
 		// Update calculations
 		bInstance.run(null,document.getElementById('testInputField'));
 		bInstance.run(null,document.getElementById('testTextarea'));
 		// Test
-		assertEquals('2469.122', document.getElementById('totalG').value);		
-		
+		assertEquals('2469.122', document.getElementById('totalG').value);
+
 	}
 
 	function testPhoneNumber(){
 		document.getElementById('testInputField').value = '812.333.6505';
-		document.getElementById('testTextarea').value = ' phone';		
+		document.getElementById('testTextarea').value = ' phone';
 		// Update calculations
 		bInstance.run(null,document.getElementById('testInputField'));
 		bInstance.run(null,document.getElementById('testTextarea'));
@@ -432,14 +434,14 @@
 	function testNumericCalculationsWithEmptyValues() {
 
 		assertEquals('20', document.getElementById('totalNANBNC').value);
-		
-		document.getElementById('testInputFieldNB').value = ' 2.4 ';	
-		bInstance.run(null,document.getElementById('testInputFieldNB'));	
+
+		document.getElementById('testInputFieldNB').value = ' 2.4 ';
+		bInstance.run(null,document.getElementById('testInputFieldNB'));
 
 		assertEquals('22.4', document.getElementById('totalNANBNC').value);
 
 	}
-	
+
 </script>
 
 
@@ -447,10 +449,10 @@
 <body>
 
 <form id="testForm">
-		
+
 	<fieldset id="calculationFieldset" style="width:45%;float:left"><legend>Calculation Examples</legend>
 			<div class="oneField">
-				<label for="testInputField" class="preField">Text input (A):</label> 
+				<label for="testInputField" class="preField">Text input (A):</label>
 				<input id="testInputField" type="" value="10" class="calc-A" />
 				<input id="testInputField" type="" value="99" class="calc-AB" />
 			</div>
@@ -468,7 +470,7 @@
 					<option value="3">3</option>
 				</select>
 			</div>
-			
+
 			<div class="oneField">
 				<p>Value for calculation stored in the class attribute.</p>
 				<label for="testSelectField2" class="preField">Select drop-down (C):</label>
@@ -479,7 +481,7 @@
 					<option value="qq" class="calcval-35">35</option>
 				</select>
 			</div>
-			
+
 			<div class="oneField">
 				<p>Value for calculation stored in the value attribute.</p>
 				<label for="testSelectMultiple1" class="preField">Select drop-down (D):</label>
@@ -488,7 +490,7 @@
 					<option value="7">7</option>
 					<option value="12">12</option>
 				</select>
-			</div>	
+			</div>
 			<div class="oneField">
 				<p>Value for calculation stored in the class attribute.</p>
 				<label for="testSelectMultiple2" class="preField">Select drop-down (D):</label>
@@ -497,11 +499,11 @@
 					<option value="7" class="calcval-7">7</option>
 					<option value="12" class="calcval-12">12</option>
 				</select>
-			</div>	
+			</div>
 			<div class="oneField">
 				<p>Value for calculation stored in the value attribute.</p>
-				<label class="preField">Radio group (E):</label>		
-				<span class="oneChoice">				
+				<label class="preField">Radio group (E):</label>
+				<span class="oneChoice">
 					<input type="radio" id="radio11" name="radioGroup1" value="14" class="calc-E"/>
 					<label for="radio1">14</label>
 				</span>
@@ -512,13 +514,13 @@
 				<span class="oneChoice">
 					<input type="radio" id="radio13" name="radioGroup1"  value="34" class="calc-E" />
 					<label for="radio3">34</label>
-				</span>			
-			</div>	
-			
+				</span>
+			</div>
+
 			<div class="oneField">
 				<p>Value for calculation stored in the class attribute.</p>
-				<label class="preField">Radio group (E):</label>		
-				<span class="oneChoice">				
+				<label class="preField">Radio group (E):</label>
+				<span class="oneChoice">
 					<input type="radio" id="radio21" name="radioGroup2" value="14" class="calc-E calcval-104"/>
 					<label for="radio1">104</label>
 				</span>
@@ -529,12 +531,12 @@
 				<span class="oneChoice">
 					<input type="radio" id="radio23" name="radioGroup2"  value="34" class="calc-E calcval-124" />
 					<label for="radio3">124</label>
-				</span>			
-			</div>	
-			
+				</span>
+			</div>
+
 			<div class="oneField">
 				<p>Value for calculation stored in the value attribute.</p>
-				<label class="preField">Checkboxes (F):</label> 
+				<label class="preField">Checkboxes (F):</label>
 				<span class="oneChoice">
 					<input type="checkbox" id="checkbox11" value="2" class="calc-F" />
 					<label for="checkbox1" class="postField">2</label>
@@ -545,12 +547,12 @@
 				</span>
 				<span class="oneChoice">
 					<input type="checkbox" id="checkbox13" value="4" class="calc-F" />
-					<label for="checkbox3" class="postField">4</label>			
+					<label for="checkbox3" class="postField">4</label>
 				</span>
 			</div>
 			<div class="oneField">
 				<p>Value for calculation stored in the class attribute.</p>
-				<label class="preField">Checkboxes (F):</label> 
+				<label class="preField">Checkboxes (F):</label>
 				<span class="oneChoice">
 					<input type="checkbox" id="checkbox21" value="ww" class="calc-F calcval-9.5" />
 					<label for="checkbox1" class="postField">9.5</label>
@@ -561,13 +563,13 @@
 				</span>
 				<span class="oneChoice">
 					<input type="checkbox" id="checkbox23" value="ee" class="calc-F calcval-11.5" />
-					<label for="checkbox3" class="postField">11.5</label>			
+					<label for="checkbox3" class="postField">11.5</label>
 				</span>
 			</div>
-			
+
 			<div class="oneField">
 				<p>Text Value for calculation stored in the class attribute.</p>
-				<label class="preField">Checkboxes (F):</label> 
+				<label class="preField">Checkboxes (F):</label>
 				<span class="oneChoice">
 					<input type="checkbox" id="checkbox21a" value="ww" class="calc-COLOR calcval-red" />
 					<label for="checkbox21a" class="postField">Red</label>
@@ -578,7 +580,7 @@
 				</span>
 				<span class="oneChoice">
 					<input type="checkbox" id="checkbox23c" value="ee" class="calc-COLOR calcval-yellow" />
-					<label for="checkbox23c" class="postField">Yellow</label>			
+					<label for="checkbox23c" class="postField">Yellow</label>
 				</span>
 			</div>
 			<br/>
@@ -586,13 +588,13 @@
 
 		<fieldset><legend>TextVariable test</legend>
 			<div class="oneField">
-				<label for="testInputField" class="preField">Text (value) input (Z):</label> 
+				<label for="testInputField" class="preField">Text (value) input (Z):</label>
 				<input id="testInputField" type="" value="address" class="calc-Z" />
 			</div>
 			<div class="oneField">
-				<label for="testInputField" class="preField">Text (value) input (Y):</label> 
+				<label for="testInputField" class="preField">Text (value) input (Y):</label>
 				<input id="testInputField" type="" value="zipcode" class="calc-Y" />
-			</div>					
+			</div>
 		<br />
 		</fieldset>
 
@@ -600,33 +602,33 @@
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total A=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalA" class="formula=A calc-TOTA" />
-			</div>			
-			
+			</div>
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total B=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalB" class="formula=B calc-TOTB" />
-			</div>	
-			
+			</div>
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total A+B=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalAB" class="formula=A+B" />
-			</div>		
-			
+			</div>
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total C=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalC" class="formula=C" />
-			</div>			
+			</div>
 
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total D=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalD" class="formula=D" />
 			</div>
-						
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total E=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalE" class="formula=E" />
 			</div>
-			
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total F=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalF" class="formula=F" />
@@ -636,47 +638,47 @@
 				<label for="" class="preField">Total Z=:</label>
 				<input type="text" readonly="readonly" value="" id="totalZ" class="formula=Z" />
 			</div>
-			
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="" class="preField">Total Y=:</label>
 				<input type="text" readonly="readonly" value="" id="totalY" class="formula=Y" />
 			</div>
 
-			
+
 			<hr/>
 			<p>Using calculated fields as variables:</p>
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="totalG" class="preField">Grand Total A+B=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalG" class="formula=TOTA+TOTB calc-GRANDTOTAL" />
 			</div>
-			
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="totalH" class="preField">10% of Grand Total=:</label>
 				<input type="text" readonly="readonly" value="0" id="totalH" class="formula=GRANDTOTAL/10" />%
 			</div>
-						
+
 			<div class="oneField" style="font-weight:bold; border-top:2px solid #333;margin-top:6px;">
 				<label for="totalX" class="preField">String().concat(Z,'-',Y)=:</label>
 				<input type="text" readonly="readonly" value="" id="totalX" class="formula=String().concat(Z,'-',Y)" />
-			</div>	
-			
+			</div>
+
 			<div class="oneField">
 				<label for="a" class="preField">A:</label>
 				<input type="text" readonly="readonly" value="" id="a" class="calc-a" />
 			</div>
-			
+
 			<div class="oneField">
 				<label for="b" class="preField">B:</label>
 				<input type="text" readonly="readonly" value="" id="b" class="calc-b" />
 			</div>
-			
+
 			<div class="oneField">
 				<label for="c" class="preField">A+B=:</label>
 				<input type="text" readonly="readonly" value="" id="c" class="formula=a+b" />
 			</div>
-			
+
 		</fieldset>
-		
+
 		<fieldset><legend>Test for Long Formula</legend>
 			<input type="text" class="calc-RegOne" value="1" />
 			<input type="hidden" class="calc-RegTwo" value="1" />
@@ -685,7 +687,7 @@
 			<input type="hidden" class="calc-AdultTwoMeals" value="1" />
 			<input type="hidden" class="calc-ChildAPreschoolLunch" value="1" />
 			<input type="hidden" class="calc-ChildAChildLunch" value="1" />
-			<input type="hidden" class="calc-ChildAAdultLunch" value="1" />	
+			<input type="hidden" class="calc-ChildAAdultLunch" value="1" />
 			<input type="hidden" class="calc-ChildBPreschoolLunch" value="1" />
 			<input type="hidden" class="calc-ChildBChildLunch" value="1" />
 			<input type="hidden" class="calc-ChildBAdultLunch" value="1" />
@@ -699,8 +701,8 @@
 			<input type="hidden" class="calc-ChildEChildLunch" value="1" />
 			<input type="hidden" class="calc-ChildEAdultLunch" value="1" />
 			<input type="hidden" class="calc-Donation" value="1" />
-						
-			<input type="text" id="inputWithLongFormula" class="formula=RegOne+RegTwo+ChildrensProgram+AdultOneMeals+AdultTwoMeals+ChildAPreschoolLunch+ChildAChildLunch+ChildAAdultLunch+ChildBPreschoolLunch+ChildBChildLunch+ChildBAdultLunch+ChildCPreschoolLunch+ChildCChildLunch+ChildCAdultLunch+ChildDPreschoolLunch+ChildDChildLunch+ChildDAdultLunch+ChildEPreschoolLunch+ChildEChildLunch+ChildEAdultLunch+Donation calc-Total" /> 
+
+			<input type="text" id="inputWithLongFormula" class="formula=RegOne+RegTwo+ChildrensProgram+AdultOneMeals+AdultTwoMeals+ChildAPreschoolLunch+ChildAChildLunch+ChildAAdultLunch+ChildBPreschoolLunch+ChildBChildLunch+ChildBAdultLunch+ChildCPreschoolLunch+ChildCChildLunch+ChildCAdultLunch+ChildDPreschoolLunch+ChildDChildLunch+ChildDAdultLunch+ChildEPreschoolLunch+ChildEChildLunch+ChildEAdultLunch+Donation calc-Total" />
 		</fieldset>
 
 
