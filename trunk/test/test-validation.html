@@ -330,6 +330,10 @@
 			testField.value='test@abc.e.mail.co.jp';
 			// Test validation rule
 			assertTrue('test@abc.e.mail.co.jp should pass email validation', bInstance.run(null, testForm));
+
+			testField.value='test-hyphen@test.com';
+			// Test validation rule
+			assertTrue('test-hyphen@test.com should pass email validation', bInstance.run(null, testForm));
 			
 			testField.value = 'test   test@test.com';
 			// Test validation rule
