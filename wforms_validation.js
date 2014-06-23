@@ -846,7 +846,7 @@ wFORMS.behaviors.validation.instance.prototype.analyzeTimeComponents = function(
  * @returns {boolean}
  */
 wFORMS.behaviors.validation.instance.prototype.validateEmail = function(element, value) {
-	var regexpEmail = /^\w[\w\.\+]*\w[@][\w\-]{1,}([.]([\w\-]{1,})){1,}$/;
+	var regexpEmail = /^\w[\w\.\-\+]*\w[@][\w\-]{1,}([.]([\w\-]{1,})){1,}$/;
 	return this.isEmpty(value) || regexpEmail.test(value);
 }
 
