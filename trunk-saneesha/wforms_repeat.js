@@ -420,10 +420,8 @@ _i.prototype.duplicateSection = function(elem){
 _i.prototype.removeSection = function(elem){
     if(elem){
 		//finding the element to which this element is the duplicate
-		var repeatElem=elem.previousSibling;
-		while(! $(repeatElem).hasClass("repeat")){
-			repeatElem=repeatElem.previousSibling;
-		}
+		var repeatElem=this.behavior.getMasterSection(elem);
+		
         // Add id to list of removed elements.
         this.logRemovedSection(elem);
 
@@ -446,7 +444,7 @@ _i.prototype.removeSection = function(elem){
 		//if there is limit to the repeatable fields
 		if(limit != null){
 			//re-showing the repeated link as the limit is reached 
-			if(this.counterRepeatedFields <=  limit){ document.getElementById(id).style.display = 'block';}
+			if(this.counterRepeatedFields <=  limit){ document.getElementById(id).style.display = '';}
 		}
 
         // Calls custom function (@DEPRECATED)
