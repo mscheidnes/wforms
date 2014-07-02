@@ -395,7 +395,7 @@ _i.prototype.duplicateSection = function(elem){
 	this.counterRepeatedFields++;
 	
 	//getting the repeat limit
-	var limit=elem.getAttribute('data-repeatlinklimit');
+	var limit=elem.getAttribute('data-repeatlimit');
 	
 	// getting the id of the repeat link 
 	var id = elem.id + this.behavior.ID_SUFFIX_DUPLICATE_LINK;
@@ -436,7 +436,7 @@ _i.prototype.removeSection = function(elem){
 		this.counterRepeatedFields--;
 		
 		//getting the repeat limit
-		var limit=elem.getAttribute('data-repeatlinklimit');
+		var limit=elem.getAttribute('data-repeatlimit');
 			
 		// getting the id of the repeat link 
 		var id = repeatElem.id + this.behavior.ID_SUFFIX_DUPLICATE_LINK;
