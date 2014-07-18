@@ -161,18 +161,28 @@ wFORMS.behaviors.autoformat = {
             if(!base2.DOM.Element.matchesSelector(element, wFORMS.behaviors.autoformat.ALLOWED_ELEMENT_TYPE[0])){
                 return;
             }
-            var id = wFORMS.behaviors.autoformat._getIDForActorElement(element);
-            //add to group
-            IDGroups.push(id);
 
-            //build global mapping
-            var mask = new wFORMS.behaviors.autoformat.Mask(element);
-            wFORMS.behaviors.autoformat._globalCache[id] = mask;
+            // Create array of all autoformat elements
+            var id = wFORMS.behaviors.autoformat._getIDForActorElement(element);
+            IDGroups.push(id);
         });
 
         var instance = new wFORMS.behaviors.autoformat.instance(formElem);
-        //add IDGroups to instance
-        instance.actorsInDomain = IDGroups; // then later the detail InFoEntry can be retrieved by using ID and searching from globalCache
+        instance.actorsInDomain = IDGroups;
+
+        // Make autoformat feature play nice with paging.
+        wFORMS.behaviors.autoformat.applyToVisibleElements(instance);
+
+        if (wFORMS.behaviors.paging) {
+            var pagingInstance = wFORMS.getBehaviorInstance(formElem, 'paging'),
+                _oldPageChange = pagingInstance.onPageChange,
+                _instance = instance;
+
+            pagingInstance.onPageChange = function (e) {
+                wFORMS.behaviors.autoformat.applyToVisibleElements(_instance);
+                _oldPageChange.apply(pagingInstance, arguments);
+            };
+        }
 
         return instance;
     },
@@ -198,6 +208,45 @@ wFORMS.behaviors.autoformat = {
 wFORMS.behaviors.autoformat.instance.prototype.onApply = function() { };
 
 wFORMS.behaviors.autoformat.instance.prototype.run = function() { };
+
+wFORMS.behaviors.autoformat.applyToVisibleElements = function(instance) {
+    // Loop through all of the autoformat element IDs.
+    var createMask = function (id, element) {
+        // Create a mask, but only if it doesn't exist yet.
+        if (!wFORMS.behaviors.autoformat._globalCache[id]) {
+            var mask = new wFORMS.behaviors.autoformat.Mask(element);
+            wFORMS.behaviors.autoformat._globalCache[id] = mask;
+        }
+    };
+
+    // Remove the mask from the global cache, which should make it able to be
+    // garbage collected.
+    var removeMask = function(id) {
+        var mask = wFORMS.behaviors.autoformat._globalCache[id];
+        if (mask) {
+            mask.removeListeners();
+        }
+
+        wFORMS.behaviors.autoformat._globalCache[id] = false;
+    }
+
+    instance.actorsInDomain.forEach(function (id) {
+        var elem = document.getElementById(id);
+
+        if (wFORMS.behaviors.paging) {
+            // If the element is visible, we want to apply a mask; if not, we
+            // want to remove it.
+            if (wFORMS.behaviors.paging.isElementVisible(elem)) {
+                createMask(id, elem);
+            } else {
+                removeMask(id);
+            }
+        } else {
+            // no paging: apply to all
+            createMask(id, elem);
+        }
+    });
+};
 
 
 /* Mask behaviors
@@ -368,7 +417,7 @@ wFORMS.behaviors.autoformat.Mask.prototype.addListeners = function() {
         that.updateValue();
         that.caret.nudge(0);    // bump to first mask char
     });
-    this.element.addEventListener('blur', function() { this.blur(); });
+    this.element.addEventListener('blur', function() { that.blur() });
     this.element.addEventListener('keydown', this.handlers.keyDown);
     this.element.addEventListener('keypress', this.handlers.keyPress);
     this.element.addEventListener('keyup', this.handlers.keyUp);
@@ -377,6 +426,24 @@ wFORMS.behaviors.autoformat.Mask.prototype.addListeners = function() {
     this.element.addEventListener('paste', this.handlers.paste);
     this.parentForm.addEventListener('submit', this.handlers.submit);
     this.element.blur();
+};
+
+/**
+ * Remove event listeners in preparation for deletion of a mask element.
+ */
+wFORMS.behaviors.autoformat.Mask.prototype.removeListeners = function() {
+    // TODO These two listeners need to be refactored into non-anonymous
+    // functions so they can be removed properly.
+
+    // this.element.removeEventListener('focus');
+    // this.element.removeEventListener('blur', that.blur);
+    this.element.removeEventListener('keydown', this.handlers.keyDown);
+    this.element.removeEventListener('keypress', this.handlers.keyPress);
+    this.element.removeEventListener('keyup', this.handlers.keyUp);
+    this.element.removeEventListener('click', this.handlers.click);
+    this.element.removeEventListener('cut', this.handlers.cut);
+    this.element.removeEventListener('paste', this.handlers.paste);
+    this.parentForm.removeEventListener('submit', this.handlers.submit);
 };
 
 /**
