@@ -849,7 +849,7 @@ wFORMS.behaviors.validation.instance.prototype.validateEmail = function(element,
 	var regexpEmail = /^\w[\w\.\-\+]*\w[@][\w\-]{1,}([.]([\w\-]{1,})){1,}$/;
 	
 	if (this.isEmpty(value)) {
-		return false;
+		return true;
 	}
 	// split on ',' and test each one
 	var input = value.split(',');
