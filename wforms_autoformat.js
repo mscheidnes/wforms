@@ -173,7 +173,7 @@ wFORMS.behaviors.autoformat = {
         // Make autoformat feature play nice with paging.
         wFORMS.behaviors.autoformat.applyToVisibleElements(instance);
 
-        if (wFORMS.behaviors.paging) {
+        if (wFORMS.behaviors.paging && wFORMS.getBehaviorInstance(formElem, 'paging')) {
             var pagingInstance = wFORMS.getBehaviorInstance(formElem, 'paging'),
                 _oldPageChange = pagingInstance.onPageChange,
                 _instance = instance;
