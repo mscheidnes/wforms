@@ -386,12 +386,36 @@ _i.prototype.duplicateSection = function(elem){
     // duplicateSection
 
     wFORMS.applyBehaviors(newElem);
+    
+    // Moves repeat link to new element
+    this.moveRepeatLinkDown(elem,newElem); 
 
     // Calls custom function
     this.behavior.onRepeat(newElem);
-
+    
     wFORMS.helpers.spotlight(newElem);
 }
+
+/**
+ * Appends he link tothe newly created element.
+ *
+ */
+_i.prototype.moveRepeatLinkDown = function(oldElem,newElem){
+    var repSpan = this.getOrCreateRepeatLink(oldElem).parentNode;
+    newElem.appendChild(repSpan);
+}
+
+/**
+ * This method rerutns the last instance in the repeated section 
+ * @param {HTMLElement} a repeated fieldset
+ */ 
+_b.getLastRepeatSect = function(elem){
+     var master = this.getMasterSection(elem);
+     var id = master.id.replace(/\[0\]/,'');    
+     // filter to the matching fieldsets we want
+     var sections = document.querySelectorAll('fieldset[id*=' + id + ']');
+     return sections[sections.length-2];
+ }
 
 /**
  * Removes section specified by id
@@ -399,6 +423,15 @@ _i.prototype.duplicateSection = function(elem){
  */
 _i.prototype.removeSection = function(elem){
     if(elem){
+        // Move repeated link to another another section if presnt
+        if(elem.querySelector('.'+ wFORMS.behaviors.repeat.CSS_DUPLICATE_SPAN)){
+            var last = wFORMS.behaviors.repeat.getLastRepeatSect(elem);
+            console.log('removed: ' + elem.id);
+            console.log('lastRepFound: ' + last.id);
+            
+            //debugger;
+        }
+
         // Add id to list of removed elements.
         this.logRemovedSection(elem);
 
