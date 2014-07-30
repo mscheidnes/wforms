@@ -412,9 +412,9 @@ _i.prototype.moveRepeatLinkDown = function(oldElem,newElem){
 _b.getLastRepeatSect = function(elem){
      var master = this.getMasterSection(elem);
      var id = master.id.replace(/\[0\]/,'');    
-     // filter to the matching fieldsets we want
      var sections = document.querySelectorAll('fieldset[id*=' + id + ']');
-     return sections[sections.length-2];
+     
+     return sections[sections.length-2]; // -1 would be one that is getting removed
  }
 
 /**
@@ -425,11 +425,8 @@ _i.prototype.removeSection = function(elem){
     if(elem){
         // Move repeated link to another another section if presnt
         if(elem.querySelector('.'+ wFORMS.behaviors.repeat.CSS_DUPLICATE_SPAN)){
-            var last = wFORMS.behaviors.repeat.getLastRepeatSect(elem);
-            console.log('removed: ' + elem.id);
-            console.log('lastRepFound: ' + last.id);
-            
-            //debugger;
+            var _b = wFORMS.behaviors.repeat;
+            var last = _b.getLastRepeatSect(elem).appendChild(_b.getRepeatSpan(elem));
         }
 
         // Add id to list of removed elements.
@@ -1013,6 +1010,31 @@ _b.getMasterSection = function(elem){
         }
         return elem;
     }
+}
+
+/**
+ * Returns html element of repeate link in the master section (repeatable) from its duplicate
+ * @param   {HTMLElement}   elem
+ * @return  {HTMLElement} or false
+ */
+_b.getRepeatSpan = function(elem){
+    var _self = this;
+    var match = null;
+   // var pattern = new RegExp('('+ _self.CSS_DUPLICATE_SPAN + '|' + _self.CSS_DELETE_SPAN + ')');
+    var parents = [];
+    parents.push(this.getRepeatedElement(elem).children);
+    parents.push(this.getMasterSection(elem).children);
+
+    // itterate through parents
+    parents.forEach(function(elems){
+        for(i=0;i<elems.length;i++) {
+            if(elems[i].className.match( _self.CSS_DUPLICATE_SPAN)) {
+                match = elems[i]; //.querySelector('.' + _self.CSS_DUPLICATE_LINK);
+                break;
+            }
+        }
+    })
+    return match || false;
 }
 
 /**
