@@ -128,18 +128,14 @@ wFORMS.behaviors.repeat = {
      * Evaluates after section is duplicated
      * @param   {HTMLElement}   elem    Duplicated section
      */
-    onRepeat : function(elem){
-        this.updateRepeatLinkPosition(elem);
-    },
+    onRepeat : function(elem){},
 
     /**
      * Custom function that could be overridden.
      * Evaluates after the section is removed
      * @param   {HTMLElement}   elem    a copy of the removed section - detached from the document
      */
-    onRemove : function(elem){
-        this.updateRepeatLinkPosition(elem);
-    },
+    onRemove : function(elem){},
 
     /**
      * Custom function that could be overridden.
@@ -393,7 +389,7 @@ _i.prototype.duplicateSection = function(elem){
 
     // Calls custom function
     this.behavior.onRepeat(newElem);
-    
+
     wFORMS.helpers.spotlight(newElem);
 }
 
@@ -984,49 +980,6 @@ _b.getMasterSection = function(elem){
         }
         return elem;
     }
-}
-
-/**
- * Returns html element of repeate link in the master section (repeatable) from its duplicate
- * @param   {HTMLElement}   elem
- * @return  {HTMLElement} or false
- */
-_b.getRepeatSpan = function(elem){
-    var _self = this;
-    var match = null;
-   // var pattern = new RegExp('('+ _self.CSS_DUPLICATE_SPAN + '|' + _self.CSS_DELETE_SPAN + ')');
-    var parents = [];
-    parents.push(this.getRepeatedElement(elem).children);
-    parents.push(this.getMasterSection(elem).children);
-    
-    // itterate through parents
-    parents.forEach(function(elems){
-        for(i=0;i<elems.length;i++) {
-            if(elems[i].className.match( _self.CSS_DUPLICATE_SPAN)) {
-                match = elems[i]; //.querySelector('.' + _self.CSS_DUPLICATE_LINK);
-                break;
-            }    
-        } 
-    })
-    return match || false;
-}
-
-/**
- * Moves the repeate link to the last instance of the repeat
- * @param   {HTMLElement}   elem    Element to append link to
- */
-_b.updateRepeatLinkPosition = function(elem) {
-    // get the link
-    var repSpan = this.getRepeatSpan(elem);
-    
-    // get the last secion
-    var lastRep = this.getRepeatedElement(elem);
-    
-    //find location to append
-    //var span = lastRep.querySelector('.removeSpan, .duplicateSpan');
-    lastRep.appendChild(repSpan);
-    
-    
 }
 
 /**
