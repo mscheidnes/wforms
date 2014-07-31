@@ -57,6 +57,12 @@ wFORMS.behaviors.repeat = {
      * @final
      */
     CSS_REPEATABLE : 'repeat',
+    
+    /**
+     * CSS class for div added to section to speorate links
+     *
+     */
+    CSS_DIVIDER : 'repeatLinkDivider',
 
     /**
      * Attribute specifies that current group is duplicate
@@ -402,7 +408,21 @@ _i.prototype.duplicateSection = function(elem){
  */
 _i.prototype.moveRepeatLinkDown = function(oldElem,newElem){
     var repSpan = this.getOrCreateRepeatLink(oldElem).parentNode;
+    newElem.appendChild(wFORMS.behaviors.repeat.makeDivider());
     newElem.appendChild(repSpan);
+}
+
+/**
+ * Makes a div to seporate the repeat and remove link spans form one another
+ *
+ */
+_b.makeDivider = function() {
+    var divider = document.createElement('DIV');
+    divider.setAttribute('class',wFORMS.behaviors.repeat.CSS_DIVIDER);
+    divider.style.height = '30px';
+    // some other CSS to the div
+    
+    return divider;
 }
 
 /**
@@ -411,8 +431,8 @@ _i.prototype.moveRepeatLinkDown = function(oldElem,newElem){
  */ 
 _b.getLastRepeatSect = function(elem){
      var master = this.getMasterSection(elem);
-     var id = master.id.replace(/\[0\]/,'');    
-     var sections = document.querySelectorAll('fieldset[id*=' + id + ']');
+     var id = master.id.replace(/\[\d+\]/,'');    
+     var sections = document.querySelectorAll('fieldset[id*="' + id + '"]');
      
      return sections[sections.length-2]; // -1 would be one that is getting removed
  }
@@ -424,10 +444,7 @@ _b.getLastRepeatSect = function(elem){
 _i.prototype.removeSection = function(elem){
     if(elem){
         // Move repeated link to another another section if presnt
-        if(elem.querySelector('.'+ wFORMS.behaviors.repeat.CSS_DUPLICATE_SPAN)){
-            var _b = wFORMS.behaviors.repeat;
-            var last = _b.getLastRepeatSect(elem).appendChild(_b.getRepeatSpan(elem));
-        }
+        this.moveRepeatLinkUp(elem);
 
         // Add id to list of removed elements.
         this.logRemovedSection(elem);
@@ -440,6 +457,18 @@ _i.prototype.removeSection = function(elem){
 
         // Calls custom function (@DEPRECATED)
         this.behavior.onRemove(elem);
+    }
+}
+
+/**
+ * Chekcs and moves repeat link up to previos elem so it it is not deleted
+ * @param {HTMLElement} the element that is bieng removed
+ */
+_i.prototype.moveRepeatLinkUp = function(elem){
+    var _b = wFORMS.behaviors.repeat;
+    // if element contains duplicate span
+    if(elem.querySelector('.' + _b.CSS_DUPLICATE_SPAN)){
+        _b.getLastRepeatSect(elem).appendChild(_b.getRepeatSpan(elem));
     }
 }
 
@@ -1018,9 +1047,9 @@ _b.getMasterSection = function(elem){
  * @return  {HTMLElement} or false
  */
 _b.getRepeatSpan = function(elem){
+    debugger;
     var _self = this;
     var match = null;
-   // var pattern = new RegExp('('+ _self.CSS_DUPLICATE_SPAN + '|' + _self.CSS_DELETE_SPAN + ')');
     var parents = [];
     parents.push(this.getRepeatedElement(elem).children);
     parents.push(this.getMasterSection(elem).children);
@@ -1029,13 +1058,25 @@ _b.getRepeatSpan = function(elem){
     parents.forEach(function(elems){
         for(i=0;i<elems.length;i++) {
             if(elems[i].className.match( _self.CSS_DUPLICATE_SPAN)) {
-                match = elems[i]; //.querySelector('.' + _self.CSS_DUPLICATE_LINK);
+                match = elems[i];
                 break;
             }
         }
     })
     return match || false;
+} 
+/*
+_b.getRepeatSpan = function(elem){
+    var elems =  this.getLastRepeatSect(elem).children;
+
+    for(i=0;i<elems.length;i++) {
+        if(elems[i].className.match( this.CSS_DUPLICATE_SPAN)) {
+            return elems[i];
+        }
+    }
+    return false;
 }
+*/
 
 /**
  * Register a callback for when an element changes id due to repeat behavior.
