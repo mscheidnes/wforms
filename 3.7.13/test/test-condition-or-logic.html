@@ -1,0 +1,147 @@
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+
+    <title>Hidden Conditionals UV4234</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+	
+	<script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
+	
+    <script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
+    <script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
+ 
+    <script type="text/javascript" src="../wforms_core.js"></script>
+    <script type="text/javascript" src="../wforms_condition.js"></script>
+    <script type="text/javascript" src="../wforms_validation.js"></script>
+
+	<script>
+	//        Test Section......
+         var bInstance = null;
+         var form = null;
+
+         var checkTimer = setInterval(function(){
+             if(wFORMS.initialized === true){
+                 clearInterval(checkTimer);
+                 setUpPageStatus = 'complete';
+             }
+         }, 50);
+
+         function setUpPage() {
+
+         }
+
+         function setUp() {
+		 	testPassed = null;
+            form = document.getElementById('tfa_0');
+            bInstance = wFORMS.getBehaviorInstance(form, 'validation');
+            wFORMS.behaviors.validation.onFail = function(){testPassed = false;};
+			wFORMS.behaviors.validation.onPass = function(){testPassed = true;};
+         }
+
+         // remove any remaining error message
+         function tearDown() {
+
+         }
+
+         function testHiddenRequiredFields() {
+			bInstance = wFORMS.getBehaviorInstance(form, 'validation');
+						
+			function hideSection(){document.getElementById('tfa_6').click();};
+			function unhideSection(){document.getElementById('tfa_5').click();};
+			function sectionHidden(){return !!document.getElementById('tfa_6').checked;};
+			
+			function hideQuestions(){document.getElementById('tfa_16').click();};
+			function unhideQuestions(){document.getElementById('tfa_15').click();};
+			function questionsHidden(){return !!document.getElementById('tfa_16').checked;};
+			 
+			// === Hide Test 1 ===
+			// both section and questions hidden
+			hideQuestions();
+			assertTrue('quesitions should be hidden for this test - hide test 1',questionsHidden());
+			hideSection();
+			assertTrue('section should be hidden for this test - hide test 1',sectionHidden());
+			// now run validation on the form
+			bInstance.run(null, form);
+			assertTrue('hide test 1 - should Pass validtion',bInstance.run(null, form));
+			
+			// === Hide Test 2 === 
+			// unhide section but keep questions hidden
+			hideQuestions();
+			assertTrue('section should be hidden for this test - hide test 2',questionsHidden());
+			unhideSection();
+			assertFalse('section should be visible for this test - hide test 2',sectionHidden());
+			// now run validation on the form
+			bInstance.run(null, form);
+			assertFalse('Hide Test 2 - Validation should fail',bInstance.run(null, form));
+			
+			// === Hide Test 3 === 
+			// unhide questions but keep section hidden
+			unhideQuestions();
+			assertFalse('questions should be visible for this test - hide test 3',questionsHidden());
+			hideSection();
+			assertTrue('section should be hidden for this test - hide test 3',sectionHidden());
+			// now run validation on the form
+			bInstance.run(null, form);
+			assertTrue('Hide Test 3 - Should pass validation - the tricky one...',bInstance.run(null, form));
+			
+			// === Hide Test 4 === 
+			// unhide both section and questions
+			unhideQuestions();
+			assertFalse('questtions should be visible for this test - hide test 4',questionsHidden());
+			unhideSection();
+			assertFalse('section should be visible for this test - hide test 4',sectionHidden());
+			// now run validation on the form
+			bInstance.run(null, form);
+			assertFalse('Hide Test 4 - Unhidden requireds should fail',bInstance.run(null, form));
+			
+         }
+    </script>
+
+            
+</head>
+<body class="default wFormWebPage">
+
+
+    <div id="tfaContent">
+    	<div class="wFormContainer"  >
+
+  <div class=""><div class="wForm" id="tfa_0-WRPR" dir="ltr">
+<div class="codesection" id="code-tfa_0"></div>
+<h3 class="wFormTitle" id="tfa_0-T">Hidden Conditionals UV4234</h3>
+<form method="post" action="http://www.tfaforms.com/responses/processor" class="hintsBelow labelsAbove" id="tfa_0">
+<div id="tfa_17" class="section inline group">
+<div id="tfa_1-D" class="oneField    ">
+<label id="tfa_1-L" for="tfa_1" class="label preField ">Show Section A?</label><br><div class="inputWrapper"><span id="tfa_1" class="choices vertical "><span class="oneChoice"><input type="radio" value="tfa_5" class="" id="tfa_5" name="tfa_1" data-conditionals="#tfa_7,#tfa_8,#tfa_9"><label class="label postField" id="tfa_5-L" for="tfa_5">Yes</label></span><span class="oneChoice"><input type="radio" value="tfa_6" class="" id="tfa_6" name="tfa_1"><label class="label postField" id="tfa_6-L" for="tfa_6">No</label></span></span></div>
+</div>
+<div id="tfa_11-D" class="oneField    ">
+<label id="tfa_11-L" for="tfa_11" class="label preField ">Unhide Inner question?</label><br><div class="inputWrapper"><span id="tfa_11" class="choices vertical "><span class="oneChoice"><input type="radio" value="tfa_15" class="" id="tfa_15" name="tfa_11" data-conditionals="#tfa_8,#tfa_9"><label class="label postField" id="tfa_15-L" for="tfa_15">Yes</label></span><span class="oneChoice"><input type="radio" value="tfa_16" class="" id="tfa_16" name="tfa_11"><label class="label postField" id="tfa_16-L" for="tfa_16">No</label></span></span></div>
+</div>
+</div>
+<fieldset id="tfa_7" class="section" data-condition="`#tfa_5`">
+<legend id="tfa_7-L">Section A</legend>
+<div id="tfa_10" class="section inline group">
+<div id="tfa_8-D" class="oneField    ">
+<label id="tfa_8-L" for="tfa_8" class="label preField reqMark">Required in Section A</label><br><div class="inputWrapper"><input type="text" id="tfa_8" name="tfa_8" value="" placeholder="" data-condition="`#tfa_15` OR `#tfa_5`" class="required"></div>
+</div>
+<div id="tfa_9-D" class="oneField    ">
+<label id="tfa_9-L" for="tfa_9" class="label preField reqMark">Another required in Section A</label><br><div class="inputWrapper"><input type="text" id="tfa_9" name="tfa_9" value="" placeholder="" data-condition="`#tfa_15` OR `#tfa_5`" class="required"></div>
+</div>
+</div>
+</fieldset>
+<div class="actions" id="tfa_0-A"><input type="submit" class="primaryAction" value="Submit"></div>
+<div style="clear:both"></div>
+<input type="hidden" value="54-7193e3c727dce9239422a5e16254f64a" name="tfa_dbCounters" id="tfa_dbCounters" autocomplete="off"><input type="hidden" value="335215" name="tfa_dbFormId" id="tfa_dbFormId"><input type="hidden" value="" name="tfa_dbResponseId" id="tfa_dbResponseId"><input type="hidden" value="c585678b49dd57c132fb16543eb036a9" name="tfa_dbControl" id="tfa_dbControl"><input type="hidden" value="1402941393" name="tfa_dbTimeStarted" id="tfa_dbTimeStarted" autocomplete="off"><input type="hidden" value="8" name="tfa_dbVersionId" id="tfa_dbVersionId"><input type="hidden" value="" name="tfa_switchedoff" id="tfa_switchedoff">
+</form>
+</div></div>
+
+  <p class="supportInfo" >
+      
+</div>    </div>
+
+    <br/><center><img style="-webkit-user-select: none" src="http://www3.formassembly.com/images/logo.png"></center>
+    <script src='http://www.tfaforms.com/js/iframe_resize_helper_internal.js'></script>
+
+</body>
+</html>
