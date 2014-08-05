@@ -229,8 +229,10 @@ wFORMS.behaviors.autoformat.applyToVisibleElements = function(instance) {
 
         wFORMS.behaviors.autoformat._globalCache[id] = false;
     }
-
-    instance.actorsInDomain.forEach(function (id) {
+    
+    
+    for (var i = 0; i<instance.actorsInDomain.length; i++) {
+        var id  = instance.actorsInDomain[i];
         var elem = document.getElementById(id);
 
         if (wFORMS.behaviors.paging) {
@@ -245,7 +247,7 @@ wFORMS.behaviors.autoformat.applyToVisibleElements = function(instance) {
             // no paging: apply to all
             createMask(id, elem);
         }
-    });
+    }
 };
 
 
