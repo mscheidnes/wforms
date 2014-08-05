@@ -202,7 +202,7 @@ _b.applyTo = function(f) {
 
         var masterNodes = masterSection.querySelectorAll(this.SELECTOR_REPEAT);
             masterNodes.forEach(function(elem){
-                masterArray.push(elem.querySelector(".duplicateLink").innerHTML);
+                masterArray.push(_self.getRepeatSpan(elem).querySelector(".duplicateLink").innerHTML);
             });
     }
 
@@ -400,6 +400,8 @@ _i.prototype.duplicateSection = function(elem){
     this.behavior.onRepeat(newElem);
     
     wFORMS.helpers.spotlight(newElem);
+    
+   // console.log('added: ' + newElem.id);
 }
 
 /**
@@ -407,7 +409,8 @@ _i.prototype.duplicateSection = function(elem){
  *
  */
 _i.prototype.moveRepeatLinkDown = function(oldElem,newElem){
-    var repSpan = this.getOrCreateRepeatLink(oldElem).parentNode;
+    //var repSpan = this.getOrCreateRepeatLink(oldElem).parentNode;
+    var repSpan = wFORMS.behaviors.repeat.getRepeatSpan(oldElem);
     newElem.appendChild(wFORMS.behaviors.repeat.makeDivider());
     newElem.appendChild(repSpan);
 }
@@ -430,25 +433,54 @@ _b.makeDivider = function() {
  * @param {HTMLElement} a repeated fieldset
  */ 
 _b.getLastRepeatSect = function(elem){
-     var master = this.getMasterSection(elem);
-     var id = master.id.replace(/\[\d+\]/,'');    
-     var sections = document.querySelectorAll('fieldset[id*="' + id + '"]');
+  //   var master = this.getMasterSection(elem) || this.getRepeatedElement(elem);
+  //   var id = master.id.replace(/\[\d+\]/,'');    
+    var id = this.getBaseId(elem);
+    var sections = document.querySelectorAll('fieldset[id*="' + id + '"]');
      
-     return sections[sections.length-1];
+    return sections[sections.length-1];
  }
+ 
+/**
+ * Returnes the base Id of the original repeatable seciton fieldset
+ *
+ * @param {HTMLelement} The element you want to get the parent ID of
+ * @return (stinrg) The id of the original repeateble fSieldset
+ *
+_b.getBaseId = function(elem) {
+   var section = (this.getMasterSection(elem) || this.getRepeatedElement(elem));
+   var temp = ssection.id.replace(/\[.+$/);
+   return temp;
+} */
+
+/**
+ * Get the number assigned to the series of repeatables
+ * This can be added the base ID to get the full ID of 
+ * repeatables in the series.
+ * 
+ * @param {HTMLelement} The element you want to get the series of
+ * @return {String} the id in '[x][y]...' format
+ */
+_b.getBaseId = function(elem){
+   var section = (this.getMasterSection(elem) || this.getRepeatedElement(elem));
+   var base = section.id.replace(/\[.+$/,'');
+   var ary = section.id.match(/\[\d+\]/g);
+   ary.splice(ary.length-1,1);
+   
+   return base + ary; //remove last item in array
+}
 
 /**
  * Removes section specified by id
  * @param   {DOMElement}    element to remove
  */
 _i.prototype.removeSection = function(elem){
-    var _b = wFORMS.behaviors.repeat;
     if(elem){
-        // Move repeated link to another another section if presnt
-        //this.moveRepeatLinkUp(elem);
-        
-        // get the rep span
-        var repSpan =_b.getRepeatSpan(elem);
+        var _b = wFORMS.behaviors.repeat;
+        var moveLink = elem === _b.getLastRepeatSect(elem);
+         
+        // get the rep span --- saved before removal
+        if(moveLink) var repSpan =_b.getRepeatSpan(elem);
         
         // Add id to list of removed elements.
         this.logRemovedSection(elem);
@@ -462,21 +494,10 @@ _i.prototype.removeSection = function(elem){
         // Calls custom function (@DEPRECATED)
         this.behavior.onRemove(elem);
         
-        // add the span back....
-        _b.getLastRepeatSect(elem).appendChild(repSpan);
-    }
-}
-
-/**
- * Chekcs and moves repeat link up to previos elem so it it is not deleted
- * @param {HTMLElement} the element that is bieng removed
- */
-_i.prototype.moveRepeatLinkUp = function(elem){
-
-    // if element contains duplicate span
-    if(elem.querySelector('.' + _b.CSS_DUPLICATE_SPAN)){
-      //  _b.getLastRepeatSect(elem).appendChild(_b.getRepeatSpan(elem));
-        elem.appendChild(_b.getRepeatSpan(elem));
+        // add the span back --- after removal
+        if(moveLink) _b.getLastRepeatSect(elem).appendChild(repSpan);
+        
+       // console.log('Removed: '+ elem.id );
     }
 }
 
@@ -1050,21 +1071,22 @@ _b.getMasterSection = function(elem){
 }
 
 /**
- * Returns html element of repeate link in the master section (repeatable) from its duplicate
+ * Returns HTML repeat span in the repatable instance
  * @param   {HTMLElement} elem
  * @return  {HTMLElement} last repeated seciton or false
  */
-_b.getRepeatSpan = function(elem){
-    var elems =  this.getLastRepeatSect(elem).children;
-
-    for(i=0;i<elems.length;i++) {
-        if(elems[i].className.match( this.CSS_DUPLICATE_SPAN)) {
-            return elems[i];
+ _b.getRepeatSpan = function(elem){
+    var form = document.getElementById('tfa_0');
+    var self = this;
+    var match;
+    [].forEach.call(document.querySelectorAll('[id^="' + this.getBaseId(elem) + '"]'),function(e){    
+   // form.querySelectorAll('[id^="' + this.getBaseId(elem) + '"]').forEach(function(e){
+        if(e.parentNode.className.match(self.CSS_DUPLICATE_SPAN)) {
+            match = e.parentNode;
         }
-    }
-    return false;
+    });    
+    return match || false;
 }
-
 
 /**
  * Register a callback for when an element changes id due to repeat behavior.
