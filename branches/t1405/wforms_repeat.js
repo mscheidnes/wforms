@@ -467,9 +467,9 @@ _b.getBaseId = function(elem){
    var ary = section.id.match(/\[\d+\]/g);
    ary.splice(ary.length-1,1);
    
-   return base + ary; //remove last item in array
-}
-
+   return base + ary.join(''); //remove commas from array.toSting()
+}   
+   
 /**
  * Removes section specified by id
  * @param   {DOMElement}    element to remove
@@ -1078,14 +1078,25 @@ _b.getMasterSection = function(elem){
  _b.getRepeatSpan = function(elem){
     var form = document.getElementById('tfa_0');
     var self = this;
+    var span;
     var match;
     [].forEach.call(document.querySelectorAll('[id^="' + this.getBaseId(elem) + '"]'),function(e){    
+   // form.querySelectorAll('[id^="' + this.getBaseId(elem) + '"]').forEach(function(e){
+        match = e.querySelector(self.CSS_DUPLICATE_SPAN);
+        if(match) {
+            span = match;
+        }
+    });    
+    return match || false;
+    
+   /* [].forEach.call(document.querySelectorAll('[id^="' + this.getBaseId(elem) + '"]'),function(e){    
    // form.querySelectorAll('[id^="' + this.getBaseId(elem) + '"]').forEach(function(e){
         if(e.parentNode.className.match(self.CSS_DUPLICATE_SPAN)) {
             match = e.parentNode;
         }
-    });    
-    return match || false;
+    }); 
+    
+    return match || false; */
 }
 
 /**
