@@ -217,6 +217,9 @@ wFORMS.behaviors.autoformat.applyToVisibleElements = function(instance) {
             var mask = new wFORMS.behaviors.autoformat.Mask(element);
             wFORMS.behaviors.autoformat._globalCache[id] = mask;
         }
+		// Make sure we wind up at a good starting place for input
+        wFORMS.behaviors.autoformat._globalCache[id].updateValue();
+        wFORMS.behaviors.autoformat._globalCache[id].caret.nudge(0);    // bump to first mask char
     };
 
     // Remove the mask from the global cache, which should make it able to be
@@ -241,7 +244,10 @@ wFORMS.behaviors.autoformat.applyToVisibleElements = function(instance) {
             if (wFORMS.behaviors.paging.isElementVisible(elem)) {
                 createMask(id, elem);
             } else {
-                removeMask(id);
+				// No need to garbage collect elements already
+				// already setup, and there are issues in
+				// recreating the mask.
+                //removeMask(id);
             }
         } else {
             // no paging: apply to all
@@ -453,7 +459,11 @@ wFORMS.behaviors.autoformat.Mask.prototype.removeListeners = function() {
  * plugin.
  */
 wFORMS.behaviors.autoformat.Mask.prototype.blur = function() {
-    this.element.value = this.stripExtraInput();
+	// Not sure about disabling this, but I don't see why
+	// we'd want to lose the characters for anything but onSubmit
+	// validations aren't run against fields, except for regexp
+	// and those need to be complete to be evaled. - dbuschho
+    //this.element.value = this.stripExtraInput();
 };
 
 /**
@@ -655,18 +665,20 @@ wFORMS.behaviors.autoformat.Mask.prototype.reformat = function() {
             if (!tmp) {
                 // no more user-submitted values, use format character
                 this.contents[i] = this.format[i];
-            } else if (this.isMaskChar(this.format[i])) {
+            } else {
+                if (this.isMaskChar(this.format[i])) {
                 v = tmp.shift();
-                if (v && this.isCharAllowed(v, this.format[i])) {
-                    this.contents[i] = v;
-                    newVals.push(v);
-                } else {
-                    // If the character isn't allowed, we'll just discard the
-                    // rest of the input. This prevents having to deal with
-                    // edge cases with mixed numbers/letters where removing
-                    // some characters can invalidate the mask.
-                    tmp = null;
-                    this.contents[i] = this.format[i];
+                    if (v && this.isCharAllowed(v, this.format[i])) {
+                        this.contents[i] = v;
+                        newVals.push(v);
+                    } else {
+                        // If the character isn't allowed, we'll just discard the
+                        // rest of the input. This prevents having to deal with
+                        // edge cases with mixed numbers/letters where removing
+                        // some characters can invalidate the mask.
+                        tmp = null;
+                        this.contents[i] = this.format[i];
+                    }
                 }
             }
         };
