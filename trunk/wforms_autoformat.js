@@ -644,7 +644,7 @@ wFORMS.behaviors.autoformat.Mask.prototype.isCharAllowed = function(c, maskChar)
     }
 
     if (maskChar === '$') {
-        return Boolean(c.match(wFORMS.behaviors.autoformat.ALPHABETIC_REGEX));
+        return Boolean(c.match(wFORMS.behaviors.autoformat.ALPHABETIC_REGEX) || c.match(wFORMS.behaviors.autoformat.NUMERIC_REGEX));
     }
 
     return false;
