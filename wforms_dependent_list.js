@@ -37,7 +37,7 @@
  *                          are to be excluded from the filtered field when this choice is selected. If not set, defaults to none/empty.
  *  data-filter-include   : A css selector. Optional. Set on a choice of a control field, indicates which choices
  *                          are to be included from the filtered field when this choice is selected. If not set, will attempt
- *                          to match the choice label with a category lable (optgroup) in the dependent field.
+ *                          to match the choice label with a category label (optgroup) in the dependent field.
  *
  */
 
@@ -57,7 +57,7 @@ wFORMS.behaviors.dependent_list  = {
         this.behavior = wFORMS.behaviors.dependent_list;
         this.target = f;
     }
-}
+};
 
 /**
  * Factory Method.
@@ -66,7 +66,7 @@ wFORMS.behaviors.dependent_list  = {
  * @return {object} an instance of the behavior
  */
 wFORMS.behaviors.dependent_list.applyTo = function(f) {
-    var b = new wFORMS.behaviors.dependent_list.instance(f);
+    var instance = new wFORMS.behaviors.dependent_list.instance(f);
     if(!f.querySelectorAll) base2.DOM.bind(f);
 
     // Selects elements and attach event listeners.
@@ -75,19 +75,24 @@ wFORMS.behaviors.dependent_list.applyTo = function(f) {
         if(!elem.addEventListener) {
             base2.DOM.bind(elem);
         }
-        elem.addEventListener('change', function(event) { b.run(event, this)}, false);
-        b.run(null, elem);
+        elem.addEventListener('change', function(event) { instance.run(event, this)}, false);
+        instance.run(null, elem);
     });
 
-    b.onApply();
-    return b;
-}
+    // Attach event handler for repeatables
+    if(elems.length>0 && wFORMS.behaviors.repeat){
+        wFORMS.behaviors.repeat.observeRepeatComplete(function(a,b,c){ instance.onRepeatableDuplicated(a,b,c); });
+        wFORMS.behaviors.repeat.observeRemoveComplete(function(a){ instance.onRepeatableRemoved(a); });
+    }
+    instance.onApply();
+    return instance;
+};
 
 /**
  * Executed once the behavior has been applied to the document.
  * Can be overwritten.
  */
-wFORMS.behaviors.dependent_list.instance.prototype.onApply = function() {}
+wFORMS.behaviors.dependent_list.instance.prototype.onApply = function() {};
 
 /**
  * Executes the behavior
@@ -96,27 +101,27 @@ wFORMS.behaviors.dependent_list.instance.prototype.onApply = function() {}
  */
 wFORMS.behaviors.dependent_list.instance.prototype.run = function(event, element) {
     var b = this;
+    var form = wFORMS.helpers.getForm(this.target);
     var selector = element.getAttribute('data-filter-dependent');
-    var dependents = this.target.querySelectorAll(selector);
+    var dependents = form.querySelectorAll(selector);
     dependents.forEach(function(dependent) {
         b.applyFiltersTo(dependent);
     });
-}
-
+};
 
 /**
  *
  */
 wFORMS.behaviors.dependent_list.instance.prototype.applyFiltersTo = function(dependent){
     var b = this;
-
+    var form = wFORMS.helpers.getForm(this.target);
     var selector = dependent.getAttribute('data-filter-control');
-    var controls = this.target.querySelectorAll(selector);
+    var controls = form.querySelectorAll(selector);
 
     controls.forEach(function(control) {
         b.filter(control, dependent);
     });
-}
+};
 
 /**
  *
@@ -174,7 +179,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.filter = function(control, de
     if(dependent.getAttribute('data-filter-dependent')) {
         this.run(null, dependent);
     }
-}
+};
 
 wFORMS.behaviors.dependent_list.instance.prototype.include = function(dependent, selector) {
     var filtered = dependent.querySelectorAll(selector);
@@ -197,7 +202,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.include = function(dependent,
             field.disabled = false;
         });
     });
-}
+};
 
 wFORMS.behaviors.dependent_list.instance.prototype.exclude = function(dependent, selector) {
     var filtered = dependent.querySelectorAll(selector);
@@ -226,7 +231,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.exclude = function(dependent,
             field.disabled = 'disabled';
         });
     });
-}
+};
 
 wFORMS.behaviors.dependent_list.instance.prototype.getChoiceLabel = function(choice) {
 
@@ -235,4 +240,159 @@ wFORMS.behaviors.dependent_list.instance.prototype.getChoiceLabel = function(cho
     }
     var label = choice.textContent || choice.innerText;  // Note: doesn't support HTML markup.
     return label;
+};
+
+wFORMS.behaviors.dependent_list.instance.prototype.updateReference = function(element, attributeName, oldReference, newReference, replaceMode) {
+
+    var attribute = element.getAttribute(attributeName);
+    var values    = attribute?attribute.split(','):[];
+
+    if(values.length>0) {
+        if(replaceMode) {
+            for(var i=0;i<values.length;i++) {
+                var id = this.unescapeId(values[i])
+
+                if(id==oldReference) {
+                    values[i] = this.escapeId(newReference);
+                    break;
+                }
+            }
+            /*
+            if(i==values.length) {
+                values.push( this.escapeId(newReference) );
+            }*/
+        } else {
+            values.push( this.escapeId(newReference) );
+        }
+        element.setAttribute(attributeName,values.join(","));
+    }
+    return element;
+};
+
+wFORMS.behaviors.dependent_list.instance.prototype.updateSelectors = function(selectors, idMappings) {
+    var selectors = selectors?selectors.split(','):[];
+    for(var i=0;i<selectors.length;i++) {
+        var id = this.unescapeId(selectors[i]);
+        if(idMappings[id]) {
+            selectors[i] = this.escapeId( idMappings[id] );
+        }
+    }
+    return selectors.join(',');
+};
+
+wFORMS.behaviors.dependent_list.instance.prototype.unescapeId = function(id) {
+    return id?id.replace(/^#/,'').replace("\\[","[").replace("\\]","]"):null;
+};
+
+wFORMS.behaviors.dependent_list.instance.prototype.escapeId = function(id) {
+    return id?"#"+id.replace("[","\\[").replace("]","\\]"):null;
+};
+
+wFORMS.behaviors.dependent_list.instance.prototype.isInSameScope = function(a,b) {
+    // repeat scope same?
+    return wFORMS.behaviors.repeat.getRepeatedElement(a) === wFORMS.behaviors.repeat.getRepeatedElement(b);
+};
+
+wFORMS.behaviors.dependent_list.instance.prototype.onRepeatableDuplicated = function( masterNode, duplicateNode, idMappings ) {
+
+    var form = wFORMS.helpers.getForm(this.target);
+    var self = this;
+    var getOldId = function(newId,idMappings) {
+        for(var oldId in idMappings) {
+            if(idMappings[oldId]==newId) {
+                return oldId;
+            }
+        }
+        return newId;
+    }
+
+
+    // See if the repeated element has dependent lists.
+    var elems = masterNode.querySelectorAll("option[data-filter-dependent], select[data-filter-dependent], input[data-filter-dependent], "+
+                                            "option[data-filter-control], select[data-filter-control], input[data-filter-control]");
+
+    if(elems.length>0) {
+
+        elems.forEach(function(elem) {
+            // Check if the ID of this element has changed.
+            var newId = elem.id;
+            var oldId = getOldId(newId, idMappings.master);
+
+            if(newId==oldId) {
+                // no change, nothing to do (happens when the master has been repeated twice or more)
+                return
+            }
+
+            // Get reference to dependent fields (and account for changed ids).
+            var selector = self.updateSelectors(elem.getAttribute('data-filter-dependent'), idMappings.master);
+
+            if(selector) {
+                // Get dependent fields
+                var dependents = form.querySelectorAll(selector);
+                dependents.forEach(function(dependent) {
+                    // Adjust data-filter-control attribute to point to new ID.
+                    self.updateReference(dependent, 'data-filter-control', oldId, newId, true);
+                });
+            }
+
+            // Get reference to control fields
+            var selector = self.updateSelectors(elem.getAttribute('data-filter-control'), idMappings.master);
+
+            if(selector) {
+                // Get control fields
+                var controls = form.querySelectorAll(selector);
+                controls.forEach(function(control) {
+                    // Adjust data-filter-control attribute to point to new ID.
+                    self.updateReference(control, 'data-filter-dependent', oldId, newId, true);
+                });
+            }
+        });
+
+        // Now adjust the copy.
+        var elems = duplicateNode.querySelectorAll("option[data-filter-dependent], select[data-filter-dependent], input[data-filter-dependent], "+
+                                                   "option[data-filter-control], select[data-filter-control], input[data-filter-control]");
+
+        var mapping = {};
+        for(var id in idMappings.repeat) {
+            var masterId = getOldId(id, idMappings.master);
+            mapping[ masterId ] = idMappings.repeat[id];
+        }
+
+        elems.forEach(function(elem) {
+            // The ID of this element has changed.
+            var newId = elem.id;
+            var oldId = getOldId(newId, idMappings.repeat);
+            oldId = getOldId(oldId, idMappings.master);
+
+            // Get reference to dependent fields (and account for changed ids).
+            var selector = self.updateSelectors(elem.getAttribute('data-filter-dependent'), mapping);
+
+            if(selector) {
+                // Get dependent fields
+                var dependents = form.querySelectorAll(selector);
+                dependents.forEach(function(dependent) {
+                    // Adjust data-filter-control attribute to point to new ID.
+                    var replaceMode = self.isInSameScope(elem, dependent);
+                    self.updateReference(dependent, 'data-filter-control', oldId, newId, replaceMode);
+                });
+            }
+
+            // Get reference to control fields
+            var selector = self.updateSelectors(elem.getAttribute('data-filter-control'), idMappings.repeat);
+
+            if(selector) {
+                // Get control fields
+                var controls = form.querySelectorAll(selector);
+                controls.forEach(function(control) {
+                    // Adjust data-filter-control attribute to point to new ID.
+                    var replaceMode = self.isInSameScope(elem, control);
+                    self.updateReference(control, 'data-filter-dependent', oldId, newId, replaceMode);
+                });
+            }
+        });
+    }
+};
+
+wFORMS.behaviors.dependent_list.instance.prototype.onRepeatableRemoved = function( removedCopy ) {
+    // no action needed here.
 };
