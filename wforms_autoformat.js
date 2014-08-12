@@ -218,8 +218,8 @@ wFORMS.behaviors.autoformat.applyToVisibleElements = function(instance) {
             wFORMS.behaviors.autoformat._globalCache[id] = mask;
         }
 		// Make sure we wind up at a good starting place for input
-        wFORMS.behaviors.autoformat._globalCache[id].updateValue();
-        wFORMS.behaviors.autoformat._globalCache[id].caret.nudge(0);    // bump to first mask char
+        // wFORMS.behaviors.autoformat._globalCache[id].updateValue();
+        // wFORMS.behaviors.autoformat._globalCache[id].caret.nudge(0);    // bump to first mask char
     };
 
     // Remove the mask from the global cache, which should make it able to be
@@ -463,7 +463,7 @@ wFORMS.behaviors.autoformat.Mask.prototype.blur = function() {
 	// we'd want to lose the characters for anything but onSubmit
 	// validations aren't run against fields, except for regexp
 	// and those need to be complete to be evaled. - dbuschho
-    //this.element.value = this.stripExtraInput();
+    this.element.value = this.stripExtraInput();
 };
 
 /**
