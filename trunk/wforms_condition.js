@@ -1218,7 +1218,15 @@ wFORMS.behaviors['condition'] = (function(){
 
     return { // the ultimate object that will become wFORMS.behaviors['condition']
 
+        // Allow behavior to be ignored.
+        skip: false,
+
         applyTo: function(domElement){
+
+            // Allow behavior to be ignored.
+            if(wFORMS.behaviors.condition.skip) {
+                return null;
+            }
 
             this.resetTriggerExecutionChain();
 

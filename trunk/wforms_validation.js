@@ -7,6 +7,9 @@ if (typeof(wFORMS) == "undefined") {
  */
 wFORMS.behaviors.validation = {
 
+    // Allow behavior to be ignored.
+    skip: false,
+
 	/*
 	 * Suffix of the ID for the error message placeholder
  	 */
@@ -191,6 +194,12 @@ wFORMS.behaviors.validation = {
  * @return {object} an instance of the behavior
  */
 wFORMS.behaviors.validation.applyTo = function(f) {
+
+    // Allow behavior to be ignored.
+    if(wFORMS.behaviors.validation.skip) {
+        return null;
+    }
+
 	if(!f || !f.tagName) {
 		throw new Error("Can't apply behavior to " + f);
 	}

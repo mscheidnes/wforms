@@ -7,6 +7,9 @@ if (typeof(wFORMS) == "undefined") {
  */
 wFORMS.behaviors.calculation  = {
 
+    // Allow behavior to be ignored.
+    skip: false,
+
     /**
      * Selector expression for the variable used in a calculation
      * @final
@@ -51,6 +54,10 @@ wFORMS.behaviors.calculation  = {
  */
 wFORMS.behaviors.calculation.applyTo = function(f) {
 
+    // Allow behavior to be ignored.
+    if(wFORMS.behaviors.calculation.skip) {
+        return null;
+    }
 
     while(f && f.tagName!='FORM') {
         f = f.parentNode;

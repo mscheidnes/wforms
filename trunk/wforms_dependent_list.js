@@ -49,6 +49,9 @@ if (typeof(wFORMS) == "undefined") {
 
 wFORMS.behaviors.dependent_list  = {
 
+    // Allow behavior to be ignored.
+    skip: false,
+
     /**
      * Creates new instance of the behavior
      * @constructor
@@ -66,6 +69,12 @@ wFORMS.behaviors.dependent_list  = {
  * @return {object} an instance of the behavior
  */
 wFORMS.behaviors.dependent_list.applyTo = function(f) {
+
+    // Allow behavior to be ignored.
+    if(wFORMS.behaviors.condition.skip) {
+        return null;
+    }
+
     var instance = new wFORMS.behaviors.dependent_list.instance(f);
     if(!f.querySelectorAll) base2.DOM.bind(f);
 
