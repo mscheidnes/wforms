@@ -71,7 +71,7 @@ wFORMS.behaviors.dependent_list  = {
 wFORMS.behaviors.dependent_list.applyTo = function(f) {
 
     // Allow behavior to be ignored.
-    if(wFORMS.behaviors.condition.skip) {
+    if(wFORMS.behaviors.dependent_list.skip) {
         return null;
     }
 
