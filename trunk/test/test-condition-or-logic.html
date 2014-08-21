@@ -8,6 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 	
 	<script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
+
+	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
+    <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
 	
     <script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
     <script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
@@ -15,6 +18,8 @@
     <script type="text/javascript" src="../wforms_core.js"></script>
     <script type="text/javascript" src="../wforms_condition.js"></script>
     <script type="text/javascript" src="../wforms_validation.js"></script>
+    
+    
 
 	<script>
 	//        Test Section......
@@ -59,7 +64,7 @@
 			// === Hide Test 1 ===
 			// both section and questions hidden
 			hideQuestions();
-			assertTrue('quesitions should be hidden for this test - hide test 1',questionsHidden());
+			assertTrue('questions should be hidden for this test - hide test 1',questionsHidden());
 			hideSection();
 			assertTrue('section should be hidden for this test - hide test 1',sectionHidden());
 			// now run validation on the form
@@ -74,7 +79,7 @@
 			assertFalse('section should be visible for this test - hide test 2',sectionHidden());
 			// now run validation on the form
 			bInstance.run(null, form);
-			assertFalse('Hide Test 2 - Validation should fail',bInstance.run(null, form));
+			assertTrue('Hide Test 2 - Validation should fail',bInstance.run(null, form));
 			
 			// === Hide Test 3 === 
 			// unhide questions but keep section hidden
@@ -89,7 +94,7 @@
 			// === Hide Test 4 === 
 			// unhide both section and questions
 			unhideQuestions();
-			assertFalse('questtions should be visible for this test - hide test 4',questionsHidden());
+			assertFalse('questions should be visible for this test - hide test 4',questionsHidden());
 			unhideSection();
 			assertFalse('section should be visible for this test - hide test 4',sectionHidden());
 			// now run validation on the form
@@ -110,7 +115,7 @@
   <div class=""><div class="wForm" id="tfa_0-WRPR" dir="ltr">
 <div class="codesection" id="code-tfa_0"></div>
 <h3 class="wFormTitle" id="tfa_0-T">Hidden Conditionals UV4234</h3>
-<form method="post" action="http://www.tfaforms.com/responses/processor" class="hintsBelow labelsAbove" id="tfa_0">
+<form method="post" action="/" class="hintsBelow labelsAbove" id="tfa_0">
 <div id="tfa_17" class="section inline group">
 <div id="tfa_1-D" class="oneField    ">
 <label id="tfa_1-L" for="tfa_1" class="label preField ">Show Section A?</label><br><div class="inputWrapper"><span id="tfa_1" class="choices vertical "><span class="oneChoice"><input type="radio" value="tfa_5" class="" id="tfa_5" name="tfa_1" data-conditionals="#tfa_7,#tfa_8,#tfa_9"><label class="label postField" id="tfa_5-L" for="tfa_5">Yes</label></span><span class="oneChoice"><input type="radio" value="tfa_6" class="" id="tfa_6" name="tfa_1"><label class="label postField" id="tfa_6-L" for="tfa_6">No</label></span></span></div>
@@ -123,10 +128,10 @@
 <legend id="tfa_7-L">Section A</legend>
 <div id="tfa_10" class="section inline group">
 <div id="tfa_8-D" class="oneField    ">
-<label id="tfa_8-L" for="tfa_8" class="label preField reqMark">Required in Section A</label><br><div class="inputWrapper"><input type="text" id="tfa_8" name="tfa_8" value="" placeholder="" data-condition="`#tfa_15` OR `#tfa_5`" class="required"></div>
+<label id="tfa_8-L" for="tfa_8" class="label preField reqMark">Required in Section A</label><br><div class="inputWrapper"><input type="text" id="tfa_8" name="tfa_8" value="" placeholder="" data-condition="`#tfa_15`" class="required"></div>
 </div>
 <div id="tfa_9-D" class="oneField    ">
-<label id="tfa_9-L" for="tfa_9" class="label preField reqMark">Another required in Section A</label><br><div class="inputWrapper"><input type="text" id="tfa_9" name="tfa_9" value="" placeholder="" data-condition="`#tfa_15` OR `#tfa_5`" class="required"></div>
+<label id="tfa_9-L" for="tfa_9" class="label preField reqMark">Another required in Section A</label><br><div class="inputWrapper"><input type="text" id="tfa_9" name="tfa_9" value="" placeholder="" data-condition="`#tfa_15`" class="required"></div>
 </div>
 </div>
 </fieldset>
