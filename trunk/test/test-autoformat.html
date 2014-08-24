@@ -48,44 +48,16 @@
         }
 
         function testTemplateInterpretation(){
-           var templateList = wFORMS.behaviors.autoformat._globalCache['ssn'].template;
+           var templateList = wFORMS.behaviors.autoformat._globalCache['ssn'].formatString;
 
            assertEquals('', 11, templateList.length);
-           var types = ['D', 'D', 'D', 'L', 'D', 'D', 'L', 'D', 'D', 'D', 'D'];
+           var types = ['#', '#', '#', '-', '#', '#', '-', '#', '#', '#', '#'];
            var i = 11;
            while(i--){
-               assertEquals('', types[i], templateList[i].type);
+               assertEquals('', types[i], templateList[i]);
            }
         }
 
-        function testTemplateFragmentCreation(){
-           var templateFragments = wFORMS.behaviors.autoformat._globalCache['ssn'].templateFragments;
-
-            var previousFragment = null, nextFragment = null;
-
-            var i = templateFragments.length;
-            while(i--){
-               if(nextFragment){
-                   assertEquals('', nextFragment.previous, templateFragments[i]);
-               }
-               assertEquals('', nextFragment, templateFragments[i].next);
-               nextFragment = templateFragments[i];
-            }
-        }
-
-        function testCaretManipulation(){
-            var input = document.getElementById('ssn');
-
-            input.value = "dummy_data";
-
-            // this test is inconsistent accross browsers. It returns either 0 (IE10, Firefox) or 10 (Chrome, Safari).
-            // var caret = wFORMS.behaviors.autoformat.getCaretPosition(input);
-            // assertEquals('', 0, caret);
-
-            wFORMS.behaviors.autoformat.setCaretPosition(input, 3);
-
-            assertEquals('', 3, wFORMS.behaviors.autoformat.getCaretPosition(input));
-        }
     </script>
 
 	</head>
