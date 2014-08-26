@@ -148,7 +148,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.filter = function(control, de
         if(!inc && !exc) {
             // simple match by label, make up the selector.
             var label = b.getChoiceLabel(choice);
-            inc = "optgroup[label='"+label+"']";
+            inc = "optgroup[label='"+label.replace("\\","\\\\").replace("'","\\'")+"']";
         }
 
         if(inc) {
