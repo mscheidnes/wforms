@@ -518,7 +518,7 @@ wFORMS.behaviors.validation.instance.prototype.removeErrorMessage = function(ele
 }
 
 /**
- * Checks the element's 'visibility' (switch behavior)
+ * Checks the element's 'visibility' (condition behavior)
  * @param {domElement} element
  * @return	{boolean}	true if the element is not 'visible' (switched off), false otherwise.
  */
