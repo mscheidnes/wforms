@@ -138,7 +138,7 @@ wFORMS.behaviors.dependent_list.instance.prototype.applyFiltersTo = function(dep
 wFORMS.behaviors.dependent_list.instance.prototype.filter = function(control, dependent) {
 
     var b = this;
-    this.dirtyCalculations = {};
+    this._dirtyCalculations = {};
 
     var _filter = function(choice, mode) {
 
