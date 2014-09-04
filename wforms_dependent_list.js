@@ -137,7 +137,9 @@ wFORMS.behaviors.dependent_list.instance.prototype.applyFiltersTo = function(dep
  */
 wFORMS.behaviors.dependent_list.instance.prototype.filter = function(control, dependent) {
 
-    var b       = this;
+    var b = this;
+    this.dirtyCalculations = {};
+
     var _filter = function(choice, mode) {
 
         var isSelected = (choice.checked || choice.selected) && !choice.disabled;
@@ -184,6 +186,13 @@ wFORMS.behaviors.dependent_list.instance.prototype.filter = function(control, de
         choices.forEach(function(n){_filter(n,'selected')});
     }
 
+    // refresh calculations
+    var calculation = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm( this.target ),"calculation");
+    for(var id in this._dirtyCalculations) {
+        calculation.run(null, this._dirtyCalculations[id]);
+    }
+    this._dirtyCalculations = {};
+
     // update any dependent recursively.
     if(dependent.getAttribute('data-filter-dependent')) {
         this.run(null, dependent);
@@ -215,6 +224,8 @@ wFORMS.behaviors.dependent_list.instance.prototype.include = function(dependent,
 
 wFORMS.behaviors.dependent_list.instance.prototype.exclude = function(dependent, selector) {
     var filtered = dependent.querySelectorAll(selector);
+    var calculation = wFORMS.getBehaviorInstance( wFORMS.helpers.getForm( this.target ),"calculation");
+    var self = this;
 
     filtered.forEach(function(filtered) {
         filtered.disabled = 'disabled';
@@ -232,12 +243,31 @@ wFORMS.behaviors.dependent_list.instance.prototype.exclude = function(dependent,
             if(filtered.parentNode.tagName!='SPAN') {
                 filtered.parentNode.insertBefore(document.createElement('span'), filtered).appendChild(filtered);
             }
+            var field = filtered.parentNode;
+            while(field && field.tagName != 'SELECT') {
+                field = field.parentNode;
+            }
+            // update calculations
+            if(field && calculation && calculation.isVariable( field )) {
+                self._dirtyCalculations[field.id] = field;
+            }
+        } else {
+            // update calculations
+            if(calculation && calculation.isVariable( filtered )) {
+                self._dirtyCalculations[field.id] = field;
+            }
         }
 
         // disable any child fields.
         fields = filtered.querySelectorAll('input,select,textarea,option');
         fields.forEach(function(field) {
             field.disabled = 'disabled';
+            field.selected = false;
+
+            // update calculations
+            if(calculation && calculation.isVariable( field )) {
+                self._dirtyCalculations[field.id] = field;
+            }
         });
     });
 };
