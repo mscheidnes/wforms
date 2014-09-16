@@ -41,7 +41,8 @@ if (typeof(wFORMS) == "undefined") {
 	wFORMS = {};
 }
 wFORMS.NAME 	= "wFORMS";
-wFORMS.VERSION 	= "3.7.12";
+wFORMS.VERSION 	= "3.7.19";
+
 wFORMS.__repr__ = function () {
 	return "[" + this.NAME + " " + this.VERSION + "]";
 };
@@ -167,6 +168,10 @@ wFORMS.helpers.getComputedStyle = function(element, styleName){
  * finds the parent form of any element
  */
 wFORMS.helpers.getForm = function (e) {
+    if (e && e.tagName && e.tagName.toLowerCase() == 'form') {
+        wFORMS.standardizeElement(e);
+        return e;
+    }
 	if (e.form) {
 		wFORMS.standardizeElement(e.form);
 		return e.form;

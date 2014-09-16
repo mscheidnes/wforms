@@ -261,6 +261,9 @@ _b.applyTo = function(f) {
 _i.prototype.onApply = function() {}
 
 
+//counter flag to count the number of repeated fields/sections at any time
+_i.prototype.counterRepeatedFields=1;
+
 /**
  * Returns repeat link for specified area if it exists,
  * otherwise creates new one and returns it
@@ -362,7 +365,10 @@ _i.prototype.createRemoveLink = function(id){
 
     return spanElem;
 }
-
+/**
+ *counter flag to count the number of repeated fields/sections at any time
+ */
+_i.prototype.counterRepeatedFields=1;
 
 /**
  * Duplicates repeat section. Changes ID of the elements, adds event listeners
@@ -395,6 +401,23 @@ _i.prototype.duplicateSection = function(elem){
     
     // Moves repeat link to new element
     this.moveRepeatLinkDown(elem,newElem); 
+
+	//increasing the counter each time a field is duplicated.
+	//to keep track of number of repeated fields.
+	this.counterRepeatedFields++;
+
+	//getting the repeat limit
+	var limit=elem.getAttribute('data-repeatlimit');
+
+	// getting the id of the repeat link
+	var id = elem.id + this.behavior.ID_SUFFIX_DUPLICATE_LINK;
+
+	//if there is limit to the repeatable fields
+	if(limit != null){
+		//hiding the repeated link as the limit is reached
+
+	    if(this.counterRepeatedFields >=  limit){ document.getElementById(id).style.display = 'none';}
+	}
 
     // Calls custom function
     this.behavior.onRepeat(newElem);
@@ -476,12 +499,9 @@ _b.getBaseId = function(elem){
  */
 _i.prototype.removeSection = function(elem){
     if(elem){
-        var _b = wFORMS.behaviors.repeat;
-        var moveLink = elem === _b.getLastRepeatSect(elem);
-         
-        // get the rep span --- saved before removal
-        if(moveLink) var repSpan =_b.getRepeatSpan(elem);
-        
+		//finding the element to which this element is the duplicate
+		var repeatElem=this.behavior.getMasterSection(elem);
+
         // Add id to list of removed elements.
         this.logRemovedSection(elem);
 
@@ -490,6 +510,22 @@ _i.prototype.removeSection = function(elem){
 
         // Better event management
         this.callRemoveCompleteObservers(elem);
+
+		//decreasing the counter each time a field/section is removed.
+		//to keep track of number of repeated fields/sections.
+		this.counterRepeatedFields--;
+
+		//getting the repeat limit
+		var limit=elem.getAttribute('data-repeatlimit');
+
+		// getting the id of the repeat link
+		var id = repeatElem.id + this.behavior.ID_SUFFIX_DUPLICATE_LINK;
+
+		//if there is limit to the repeatable fields
+		if(limit != null){
+			//re-showing the repeated link as the limit is reached
+			if(this.counterRepeatedFields <=  limit){ document.getElementById(id).style.display = '';}
+		}
 
         // Calls custom function (@DEPRECATED)
         this.behavior.onRemove(elem);

@@ -7,6 +7,9 @@ if (typeof(wFORMS) == "undefined") {
  */
 wFORMS.behaviors.calculation  = {
 
+    // Allow behavior to be ignored.
+    skip: false,
+
     /**
      * Selector expression for the variable used in a calculation
      * @final
@@ -51,6 +54,10 @@ wFORMS.behaviors.calculation  = {
  */
 wFORMS.behaviors.calculation.applyTo = function(f) {
 
+    // Allow behavior to be ignored.
+    if(wFORMS.behaviors.calculation.skip) {
+        return null;
+    }
 
     while(f && f.tagName!='FORM') {
         f = f.parentNode;
@@ -377,23 +384,19 @@ wFORMS.behaviors.calculation.instance.prototype.getValueFromClassName = function
             if(element.selectedIndex==-1) {
                 return null;
             }
-            if (element.multiple) {
-                var v=[];
-                for(var i=0;i<element.options.length;i++) {
-                    if(element.options[i].selected) {
-                        if(element.options[i].className && element.options[i].className.indexOf(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)!=-1) {
-                            var value = element.options[i].className.split(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)[1].split(' ')[0];
-                            v.push(value);
-                        }
+
+            var v=[];
+            for(var i=0;i<element.options.length;i++) {
+                if(element.options[i].selected) {
+                    if(element.options[i].className && element.options[i].className.indexOf(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)!=-1) {
+                        var value = element.options[i].className.split(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)[1].split(' ')[0];
+                        v.push(value);
                     }
                 }
-                if(v.length==0) return null;
-                return v;
             }
-            if (element.options[element.selectedIndex].className &&  element.options[element.selectedIndex].className.indexOf(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)!=-1) {
-                var value =  element.options[element.selectedIndex].className.split(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)[1].split(' ')[0];
-                return value;
-            }
+            if(v.length==0) return null;
+            return v;
+
             break;
         case "TEXTAREA":
             if(!element.className || element.className.indexOf(this.behavior.CHOICE_VALUE_SELECTOR_PREFIX)==-1)

@@ -62,6 +62,11 @@
         assertFalse( document.getElementById('simpleA').disabled );
         assertTrue( document.getElementById('simpleB').disabled );
         assertTrue( document.getElementById('simpleC').disabled );
+        assertTrue( document.getElementById('simpleD').disabled );
+        assertTrue( document.getElementById('simpleE').disabled );
+        assertTrue( document.getElementById('simpleF').disabled );
+        assertTrue( document.getElementById('simpleG').disabled );
+        assertTrue( document.getElementById('simpleH').disabled );
 
         c.selectedIndex = 3;
         b.filter(c,d);
@@ -69,13 +74,83 @@
         assertTrue( document.getElementById('simpleA').disabled );
         assertFalse( document.getElementById('simpleB').disabled );
         assertTrue( document.getElementById('simpleC').disabled );
+        assertTrue( document.getElementById('simpleD').disabled );
+        assertTrue( document.getElementById('simpleE').disabled );
+        assertTrue( document.getElementById('simpleF').disabled );
+        assertTrue( document.getElementById('simpleG').disabled );
+        assertTrue( document.getElementById('simpleH').disabled );
 
         c.selectedIndex = 4;
         b.filter(c,d);
 
-        assertTrue( document.getElementById('simpleA').disabled );
-        assertTrue( document.getElementById('simpleB').disabled );
-        assertFalse( document.getElementById('simpleC').disabled );
+        assertTrue('41', document.getElementById('simpleA').disabled );
+        assertTrue('41', document.getElementById('simpleB').disabled );
+        assertFalse('41', document.getElementById('simpleC').disabled );
+        assertTrue('41', document.getElementById('simpleD').disabled );
+        assertTrue('41', document.getElementById('simpleE').disabled );
+        assertTrue('41', document.getElementById('simpleF').disabled );
+        assertTrue('41', document.getElementById('simpleG').disabled );
+        assertTrue('41', document.getElementById('simpleH').disabled );
+
+        c.selectedIndex = 5;
+        b.filter(c,d);
+
+        assertTrue('51', document.getElementById('simpleA').disabled );
+        assertTrue('51', document.getElementById('simpleB').disabled );
+        assertTrue('51', document.getElementById('simpleC').disabled );
+        assertFalse('51', document.getElementById('simpleD').disabled );
+        assertTrue('51', document.getElementById('simpleE').disabled );
+        assertTrue('51', document.getElementById('simpleF').disabled );
+        assertTrue('51', document.getElementById('simpleG').disabled );
+        assertTrue('51', document.getElementById('simpleH').disabled );
+
+        c.selectedIndex = 6;
+        b.filter(c,d);
+
+        assertTrue('61', document.getElementById('simpleA').disabled );
+        assertTrue('61', document.getElementById('simpleB').disabled );
+        assertTrue('61', document.getElementById('simpleC').disabled );
+        assertTrue('61', document.getElementById('simpleD').disabled );
+        assertFalse('61', document.getElementById('simpleE').disabled );
+        assertTrue('61', document.getElementById('simpleF').disabled );
+        assertTrue('61', document.getElementById('simpleG').disabled );
+        assertTrue('61', document.getElementById('simpleH').disabled );
+
+        c.selectedIndex = 7;
+        b.filter(c,d);
+
+        assertTrue('71', document.getElementById('simpleA').disabled );
+        assertTrue('71', document.getElementById('simpleB').disabled );
+        assertTrue('71', document.getElementById('simpleC').disabled );
+        assertTrue('71', document.getElementById('simpleD').disabled );
+        assertTrue('71', document.getElementById('simpleE').disabled );
+        assertFalse('71', document.getElementById('simpleF').disabled );
+        assertTrue('71', document.getElementById('simpleG').disabled );
+        assertTrue('71', document.getElementById('simpleH').disabled );
+
+        c.selectedIndex = 8;
+        b.filter(c,d);
+
+        assertTrue( '81',document.getElementById('simpleA').disabled );
+        assertTrue( '81',document.getElementById('simpleB').disabled );
+        assertTrue( '81',document.getElementById('simpleC').disabled );
+        assertTrue( '81',document.getElementById('simpleD').disabled );
+        assertTrue( '81',document.getElementById('simpleE').disabled );
+        assertTrue( '81',document.getElementById('simpleF').disabled );
+        assertFalse('81', document.getElementById('simpleG').disabled );
+        assertTrue( '81',document.getElementById('simpleH').disabled );
+
+        c.selectedIndex = 9;
+        b.filter(c,d);
+
+        assertTrue( '91',document.getElementById('simpleA').disabled );
+        assertTrue( '92',document.getElementById('simpleB').disabled );
+        assertTrue( '93',document.getElementById('simpleC').disabled );
+        assertTrue( '94',document.getElementById('simpleD').disabled );
+        assertTrue( '95',document.getElementById('simpleE').disabled );
+        assertTrue( '96',document.getElementById('simpleF').disabled );
+        assertTrue( '97',document.getElementById('simpleG').disabled );
+        assertFalse('98', document.getElementById('simpleH').disabled );
     }
 
     function testRecursive() {
@@ -116,6 +191,11 @@
             <option id="optionA">Simple A</option>
             <option>Simple B</option>
             <option>Simple C</option>
+            <option>Simple'D</option>
+            <option>Simple"E</option>
+            <option>Simple/F</option>
+            <option>Simple&G</option>
+            <option>Simple\H</option>
         </select> <br/>
 
         <select id="simple2" data-filter-control="#simple1">
@@ -132,6 +212,26 @@
             <optgroup id="simpleC" label="Simple C">
                 <option>simple - C - 1</option>
                 <option>simple - C - 2</option>
+            </optgroup>
+            <optgroup id="simpleD" label="Simple'D">
+                <option>simple - D - 1</option>
+                <option>simple - D - 2</option>
+            </optgroup>
+            <optgroup id="simpleE" label='Simple"E'>
+                <option>simple - E - 1</option>
+                <option>simple - E - 2</option>
+            </optgroup>
+            <optgroup id="simpleF" label="Simple/F">
+                <option>simple - F - 1</option>
+                <option>simple - F - 2</option>
+            </optgroup>
+            <optgroup id="simpleG" label="Simple&G">
+                <option>simple - G - 1</option>
+                <option>simple - G - 2</option>
+            </optgroup>
+            <optgroup id="simpleH" label="Simple\H">
+                <option>simple - H - 1</option>
+                <option>simple - H - 2</option>
             </optgroup>
         </select> <br/>
 

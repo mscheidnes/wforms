@@ -7,6 +7,9 @@ if (typeof(wFORMS) == "undefined") {
  */
 wFORMS.behaviors.validation = {
 
+    // Allow behavior to be ignored.
+    skip: false,
+
 	/*
 	 * Suffix of the ID for the error message placeholder
  	 */
@@ -191,6 +194,12 @@ wFORMS.behaviors.validation = {
  * @return {object} an instance of the behavior
  */
 wFORMS.behaviors.validation.applyTo = function(f) {
+
+    // Allow behavior to be ignored.
+    if(wFORMS.behaviors.validation.skip) {
+        return null;
+    }
+
 	if(!f || !f.tagName) {
 		throw new Error("Can't apply behavior to " + f);
 	}
@@ -509,7 +518,7 @@ wFORMS.behaviors.validation.instance.prototype.removeErrorMessage = function(ele
 }
 
 /**
- * Checks the element's 'visibility' (switch behavior)
+ * Checks the element's 'visibility' (condition behavior)
  * @param {domElement} element
  * @return	{boolean}	true if the element is not 'visible' (switched off), false otherwise.
  */
@@ -847,7 +856,18 @@ wFORMS.behaviors.validation.instance.prototype.analyzeTimeComponents = function(
  */
 wFORMS.behaviors.validation.instance.prototype.validateEmail = function(element, value) {
 	var regexpEmail = /^\w[\w\.\-\+]*\w[@][\w\-]{1,}([.]([\w\-]{1,})){1,}$/;
-	return this.isEmpty(value) || regexpEmail.test(value);
+	
+	if (this.isEmpty(value)) {
+		return true;
+	}
+	// split on ',' and test each one
+	var input = value.split(',');
+	for(var i = 0; i<input.length; i++){
+		if (!regexpEmail.test(input[i].trim())) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
