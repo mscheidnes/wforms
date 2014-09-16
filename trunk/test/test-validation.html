@@ -351,6 +351,14 @@
 			// Test validation rule
 			assertFalse('test@test .com should fail email validation', bInstance.run(null, testForm))
 			
+			testField.value = 'test@test.com,other@test.org';
+			// Test validation rule
+			assertTrue('test@test.com,other@test.org should pass email validation', bInstance.run(null, testForm))
+			
+			testField.value = 'test@test.com,other@test.org,someemail@aplace.net';
+			// Test validation rule
+			assertTrue('test@test.com,other@test.org,someemail@aplace.net should pass email validation', bInstance.run(null, testForm))
+			
 			testField.value = 'test.@test.com';
 			// Test validation rule
 			assertFalse('test.@test.com should fail email validation', bInstance.run(null, testForm))
