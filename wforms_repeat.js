@@ -576,7 +576,7 @@ _i.prototype.updateMasterElements  = function(elem, suffix){
                 } else if(attrName=='id' && wFORMS.behaviors.validation && wFORMS.behaviors.validation.isErrorPlaceholderId(n.id)){
                     n.id = value.replace(new RegExp("(.*)(" + wFORMS.behaviors.validation.ERROR_PLACEHOLDER_SUFFIX + ')$'),"$1" + suffix + "$2");
                 } else if(attrName=='id' && n.id.indexOf(this.behavior.ID_SUFFIX_DUPLICATE_LINK) != -1){
-                    n.id = value.replace(new RegExp("(.*)(" + this.behavior.ID_SUFFIX_DUPLICATE_LINK + ')$'), "$1" + suffix + "$2");
+                    n.id = value.match(new RegExp("[^\[|-]*")).toString() + suffix + this.behavior.ID_SUFFIX_DUPLICATE_LINK;
                 } else if(attrName=='id'){
                     n.id = value + suffix;      // do not use setAttribute for the id property (doesn't work in IE6)
                 } else if(attrName=='name'){
