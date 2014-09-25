@@ -937,6 +937,8 @@ wFORMS.behaviors.validation.instance.prototype.validateCustom = function(element
  * @param {domElement} element
  * @returns {boolean}
  */
+wFORMS.behaviors.validation.instance.prototype.ALLOWED_ELEMENT_TYPE = ['input[type="text"][id^="tfa_"]','textarea[id^="tfa_"]'];
+
 wFORMS.behaviors.validation.instance.prototype.validateWordCount = function(element, value) {
     // need to check the type attribute... if that checks out then use the size to dertmin.
     if (element.count > element.getAttribute('data-maxwords')) {
@@ -1185,11 +1187,17 @@ base2.DOM.Element.addEventListener(document, 'DOMContentLoaded',wFORMS.behaviors
  */
 
 wFORMS.behaviors.word_counter = {
+	ALLOWED_ELEMENT_TYPES: ['input[type="text"][id^="tfa_"]','textarea[id^="tfa_"]'],
     CLASSNAME: 'count-words',
     ATTRIBUTE: 'data-maxwords',
     applyTo: function(f) {
         var instances = [];
-        var inputs = f.querySelectorAll('.' + this.CLASSNAME);
+		
+		var allowed = [];
+		for(i in this.ALLOWED_ELEMENT_TYPES){
+			allowed.push(this.ALLOWED_ELEMENT_TYPES[i] + '.' + this.CLASSNAME);
+		}
+        var inputs = document.querySelectorAll(allowed.join(','));				
         for (var i = 0; i < inputs.length; i++) {
             var input = inputs.item(i);
             var instance = new wFORMS.behaviors.word_counter.instance(input);
