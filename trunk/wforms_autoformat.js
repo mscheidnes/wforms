@@ -4,7 +4,7 @@ if (typeof(wFORMS) == "undefined") {
 
 wFORMS.behaviors.autoformat = {
 
-    ATTRIBUTE_SELECTOR: 'input[autoformat]',
+    ATTRIBUTE_SELECTOR: 'input[autoformat][id^="tfa_"]',
     ALLOWED_ELEMENT_TYPE: ['input[type="text"]'],
 
     /**

@@ -39,7 +39,7 @@
 
         function testApplyTo(){
 
-            var ids = ['ssn', 'telephone', 'telephone_short', 'decimal', 'SN', 'IF_ELSE', 'alternate'];
+            var ids = ['tfa_ssn', 'tfa_telephone', 'tfa_telephone_short', 'tfa_decimal', 'tfa_SN', 'tfa_IF_ELSE', 'tfa_alternate'];
 
             var i = ids.length;
             while(i--){
@@ -48,7 +48,7 @@
         }
 
         function testTemplateInterpretation(){
-           var templateList = wFORMS.behaviors.autoformat._globalCache['ssn'].formatString;
+           var templateList = wFORMS.behaviors.autoformat._globalCache['tfa_ssn'].formatString;
 
            assertEquals('', 11, templateList.length);
            var types = ['#', '#', '#', '-', '#', '#', '-', '#', '#', '#', '#'];
@@ -73,31 +73,31 @@
 
         <form method="post" action="" id="testForm" >
 
-            <div><input type="text" id="ssn"  name="testField" autoformat="###-##-####" class="" value=""/>
+            <div><input type="text" id="tfa_ssn"  name="testField" autoformat="###-##-####" class="" value=""/>
             <label>###-##-####</label></div>
 
-            <div><input type="text" id="telephone"  name="testField" autoformat="(#) ### ## ####" class="" value=""/>
+            <div><input type="text" id="tfa_telephone"  name="testField" autoformat="(#) ### ## ####" class="" value=""/>
             <label>(#)### ## ####</label></div>
 
-            <div><input type="text" id="telephone_short"  name="testField" autoformat="### ## ####" class="" value=""/>
+            <div><input type="text" id="tfa_telephone_short"  name="testField" autoformat="### ## ####" class="" value=""/>
             <label>### ## ####</label></div>
 
-            <div><input type="text" id="decimal"  name="testField" autoformat="###.##" class="" value=""/>
+            <div><input type="text" id="tfa_decimal"  name="testField" autoformat="###.##" class="" value=""/>
             <label>###.##</label></div>
 
-            <div><input type="text" id="SN"  name="testField" autoformat="$$$$-$$$$-$$$$-$$$$" class="" value="" size="30"/>
+            <div><input type="text" id="tfa_SN"  name="testField" autoformat="$$$$-$$$$-$$$$-$$$$" class="" value="" size="30"/>
             <label>$$$$-$$$$-$$$$-$$$$</label></div>
 
-            <div><input type="text" id="IF_ELSE"  name="testField" autoformat="If($$$$$$){$$$$$$}else{$$$$$$}" class="" value="" size="30"/>
+            <div><input type="text" id="tfa_IF_ELSE"  name="testField" autoformat="If($$$$$$){$$$$$$}else{$$$$$$}" class="" value="" size="30"/>
             <label>If($$$$$$){$$$$$$}else{$$$$$$}</label></div>
 
-            <div><input type="text" id="alternate"  name="testField" autoformat="$#$#$#$#$#" class="" value="" size="30"/>
+            <div><input type="text" id="tfa_alternate"  name="testField" autoformat="$#$#$#$#$#" class="" value="" size="30"/>
             <label>$#$#$#$#$#</label></div>
 
             <h4>right-to-left</h4>
-            <div><input type="text" id="rtl1"  name="testField" autoformat="###.##" class="" value="" size="30" dir="rtl" />
+            <div><input type="text" id="tfa_rtl1"  name="testField" autoformat="###.##" class="" value="" size="30" dir="rtl" />
             <label>###.##</label></div>
-            <div dir="rtl"><input type="text" id="rtl2"  name="testField" autoformat="###.##" class="" value="" size="30"  />
+            <div dir="rtl"><input type="text" id="tfa_rtl2"  name="testField" autoformat="###.##" class="" value="" size="30"  />
             <label>###.##</label></div>
         </form>
 

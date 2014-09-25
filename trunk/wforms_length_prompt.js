@@ -6,10 +6,10 @@ if (typeof(wFORMS) == "undefined") {
 wFORMS.behaviors.lengthPrompt = {
 
     ATTRIBUTE_SELECTOR: 'maxLength',
-    ALLOWED_ELEMENT_TYPE: ['input[type="text"]', 'input[type="color"]', 'input[type="date"]', 'input[type="datetime"]',
-        , 'input[type="datetime-local"]', 'input[type="email"]', 'input[type="month"]', 'input[type="number"]',
-        'input[type="range"]', 'input[type="search"]', 'input[type="tel"]', 'input[type="time"]', 'input[type="url"]',
-        'input[type="week"]','textarea'],
+    ALLOWED_ELEMENT_TYPE: ['input[type="text"][id^="tfa_"]', 'input[type="color"][id^="tfa_"]', 'input[type="date"][id^="tfa_"]', 'input[type="datetime"][id^="tfa_"]',
+        'input[type="datetime-local"][id^="tfa_"]', 'input[type="email"][id^="tfa_"]', 'input[type="month"][id^="tfa_"]', 'input[type="number"][id^="tfa_"]',
+        'input[type="range"][id^="tfa_"]', 'input[type="search"][id^="tfa_"]', 'input[type="tel"][id^="tfa_"]', 'input[type="time"][id^="tfa_"]', 'input[type="url"][id^="tfa_"]',
+        'input[type="week"][id^="tfa_"]','textarea[id^="tfa_"]'],
     MONITOR_CHECK_TIMES: 10,
     CUSTOM_INDICATOR_STYLE: 'lengthIndicator',
 

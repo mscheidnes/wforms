@@ -32,7 +32,7 @@
         function tearDown() {}
 
         function testApplyTo(){
-            var ids = ['ssn', 'email', 'url', 'textarea_test'];
+            var ids = ['tfa_ssn', 'tfa_email', 'tfa_url', 'tfa_textarea_test'];
             var i = ids.length;
             while(i--){
 
@@ -56,13 +56,13 @@
         <form method="post" action="" id="testForm" >
 
             <fieldset>
-                <input type="text" id="ssn"  name="testField" maxlength="13" class="" value=""/> <br/>
-                <input type="email" id="email"  name="testField" maxlength="7" class="" value=""/> <br/>
-                <input type="url" id="url"  name="testField" maxlength="5" class="" value=""/>
+                <input type="text" id="tfa_ssn"  name="testField" maxlength="13" class="" value=""/> <br/>
+                <input type="email" id="tfa_email"  name="testField" maxlength="7" class="" value=""/> <br/>
+                <input type="url" id="tfa_url"  name="testField" maxlength="5" class="" value=""/>
             </fieldset> .
             <fieldset>
 
-                <textarea id="textarea_test"  name="testField" maxlength="25" class=""></textarea>
+                <textarea id="tfa_textarea_test"  name="testField" maxlength="25" class=""></textarea>
             </fieldset> .
 
         </form>
