@@ -730,7 +730,8 @@ _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName)
         }
 
         if(e.hasClass(this.behavior.CSS_REPEATABLE)){
-            this.updateSectionChildNodes(e, this.createSuffix(e), preserveRadioName);
+            e.id=e.id+"[0]";
+            this.updateSectionChildNodes(e, suffix+"[0]", preserveRadioName);
         } else{
             this.updateSectionChildNodes(e, suffix, preserveRadioName);
         }
@@ -754,7 +755,6 @@ _i.prototype.updateSectionChildNodes = function(elem, suffix, preserveRadioName)
  */
 _i.prototype.createSuffix = function(e, index){
 
-    // var idx = e.getAttribute('dindex');
     var suffix = '[' + (index ? index : '0' ) + ']';
     var reg = /\[(\d+)\]$/;
     e = e.parentNode;
