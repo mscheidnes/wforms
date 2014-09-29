@@ -1194,7 +1194,7 @@ wFORMS.behaviors.word_counter = {
         var instances = [];
 		
 		var allowed = [];
-		for(i in this.ALLOWED_ELEMENT_TYPES){
+		for(i = 0; i<this.ALLOWED_ELEMENT_TYPES.length; i++){
 			allowed.push(this.ALLOWED_ELEMENT_TYPES[i] + '.' + this.CLASSNAME);
 		}
         var inputs = document.querySelectorAll(allowed.join(','));				
