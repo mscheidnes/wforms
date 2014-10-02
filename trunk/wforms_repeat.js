@@ -57,7 +57,7 @@ wFORMS.behaviors.repeat = {
      * @final
      */
     CSS_REPEATABLE : 'repeat',
-
+	
     /**
      * Attribute specifies that current group is duplicate
      * @final
@@ -69,7 +69,11 @@ wFORMS.behaviors.repeat = {
      * @final
      */
     ATTR_DUPLICATE_ELEM : 'wfr__dup_elem',
-
+	
+	/**
+	 * Attribute that holds text for label of add link
+	 */
+	ATTR_LABEL : 'data-repeatlabel',
 
     /**
      * Means that element has been already handled by repeat behavior
@@ -98,7 +102,8 @@ wFORMS.behaviors.repeat = {
         ADD_TITLE : "Will duplicate this question or section.",
 
         REMOVE_CAPTION : "Remove",
-        REMOVE_TITLE : "Will remove this question or section"
+        REMOVE_TITLE : "Will remove this question or section",
+		REMOVE_WARNING : "Are you sure you want to remove this section? All data in this section will be lost."
     },
 
     /**
@@ -194,10 +199,10 @@ _b.applyTo = function(f) {
         var masterSection = wFORMS.behaviors.repeat.getMasterSection(f);
             if(!masterSection.querySelectorAll){base2.DOM.bind(masterSection);}
 
-        var masterNodes = masterSection.querySelectorAll(this.SELECTOR_REPEAT);
+/*        var masterNodes = masterSection.querySelectorAll(this.SELECTOR_REPEAT);
             masterNodes.forEach(function(elem){
-                masterArray.push(elem.querySelector(".duplicateLink").innerHTML);
-            });
+                masterArray.push(elem.getAttribute(this.behavior.LABEL_TEXT));
+            }); */
     }
 
     f.querySelectorAll(this.SELECTOR_REPEAT).forEach(
@@ -208,8 +213,8 @@ _b.applyTo = function(f) {
             if(!elem.id) elem.id = wFORMS.helpers.randomId();
 
             var _b = new _self.instance(elem);
-            if(masterArray && masterArray[index]){
-                _b.behavior.MESSAGES.ADD_CAPTION = masterArray[index];
+            if(elem.getAttribute(wFORMS.behaviors.repeat.ATTR_LABEL)){
+                _b.behavior.MESSAGES.ADD_CAPTION = elem.getAttribute(wFORMS.behaviors.repeat.ATTR_LABEL);
             }
             var e = _b.getOrCreateRepeatLink(elem);
             e.addEventListener('click', function(event) { _b.run(event, e)}, false);
@@ -267,25 +272,20 @@ _i.prototype.counterRepeatedFields=1;
 _i.prototype.getOrCreateRepeatLink = function(elem){
     var id = elem.id + this.behavior.ID_SUFFIX_DUPLICATE_LINK;
     var e = document.getElementById(id);
-    if(!e || e == ''){
+    if(!e || e == ''){ 
         e = this.createRepeatLink(id);
 
         // Wraps in a span for better CSS positionning control.
         var spanElem = document.createElement('span');
         spanElem.className = this.behavior.CSS_DUPLICATE_SPAN;
         e = spanElem.appendChild(e);
-
-        if(elem.tagName.toUpperCase() == 'TR'){
-            var tdElem = elem.getElementsByTagName('TD');
-            if(!tdElem){
-                tdElem = elem.appendChild(document.createElement('TD'));
-            } else {
-                tdElem = tdElem[tdElem.length-1];
-            }
-            tdElem.appendChild(spanElem);
-        }else{
-            elem.appendChild(spanElem);
-            // elem.parentNode.insertBefore(spanElem, elem.nextSibling);
+		
+		if(elem.tagName.toUpperCase() == 'TR'){
+            var table = elem.parentNode.parentNode;
+			table.style.marginBottom = '0px';
+            table.parentNode.appendChild(spanElem);
+        } else { 
+			elem.parentNode.insertBefore(spanElem, elem.nextSibling);
         }
     }
     return base2.DOM.bind(e);
@@ -325,7 +325,8 @@ _i.prototype.getOrCreateRemoveLink= function(elem){
         var tdElem = tds[tds.length-1];
         tdElem.appendChild(e);
     } else {
-        elem.appendChild(e)
+        //elem.appendChild(e)
+		elem.insertBefore(e,elem.children[1]);
     }
 }
 
@@ -374,6 +375,7 @@ _i.prototype.duplicateSection = function(elem){
         return false;
     }
     this.updateMasterSection(elem);
+	
     // Creates clone of the group
     var newElem = elem.cloneNode(true);
 
@@ -516,9 +518,11 @@ _i.prototype.getInsertNode = function(elem) {
  * @param   {HTMLElement}   elem    Element produced event
  */
 _i.prototype.onRemoveLinkClick = function(event, link){
-    var e  = document.getElementById(link.getAttribute(this.behavior.ATTR_LINK_SECTION_ID));
-    this.removeSection(e);
-    if(event) event.preventDefault();
+	if(confirm(this.behavior.MESSAGES.REMOVE_WARNING)) {
+		var e  = document.getElementById(link.getAttribute(this.behavior.ATTR_LINK_SECTION_ID));
+		this.removeSection(e);
+		if(event) event.preventDefault();
+	}
 };
 
 /**

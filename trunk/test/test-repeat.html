@@ -552,20 +552,18 @@
 
 
 		<fieldset id="repeatLabelTestParent"><legend>Parent Repeat - Label persistance</legend>
-			<fieldset class="repeat" id="repeatLabelTest"><legend>Repeat</legend>
+			<fieldset class="repeat" id="repeatLabelTest" data-repeatlabel="Repeat_TEST" ><legend>Repeat</legend>
 				<div class="oneField">
 					<input id="repeatLabelTest1" type="text" size="40" />
 				</div>
-				<fieldset class="repeat" id="repeatLabelTest2"><legend>Nested Repeat</legend>
+				<fieldset class="repeat section" data-repeatlabel="RepeatNested_TEST" id="repeatLabelTest2"><legend>Nested Repeat</legend>
 					<div class="oneField">
 						<input id="repeatLabelTest3" type="text" size="40" />
 					</div>
 					<div class="oneField">
 						<input id="repeatLabelTest4" type="text" size="40" />
 					</div>
-					<span class="duplicateSpan"><a id="repeatLabelTest2-wfDL" class="duplicateLink" href="#">RepeatNested_TEST</a></span>
 				</fieldset>
-				<span class="duplicateSpan"><a id="repeatLabelTest-wfDL" class="duplicateLink" href="#">Repeat_TEST</a></span>
 			</fieldset>
 			<input type="button" value="run test" onclick="testRepeatLabelRepeat()"/>
 		</fieldset>
