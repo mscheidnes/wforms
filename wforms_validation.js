@@ -864,7 +864,7 @@ wFORMS.behaviors.validation.instance.prototype.validateEmail = function(element,
 	var input = value.split(',');
 	for(var i = 0; i<input.length; i++){
 		// simulate String.trim() -- older IE consideration
-		var final = input[i].replace(/^\s+|\s+$/g, '');;
+		var final = input[i].replace(/^\s+|\s+$/g, '');
 		if (!regexpEmail.test(final)) {
 			return false;
 		}
