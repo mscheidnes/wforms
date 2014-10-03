@@ -1195,11 +1195,11 @@ wFORMS.behaviors.word_counter = {
     applyTo: function(f) {
         var instances = [];
 		
-		var allowed = [];
-		for(i = 0; i<this.ALLOWED_ELEMENT_TYPES.length; i++){
+	var allowed = [];
+	for(i = 0; i<this.ALLOWED_ELEMENT_TYPES.length; i++){
 			allowed.push(this.ALLOWED_ELEMENT_TYPES[i] + '.' + this.CLASSNAME);
-		}
-        var inputs = document.querySelectorAll(allowed.join(','));				
+	}
+        var inputs = f.querySelectorAll(allowed.join(','));				
         for (var i = 0; i < inputs.length; i++) {
             var input = inputs.item(i);
             var instance = new wFORMS.behaviors.word_counter.instance(input);

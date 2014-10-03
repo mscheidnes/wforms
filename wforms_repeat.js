@@ -326,7 +326,7 @@ _i.prototype.getOrCreateRemoveLink= function(elem){
         tdElem.appendChild(e);
     } else {
         //elem.appendChild(e)
-		elem.insertBefore(e,elem.children[1]);
+		elem.insertBefore(e,elem.children[0]);
     }
 }
 
