@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <title>wForms 3.0 - Autoformat Behavior Test Suite</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="Description" content="wForms is an open-source, unobtrusive javascript library that adds commonly needed behaviors to traditional web forms without the need for any programming skills." />
+    <meta http-equiv="Keywords" content="form, web form, html form, online form, wForms, input validation, field validation, javascript library" />
+	
+	<script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
+
+	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
+    <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
+
+	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
+	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
+    <script type="text/javascript" src="../wforms_core.js"></script>   
+    <script type="text/javascript" src="../wforms_paging.js"></script>   
+    <script type="text/javascript" src="../wforms_autoformat.js"></script>
+    
+    <script type="text/javascript" language="JavaScript">
+
+        var checkTimer = setInterval(function(){
+            if(wFORMS.initialized === true){
+                clearInterval(checkTimer);
+                setUpPageStatus = 'complete';
+            }
+        }, 50);
+
+        function setUpPage() {
+            wFORMS.behaviors.paging.warnOnUnload = false;
+            wFORMS.behaviors.autoformat.applyTo(document.getElementById('testForm'));
+            wFORMS.behaviors.autoformat.applyTo(document.getElementById('testForm'));
+        }
+        
+        function setUp() {
+        	var bInstance = wFORMS.getBehaviorInstance(document.getElementById('testForm'), 'paging');
+			bInstance.currentPageIndex=1; 
+			wFORMS.behaviors.paging.applyTo(document.getElementById('testForm'));
+            
+        }
+
+        function testSetupWorked(){
+            assertTrue("tfa_1 field not set properly",document.getElementById('tfa_1').value=='111-111-111#');
+            assertTrue("tfa_4 field not set properly",document.getElementById('tfa_4').value=='aaa-aaa-aaa');  // Being on the second page, this autoformat
+																											   // isn't configured yet, so no mask.
+            document.getElementById('wfPageNextId1').click();
+            document.getElementById('wfPagePreviousId2').click();
+            assertTrue("tfa_1 field data lost on page change",document.getElementById('tfa_1').value=='111-111-111#'); // No data loss after paging.
+            assertTrue("tfa_4 field data lost on page change",document.getElementById('tfa_4').value=='aaa-aaa-aaa$'); // Now has been configured with mask
+																													   // and should stay.
+        }
+        
+        function tearDown() {
+        }
+
+    </script>
+            
+</head>
+<body class="default wFormWebPage">
+
+
+    <div id="tfaContent">
+    	<div class="wFormContainer"  >
+
+  <div class=""><div class="wForm" id="tfa_0-WRPR" dir="ltr">
+<div class="codesection" id="code-tfa_0"></div>
+<h3 class="wFormTitle" id="tfa_0-T">Autoformat Data Loss</h3>
+<form method="post" action="http://www.tfaforms.com/responses/processor" class="hintsBelow labelsAbove" id="testForm">
+<div class="wfPage " id="wfPgIndex-1"><div class="section pageSection" id="tfa_2">
+<h4 id="tfa_2-T">Page 1</h4>
+<div id="tfa_1-D" class="oneField    ">
+<label id="tfa_1-L" for="tfa_1" class="label preField ">Autoformat field</label><br><div class="inputWrapper"><input type="text" id="tfa_1" name="tfa_1" value="111-111-111" placeholder="" autoformat="###-###-####" class=""></div>
+</div>
+<div id="tfa_5-D" class="oneField    ">
+<label id="tfa_5-L" for="tfa_5" class="label preField ">Edit this text</label><br><div class="inputWrapper"><input type="text" id="tfa_5" name="tfa_5" value="222-222-2222" placeholder="" autoformat="###-###-###########" class=""></div>
+</div>
+</div></div>
+<div class="wfPage " id="wfPgIndex-2"><div class="section pageSection" id="tfa_3">
+<h4 id="tfa_3-T">Page  2</h4>
+<div id="tfa_4-D" class="oneField    ">
+<label id="tfa_4-L" for="tfa_4" class="label preField reqMark">2ndAutoFormatField</label><br><div class="inputWrapper"><input type="text" id="tfa_4" name="tfa_4" value="aaa-aaa-aaa" placeholder="" autoformat="$$$-$$$-$$$$" class="required"></div>
+</div>
+</div></div>
+<div class="actions" id="tfa_0-A"><input type="submit" class="primaryAction" value="Submit"></div>
+<div style="clear:both"></div>
+<input type="hidden" value="739-786902a516c540b3471e37378f19aad1" name="tfa_dbCounters" id="tfa_dbCounters" autocomplete="off"><input type="hidden" value="340507" name="tfa_dbFormId" id="tfa_dbFormId"><input type="hidden" value="41578818" name="tfa_dbResponseId" id="tfa_dbResponseId"><input type="hidden" value="f5227dd6a22414d3d513f42b87240dc6" name="tfa_dbControl" id="tfa_dbControl"><input type="hidden" value="71" name="tfa_dbCumulatedTime" id="tfa_dbCumulatedTime" autocomplete="off"><input type="hidden" value="1406741005" name="tfa_dbTimeStarted" id="tfa_dbTimeStarted" autocomplete="off"><input type="hidden" value="2" name="tfa_dbVersionId" id="tfa_dbVersionId"><input type="hidden" value="" name="tfa_switchedoff" id="tfa_switchedoff">
+</form>
+
+</div>    </div>
+
+</body>
+</html>
