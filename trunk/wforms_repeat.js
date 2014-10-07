@@ -1105,8 +1105,23 @@ _b.stopObservingRepeatComplete = function(f) {
 }
 
 _i.prototype.callRepeatCompleteObservers = function(original,copy) {
+
+    function clone(obj) {
+        if(obj == null || typeof(obj) != 'object')
+            return obj;
+
+        var temp = obj.constructor();
+
+        for(var key in obj) {
+            if(obj.hasOwnProperty(key)) {
+                temp[key] = clone(obj[key]);
+            }
+        }
+        return temp;
+    }
+
     for(var i=0;i<this.behavior._callbacks.onRepeat.length;i++) {
-        this.behavior._callbacks.onRepeat[i].call(window,original,copy,this._idUpdates);
+        this.behavior._callbacks.onRepeat[i].call(window,original,copy,clone(this._idUpdates));
     }
     // reset
     this._idUpdates = { 'master': {}, 'repeat': {} };
