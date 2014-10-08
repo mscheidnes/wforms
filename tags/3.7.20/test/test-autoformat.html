@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <title>wForms 3.0 - Autoformat Behavior Test Suite</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="Description" content="wForms is an open-source, unobtrusive javascript library that adds commonly needed behaviors to traditional web forms without the need for any programming skills." />
+    <meta http-equiv="Keywords" content="form, web form, html form, online form, wForms, input validation, field validation, javascript library" />
+	
+	<script type="text/javascript" src="jsunit/app/jsUnitCore.js"></script>
+
+	<link href="../css/wforms-jsonly.css" type="text/css" rel="stylesheet" />
+    <link href="../css/wforms-layout.css" type="text/css" rel="stylesheet" />
+
+	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2.js"></script>
+	<script type="text/javascript" src="../lib/base2/v1.0.1/src/base2-dom.js"></script>
+    <script type="text/javascript" src="../wforms_core.js"></script>
+    <script type="text/javascript" src="../wforms_autoformat.js"></script>
+    <style>input {background-color: transparent;}</style>
+
+    <script type="text/javascript" language="JavaScript">
+        var bInstance = null;
+
+        var checkTimer = setInterval(function(){
+            if(wFORMS.initialized === true){
+                clearInterval(checkTimer);
+                setUpPageStatus = 'complete';
+            }
+        }, 50);
+
+        function setUpPage() {
+
+        }
+        
+        function setUp() {
+            wFORMS.behaviors.autoformat.applyTo(document.getElementById('testForm'));
+        }
+
+        function tearDown() {}
+
+        function testApplyTo(){
+
+            var ids = ['tfa_ssn', 'tfa_telephone', 'tfa_telephone_short', 'tfa_decimal', 'tfa_SN', 'tfa_IF_ELSE', 'tfa_alternate'];
+
+            var i = ids.length;
+            while(i--){
+                assertTrue('', ids[i] in wFORMS.behaviors.autoformat._globalCache );
+            }
+        }
+
+        function testTemplateInterpretation(){
+           var templateList = wFORMS.behaviors.autoformat._globalCache['tfa_ssn'].formatString;
+
+           assertEquals('', 11, templateList.length);
+           var types = ['#', '#', '#', '-', '#', '#', '-', '#', '#', '#', '#'];
+           var i = 11;
+           while(i--){
+               assertEquals('', types[i], templateList[i]);
+           }
+        }
+
+    </script>
+
+	</head>
+    <body class="default wFormWebPage">
+    <div style="width:700px; height:300px; vertical-align: middle; display: table-cell; padding-left: 50px">
+        <p>
+            <ul>
+                <li>$ stands for an alphanumeric character, # is a digital character.</li>
+                <li>Copy & Paste works for the inputs.</li>
+                <li>Matching the fixed text parts is case-insensitive. (controlled by an option)</li>
+            </ul>
+        </p>
+
+        <form method="post" action="" id="testForm" >
+
+            <div><input type="text" id="tfa_ssn"  name="testField" autoformat="###-##-####" class="" value=""/>
+            <label>###-##-####</label></div>
+
+            <div><input type="text" id="tfa_telephone"  name="testField" autoformat="(#) ### ## ####" class="" value=""/>
+            <label>(#)### ## ####</label></div>
+
+            <div><input type="text" id="tfa_telephone_short"  name="testField" autoformat="### ## ####" class="" value=""/>
+            <label>### ## ####</label></div>
+
+            <div><input type="text" id="tfa_decimal"  name="testField" autoformat="###.##" class="" value=""/>
+            <label>###.##</label></div>
+
+            <div><input type="text" id="tfa_SN"  name="testField" autoformat="$$$$-$$$$-$$$$-$$$$" class="" value="" size="30"/>
+            <label>$$$$-$$$$-$$$$-$$$$</label></div>
+
+            <div><input type="text" id="tfa_IF_ELSE"  name="testField" autoformat="If($$$$$$){$$$$$$}else{$$$$$$}" class="" value="" size="30"/>
+            <label>If($$$$$$){$$$$$$}else{$$$$$$}</label></div>
+
+            <div><input type="text" id="tfa_alternate"  name="testField" autoformat="$#$#$#$#$#" class="" value="" size="30"/>
+            <label>$#$#$#$#$#</label></div>
+
+            <h4>right-to-left</h4>
+            <div><input type="text" id="tfa_rtl1"  name="testField" autoformat="###.##" class="" value="" size="30" dir="rtl" />
+            <label>###.##</label></div>
+            <div dir="rtl"><input type="text" id="tfa_rtl2"  name="testField" autoformat="###.##" class="" value="" size="30"  />
+            <label>###.##</label></div>
+        </form>
+
+        </div>
+
+    </body>
+</html>
+
